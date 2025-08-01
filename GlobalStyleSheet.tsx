@@ -1,0 +1,51 @@
+import { StyleSheet } from "react-native";
+
+export const globalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#f0f0f0",
+    width: "100%",
+  },
+  inputField: {
+    height: 48,
+    borderColor: "#bbb",
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    width: "100%",
+    maxWidth: 340,
+    backgroundColor: "#fff",
+    fontSize: 16,
+  },
+  buttonContainer: {
+    backgroundColor: "#8400c2ff",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+    maxWidth: 340,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  nameCard: {
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    alignItems: "center",
+    width: "100%",
+    maxWidth: 340,
+    alignSelf: "center",
+  },
+});
