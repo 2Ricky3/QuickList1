@@ -1,4 +1,10 @@
 import React, { useState } from "react";
+import { globalStyles } from "../GlobalStyleSheet";
+import { ActivityIndicator } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
 import {
   Text,
   View,
@@ -7,45 +13,56 @@ import {
   Pressable,
   Image
 } from "react-native";
-import { globalStyles } from "../GlobalStyleSheet";
-import { ActivityIndicator } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
 
-const LoginScreen = () => {
+const RegisterScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Please enter email and password");
+  const handleRegister = async () => {
+    if (!email || !password || !name) {
+      alert("All fields are required");
       return;
     }
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        email,
+        displayName: name,
+        createdAt: serverTimestamp(),
+      });
+
       setLoading(false);
-      navigation.navigate("Home");
+      alert("Account created!");
+      navigation.navigate("Login");
     } catch (error: any) {
       setLoading(false);
-      alert(error.message || "Login failed");
+      alert(error.message || "Registration failed");
     }
   };
 
   return (
     <SafeAreaView style={globalStyles.container}>
-        <Image
+          <Image
         source={require("../assets/Logo.png")}
         style={{ width: 120, height: 120, alignSelf: "center", marginBottom: 20 }}
         resizeMode="contain"
       />
-      <Text style={globalStyles.titleText}>Sign In</Text>
+      <Text style={globalStyles.titleText}>Create Account</Text>
 
       <View style={globalStyles.formWrapper}>
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          style={globalStyles.inputField}
+        />
         <TextInput
           placeholder="Email"
           keyboardType="email-address"
@@ -63,27 +80,27 @@ const LoginScreen = () => {
         />
         <Pressable
           style={globalStyles.buttonContainer}
-          onPress={handleLogin}
+          onPress={handleRegister}
           disabled={loading}
         >
           <Text style={globalStyles.buttonText}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Registering..." : "Register"}
           </Text>
         </Pressable>
         {loading && <ActivityIndicator size="large" color="#C20200" />}
       </View>
 
       <Text style={globalStyles.footerText}>
-        Don’t have an account?{" "}
+        Already have an account?{" "}
         <Text
           style={globalStyles.footerLink}
-          onPress={() => navigation.navigate("Register")}
+          onPress={() => navigation.navigate("Login")}
         >
-          Register
+          Sign In
         </Text>
       </Text>
     </SafeAreaView>
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;
