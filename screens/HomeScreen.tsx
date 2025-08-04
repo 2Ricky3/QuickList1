@@ -1,144 +1,120 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   SafeAreaView,
   ScrollView,
-  TextInput,
   Pressable,
-  Image,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
+import { auth, db } from "../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        } else {
+          console.warn("User data not found.");
+        }
+      } else {
+        navigation.navigate("Login");
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigation.navigate("Login");
+    } catch (error) {
+      Alert.alert("Error", "Could not log out. Try again.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#C20200" />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
-      <ScrollView
-        contentContainerStyle={{ padding: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
         {/* Header */}
-        <View style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 16, color: "#555" }}>Hello, Ethan</Text>
-          <Text style={{ fontSize: 26, fontWeight: "bold", marginTop: 4 }}>
-            Let’s Learning{"\n"}Together!
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <Text style={{ fontSize: 22, fontWeight: "bold", color: "#C20200" }}>
+            Welcome, {userData?.displayName || "User"}!
           </Text>
         </View>
 
-        {/* Search */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "#f1f1f1",
-            borderRadius: 12,
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            marginBottom: 24,
-          }}
-        >
-          <TextInput
-            placeholder="Search what you need"
-            style={{ flex: 1, fontSize: 16 }}
-          />
-          <View
-            style={{
-              backgroundColor: "#132742",
-              padding: 10,
-              borderRadius: 10,
-              marginLeft: 8,
-            }}
-          >
-            <Text style={{ color: "#fff" }}>🔍</Text>
-          </View>
-        </View>
-
-        {/* Continue Course */}
-        <View
-          style={{
-            backgroundColor: "#FFD86E",
-            borderRadius: 16,
-            padding: 20,
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 32,
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 6 }}>
-              To be Marketers Professional!
-            </Text>
-            <Text style={{ fontSize: 12, color: "#555", marginBottom: 10 }}>
-              Ready for the new challenge and new career?
-            </Text>
-            <Pressable
-              style={{
-                backgroundColor: "#132742",
-                paddingVertical: 8,
-                paddingHorizontal: 14,
-                borderRadius: 10,
-                alignSelf: "flex-start",
-              }}
-              onPress={() => navigation.navigate("Login")}
-            >
-              <Text style={{ color: "#fff", fontSize: 14 }}>🎯 Lesson 3</Text>
-            </Pressable>
-          </View>
-          <View
-            style={{
-              width: 80,
-              height: 80,
-              marginLeft: 10,
-              backgroundColor: "#eee",
-              borderRadius: 16,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#aaa" }}>No Image</Text>
-          </View>
-        </View>
-
-        {/* Top Courses */}
-        <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
-          Top Courses
+        <Text style={{ fontSize: 16, color: "#333", marginBottom: 16 }}>
+          What would you like to do?
         </Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
-          <CourseCard title="Marketing" courses="14" bgColor="#FFD3E2" />
-          <CourseCard title="Design" courses="21" bgColor="#D1E3FF" />
-          <CourseCard title="Programming" courses="18" bgColor="#D3FFD3" />
-          <CourseCard title="Business" courses="12" bgColor="#FFF3D1" />
-          <CourseCard title="Photography" courses="9" bgColor="#E2D3FF" />
+
+        {/* Feature Cards */}
+        <View style={{ gap: 20 }}>
+          {/* Previous Buys Card */}
+          <Pressable
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 16,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: "#C20200",
+              shadowColor: "#000",
+              shadowOpacity: 0.08,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#C20200", marginBottom: 8 }}>
+              🛒 Previous Buys
+            </Text>
+            <Text style={{ color: "#555", fontSize: 14 }}>
+              View your past grocery lists and reorder quickly.
+            </Text>
+          </Pressable>
+
+          {/* Create New List Card */}
+          <Pressable
+            style={{
+              backgroundColor: "#C20200",
+              borderRadius: 16,
+              padding: 20,
+              shadowColor: "#000",
+              shadowOpacity: 0.08,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
+            onPress={() => navigation.navigate("CreateScreen")}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fff", marginBottom: 8 }}>
+              📝 New Grocery List
+            </Text>
+            <Text style={{ color: "#f3f3f3", fontSize: 14 }}>
+              Start a fresh grocery list from scratch.
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
-  );
-};
-
-type CourseCardProps = {
-  title: string;
-  courses: string;
-  bgColor: string;
-};
-
-const CourseCard = ({ title, courses, bgColor }: CourseCardProps) => {
-  const navigation = useNavigation();
-  return (
-    <Pressable
-      style={{
-        width: "48%",
-        backgroundColor: bgColor,
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 16,
-      }}
-      onPress={() => navigation.navigate("Login")}
-    >
-      <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 4 }}>
-        {title}
-      </Text>
-      <Text style={{ color: "#555" }}>{courses} Course</Text>
-    </Pressable>
   );
 };
 
