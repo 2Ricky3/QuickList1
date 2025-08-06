@@ -1,29 +1,67 @@
-import { StatusBar } from 'expo-status-bar';
-import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
-import RegisterScreen from './screens/RegisterScreen'; // <-- add if created
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
+// App.tsx
+import { StatusBar } from "expo-status-bar";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { StyleSheet } from "react-native";
 
-const Stack = createNativeStackNavigator();
+import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
+import HomeScreen from "./screens/HomeScreen";
+import CreateScreen from "./screens/CreateScreen";
+import PreviousListScreen from "./screens/PreviousListScreen";
+
+import { RootStackParamList } from "./types"; // import route types
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <StatusBar style="dark" />
-      <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{
-          headerStyle: { backgroundColor: '#C20200' },
-          headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: 'bold', fontSize: 22 },
-          headerShadowVisible: false,
-        }}
-      >
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Sign In" }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Register" }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Names List" }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={styles.container}>
+      <NavigationContainer>
+        <StatusBar style="dark" />
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{
+            headerStyle: { backgroundColor: "#C20200" },
+            headerTintColor: "#fff",
+            headerTitleStyle: { fontWeight: "bold", fontSize: 22 },
+            headerShadowVisible: false,
+          }}
+        >
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ title: "Sign In" }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{ title: "Register" }}
+          />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ title: "QuickList" }}
+          />
+          <Stack.Screen
+            name="CreateScreen"
+            component={CreateScreen}
+            options={{ title: "Create List" }}
+          />
+            <Stack.Screen
+            name="PreviousListScreen"
+            component={PreviousListScreen}
+            options={{ title: "Previous Lists" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

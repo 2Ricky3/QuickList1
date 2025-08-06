@@ -1,10 +1,4 @@
 import React, { useState } from "react";
-import { globalStyles } from "../GlobalStyleSheet";
-import { ActivityIndicator } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
 import {
   Text,
   View,
@@ -13,9 +7,21 @@ import {
   Pressable,
   Image
 } from "react-native";
+import { globalStyles } from "../GlobalStyleSheet";
+import { ActivityIndicator } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
+
+type RootStackParamList = {
+  Home: undefined;
+  Login: undefined;
+};
 
 const RegisterScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -49,7 +55,7 @@ const RegisterScreen = () => {
 
   return (
     <SafeAreaView style={globalStyles.container}>
-          <Image
+      <Image
         source={require("../assets/Logo.png")}
         style={{ width: 120, height: 120, alignSelf: "center", marginBottom: 20 }}
         resizeMode="contain"

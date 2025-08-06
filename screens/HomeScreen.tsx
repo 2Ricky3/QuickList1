@@ -1,3 +1,4 @@
+// HomeScreen.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -12,9 +13,17 @@ import { auth, db } from "../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../types"; 
+import { colors } from "../GlobalStyleSheet"; 
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Home"
+>;
 
 const HomeScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +57,9 @@ const HomeScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
         <ActivityIndicator size="large" color="#C20200" />
       </SafeAreaView>
     );
@@ -57,8 +68,14 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        {/* Header */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 24,
+          }}
+        >
           <Text style={{ fontSize: 22, fontWeight: "bold", color: "#C20200" }}>
             Welcome, {userData?.displayName || "User"}!
           </Text>
@@ -68,9 +85,8 @@ const HomeScreen = () => {
           What would you like to do?
         </Text>
 
-        {/* Feature Cards */}
         <View style={{ gap: 20 }}>
-          {/* Previous Buys Card */}
+          {/* 🛒 Previous Buys */}
           <Pressable
             style={{
               backgroundColor: "#fff",
@@ -83,8 +99,16 @@ const HomeScreen = () => {
               shadowRadius: 4,
               elevation: 3,
             }}
+            onPress={() => navigation.navigate("PreviousListScreen")} 
           >
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#C20200", marginBottom: 8 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#C20200",
+                marginBottom: 8,
+              }}
+            >
               🛒 Previous Buys
             </Text>
             <Text style={{ color: "#555", fontSize: 14 }}>
@@ -92,7 +116,7 @@ const HomeScreen = () => {
             </Text>
           </Pressable>
 
-          {/* Create New List Card */}
+          {/* 📝 New Grocery List */}
           <Pressable
             style={{
               backgroundColor: "#C20200",
@@ -105,7 +129,14 @@ const HomeScreen = () => {
             }}
             onPress={() => navigation.navigate("CreateScreen")}
           >
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fff", marginBottom: 8 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#fff",
+                marginBottom: 8,
+              }}
+            >
               📝 New Grocery List
             </Text>
             <Text style={{ color: "#f3f3f3", fontSize: 14 }}>
