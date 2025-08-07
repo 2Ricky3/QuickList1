@@ -32,12 +32,12 @@ export default function App() {
           <Stack.Screen
             name="Login"
             component={LoginScreen}
-            options={{ title: "Sign In" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Register"
             component={RegisterScreen}
-            options={{ title: "Register" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Home"

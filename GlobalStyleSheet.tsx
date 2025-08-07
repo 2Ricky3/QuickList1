@@ -23,8 +23,8 @@ export const globalStyles = StyleSheet.create({
   },
   inputField: {
     height: 48,
-    borderWidth: 1,
-    borderColor: colors.gray,
+    borderWidth: 1.5,
+    borderColor: colors.primary, 
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
@@ -38,6 +38,11 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 4,
   },
   buttonText: {
     color: colors.white,
@@ -55,7 +60,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: "600",
   },
   formWrapper: {
-  paddingHorizontal: 24,
-},
-
+    paddingHorizontal: 24,
+  },
+  
 });

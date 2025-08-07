@@ -8,6 +8,9 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
   ActivityIndicator,
 } from "react-native";
 import { globalStyles } from "../GlobalStyleSheet";
@@ -45,69 +48,91 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={globalStyles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1, justifyContent: "center" }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
-        <Image
-          source={require("../assets/Logo.png")}
-          style={{
-            width: 120,
-            height: 120,
-            alignSelf: "center",
-            marginBottom: 20,
-          }}
-          resizeMode="contain"
-        />
-
-        <Text style={globalStyles.titleText}>Sign In</Text>
-
-        <View style={globalStyles.formWrapper}>
-          <TextInput
-            placeholder="Email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-            style={globalStyles.inputField}
-          />
-          <TextInput
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            style={globalStyles.inputField}
-          />
-
-          <Pressable
-            style={globalStyles.buttonContainer}
-            onPress={handleLogin}
-            disabled={loading}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 20 }}
+            keyboardShouldPersistTaps="handled"
           >
-            <Text style={globalStyles.buttonText}>
-              {loading ? "Logging in..." : "Login"}
-            </Text>
-          </Pressable>
-
-          {loading && (
-            <ActivityIndicator
-              size="large"
-              color="#C20200"
-              style={{ marginTop: 20 }}
+            <Image
+              source={require("../assets/Logo.png")}
+              style={{
+                width: 120,
+                height: 120,
+                alignSelf: "center",
+                marginBottom: 20,
+              }}
+              resizeMode="contain"
             />
-          )}
-        </View>
 
-        <Text style={globalStyles.footerText}>
-          Don’t have an account?{" "}
-          <Text
-            style={globalStyles.footerLink}
-            onPress={() => navigation.navigate("Register")}
-          >
-            Register
-          </Text>
-        </Text>
+            <Text style={globalStyles.titleText}>Sign In</Text>
+
+            <View style={globalStyles.formWrapper}>
+              <TextInput
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+                style={globalStyles.inputField}
+              />
+              <TextInput
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                style={globalStyles.inputField}
+              />
+
+              <Pressable
+                onPress={handleLogin}
+                disabled={loading}
+                style={({ pressed }) => [
+                  globalStyles.buttonContainer,
+                  pressed && {
+                    backgroundColor: "#fff",
+                    borderWidth: 1,
+                    borderColor: "#C20200",
+                  },
+                ]}
+              >
+                {({ pressed }) => (
+                  <Text
+                    style={[
+                      globalStyles.buttonText,
+                      pressed && { color: "#C20200" },
+                    ]}
+                  >
+                    {loading ? "Logging in..." : "Login"}
+                  </Text>
+                )}
+              </Pressable>
+
+              {loading && (
+                <ActivityIndicator
+                  size="large"
+                  color="#C20200"
+                  style={{ marginTop: 20 }}
+                />
+              )}
+            </View>
+
+            <Text style={globalStyles.footerText}>
+              Don’t have an account?{" "}
+              <Text
+                style={globalStyles.footerLink}
+                onPress={() => navigation.navigate("Register")}
+              >
+                Register
+              </Text>
+            </Text>
+          </ScrollView>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
