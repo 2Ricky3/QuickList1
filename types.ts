@@ -5,4 +5,5 @@ export type RootStackParamList = {
   Home: undefined;
   CreateScreen: undefined;
   PreviousListScreen: undefined;
+  EditListScreen: { list: any };
 };

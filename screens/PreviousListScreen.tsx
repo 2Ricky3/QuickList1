@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,11 +13,10 @@ import {
   query,
   where,
   getDocs,
-  orderBy,
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { auth, db } from "../firebaseConfig";
 import { colors } from "../GlobalStyleSheet";
 
@@ -26,36 +25,36 @@ const PreviousListScreen = () => {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchLists = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
+  const fetchLists = async () => {
+    try {
+      setLoading(true);
+      const user = auth.currentUser;
+      if (!user) return;
 
-        const q = query(
-          collection(db, "lists"),
-          where("uid", "==", user.uid)
-        );
-        const querySnapshot = await getDocs(q);
-        const fetchedLists: any = [];
+      const q = query(collection(db, "lists"), where("uid", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      const fetchedLists = [];
 
-        querySnapshot.forEach((doc) => {
-          fetchedLists.push({ id: doc.id, ...doc.data() });
-        });
+      querySnapshot.forEach((docSnap) => {
+        fetchedLists.push({ id: docSnap.id, ...docSnap.data() });
+      });
 
-        setLists(fetchedLists);
-      } catch (error) {
-        Alert.alert("Error", "Failed to load lists.");
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setLists(fetchedLists);
+    } catch (error) {
+      Alert.alert("Error", "Failed to load lists.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchLists();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchLists();
+    }, [])
+  );
 
-  const handleDeleteList = async (listId: string) => {
+  const handleDeleteList = async (listId) => {
     Alert.alert(
       "Delete List",
       "Are you sure you want to delete this list?",
@@ -106,7 +105,7 @@ const PreviousListScreen = () => {
         {lists.length === 0 ? (
           <Text style={{ color: "#999", fontSize: 16 }}>No lists found.</Text>
         ) : (
-          lists.map((list: any) => (
+          lists.map((list) => (
             <View
               key={list.id}
               style={{
@@ -139,9 +138,19 @@ const PreviousListScreen = () => {
                   {list.title}
                 </Text>
 
-                <Pressable onPress={() => handleDeleteList(list.id)}>
-                  <Text style={{ color: "red", fontSize: 14 }}>Delete</Text>
-                </Pressable>
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  <Pressable
+                    onPress={() => navigation.navigate("EditListScreen", { list })}
+                  >
+                    <Text style={{ color: colors.primary, fontSize: 14 }}>
+                      Edit
+                    </Text>
+                  </Pressable>
+
+                  <Pressable onPress={() => handleDeleteList(list.id)}>
+                    <Text style={{ color: "red", fontSize: 14 }}>Delete</Text>
+                  </Pressable>
+                </View>
               </View>
 
               <Text style={{ marginTop: 8, fontSize: 14, color: "#555" }}>

@@ -10,8 +10,9 @@ import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
 import CreateScreen from "./screens/CreateScreen";
 import PreviousListScreen from "./screens/PreviousListScreen";
+import EditListScreen from "./screens/EditListScreen";
 
-import { RootStackParamList } from "./types"; // import route types
+import { RootStackParamList } from "./types"; 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -53,6 +54,11 @@ export default function App() {
             name="PreviousListScreen"
             component={PreviousListScreen}
             options={{ title: "Previous Lists" }}
+          />
+           <Stack.Screen
+            name="EditListScreen"
+            component={EditListScreen}
+            options={{ title: "Edit List Screen" }}
           />
         </Stack.Navigator>
       </NavigationContainer>
