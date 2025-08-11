@@ -13,6 +13,8 @@ import { Swipeable } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
+import { v4 as uuidv4 } from "uuid"; 
+import 'react-native-get-random-values';
 import { globalStyles, colors } from "../GlobalStyleSheet";
 
 const CreateScreen = () => {
@@ -51,6 +53,8 @@ const CreateScreen = () => {
         title: listTitle,
         items: items.filter((i) => i.trim() !== ""),
         createdAt: Timestamp.now(),
+         shareId: uuidv4(),    
+      allowPublicEdit: false
       });
 
       Alert.alert("Success", "List created!");

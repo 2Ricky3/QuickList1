@@ -8,10 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  View,
+  Switch,
+  StyleSheet,
 } from "react-native";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { globalStyles } from "../GlobalStyleSheet";
+import { globalStyles, colors } from "../GlobalStyleSheet";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 const EditListScreen = () => {
@@ -21,6 +24,9 @@ const EditListScreen = () => {
 
   const [title, setTitle] = useState(list.title);
   const [items, setItems] = useState(list.items?.join(", ") || "");
+  const [allowPublicEdit, setAllowPublicEdit] = useState(
+    list.allowPublicEdit ?? false
+  );
 
   const handleSave = async () => {
     try {
@@ -28,6 +34,7 @@ const EditListScreen = () => {
       await updateDoc(listRef, {
         title: title.trim(),
         items: items.split(",").map((i: string) => i.trim()),
+        allowPublicEdit: allowPublicEdit,
       });
       Alert.alert("Success", "List updated successfully!");
       navigation.goBack();
@@ -41,7 +48,7 @@ const EditListScreen = () => {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} 
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
       <SafeAreaView style={globalStyles.container}>
         <ScrollView
@@ -61,9 +68,21 @@ const EditListScreen = () => {
             value={items}
             onChangeText={setItems}
             placeholder="Items (comma separated)"
-            style={globalStyles.inputField}
+            style={[globalStyles.inputField, { height: 100, textAlignVertical: "top" }]}
             multiline
           />
+
+          <View style={styles.toggleContainer}>
+            <Text style={[styles.toggleLabel, { color: colors.primary }]}>
+              Allow Public Edit
+            </Text>
+            <Switch
+              value={allowPublicEdit}
+              onValueChange={setAllowPublicEdit}
+              thumbColor={allowPublicEdit ? colors.primary : "#f4f3f4"}
+              trackColor={{ false: "#767577", true: "#f4f3f4" }}
+            />
+          </View>
 
           <Pressable onPress={handleSave} style={globalStyles.buttonContainer}>
             <Text style={globalStyles.buttonText}>Save Changes</Text>
@@ -73,5 +92,18 @@ const EditListScreen = () => {
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 16,
+    justifyContent: "space-between",
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
 
 export default EditListScreen;
