@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { globalStyles, colors } from "../GlobalStyleSheet";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 const EditListScreen = () => {
@@ -50,42 +49,40 @@ const EditListScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
-      <SafeAreaView style={globalStyles.container}>
+      <SafeAreaView style={styles.container}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={globalStyles.headerTitle}>Edit List</Text>
+          <Text style={styles.headerTitle}>Edit List</Text>
 
           <TextInput
             value={title}
             onChangeText={setTitle}
             placeholder="List Title"
-            style={globalStyles.inputField}
+            style={styles.inputField}
           />
 
           <TextInput
             value={items}
             onChangeText={setItems}
             placeholder="Items (comma separated)"
-            style={[globalStyles.inputField, { height: 100, textAlignVertical: "top" }]}
+            style={[styles.inputField, styles.itemsInput]}
             multiline
           />
 
           <View style={styles.toggleContainer}>
-            <Text style={[styles.toggleLabel, { color: colors.primary }]}>
-              Allow Public Edit
-            </Text>
+            <Text style={styles.toggleLabel}>Allow Public Edit</Text>
             <Switch
               value={allowPublicEdit}
               onValueChange={setAllowPublicEdit}
-              thumbColor={allowPublicEdit ? colors.primary : "#f4f3f4"}
+              thumbColor={allowPublicEdit ? "#C20200" : "#f4f3f4"}
               trackColor={{ false: "#767577", true: "#f4f3f4" }}
             />
           </View>
 
-          <Pressable onPress={handleSave} style={globalStyles.buttonContainer}>
-            <Text style={globalStyles.buttonText}>Save Changes</Text>
+          <Pressable onPress={handleSave} style={styles.buttonContainer}>
+            <Text style={styles.buttonText}>Save Changes</Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
@@ -93,17 +90,78 @@ const EditListScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+
+ const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 24, 
+    paddingTop: 20,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#C20200",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  inputField: {
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: "#C20200",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+
+    marginHorizontal: 8,
+
+    fontSize: 16,
+    backgroundColor: "#f8f8f8",
+    color: "#520600",
+
+    alignSelf: "center",
+    width: "95%", 
+  },
+  itemsInput: {
+    height: 100,
+    textAlignVertical: "top",
+  },
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 16,
     justifyContent: "space-between",
+    marginHorizontal: 8,
   },
   toggleLabel: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#C20200",
+  },
+  buttonContainer: {
+    backgroundColor: "#C20200",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 8,
+    marginHorizontal: 8,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 4,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
+
 
 export default EditListScreen;

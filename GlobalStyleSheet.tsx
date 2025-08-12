@@ -23,7 +23,7 @@ export const globalStyles = StyleSheet.create({
 
   safeArea: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: "transparent", 
   },
 
   scrollContent: {
@@ -35,44 +35,51 @@ export const globalStyles = StyleSheet.create({
   },
 
   greetingText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary,
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.dark,
+    letterSpacing: 0.5,
   },
 
   dateText: {
-    fontSize: 16,
-    color: "#555",
-    marginTop: 4,
+    fontSize: 18,
+    color: colors.gray,
+    marginTop: 6,
+    letterSpacing: 0.3,
   },
 
   statsCard: {
     marginBottom: 24,
     padding: 20,
     borderRadius: 20,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#ffffffcc", 
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
   },
 
   statsTitle: {
-    fontWeight: "600",
-    fontSize: 18,
-    marginBottom: 8,
+    fontWeight: "700",
+    fontSize: 20,
+    marginBottom: 12,
+    color: colors.dark,
+    letterSpacing: 0.5,
   },
 
   statsText: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 4,
+    fontSize: 15,
+    color: colors.gray,
+    marginBottom: 6,
+    letterSpacing: 0.3,
   },
 
   optionsText: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 16,
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.dark,
+    marginBottom: 20,
+    letterSpacing: 0.4,
   },
 
   optionsContainer: {
@@ -92,15 +99,17 @@ export const globalStyles = StyleSheet.create({
   },
 
   previousBuysTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "700",
     color: colors.primary,
     marginBottom: 8,
+    letterSpacing: 0.6,
   },
 
   previousBuysSubtitle: {
-    color: "#555",
+    color: colors.gray,
     fontSize: 16,
+    lineHeight: 22,
   },
 
   newListButton: {
@@ -114,15 +123,17 @@ export const globalStyles = StyleSheet.create({
   },
 
   newListTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "700",
     color: colors.white,
     marginBottom: 8,
+    letterSpacing: 0.6,
   },
 
   newListSubtitle: {
-    color: "#f3f3f3",
+    color: "#f0f0f0",
     fontSize: 16,
+    lineHeight: 22,
   },
 
   titleText: {
@@ -193,7 +204,7 @@ export const globalStyles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
     borderRadius: 8,
-      marginHorizontal: 8,
+    marginHorizontal: 8,
     fontSize: 16,
     backgroundColor: "#f8f8f8",
     color: colors.dark,
@@ -203,7 +214,7 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: colors.primary,
     padding: 12,
     borderRadius: 8,
-      marginHorizontal: 8,
+    marginHorizontal: 8,
     alignItems: "center",
     marginTop: 10,
     shadowColor: "#000",

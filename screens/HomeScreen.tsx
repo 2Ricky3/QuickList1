@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons"; 
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { auth, db } from "../firebaseConfig";
 import {
   doc,
@@ -24,6 +24,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import { colors, globalStyles } from "../GlobalStyleSheet";
+import { LinearGradient } from "expo-linear-gradient";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -151,82 +152,120 @@ const HomeScreen = () => {
   }
 
   return (
-    <SafeAreaView style={globalStyles.safeArea}>
-      <ScrollView contentContainerStyle={globalStyles.scrollContent}>
-        <View style={globalStyles.headerContainer}>
-          <Text style={globalStyles.greetingText}>
-            {getGreeting()}, {userData?.displayName || "User"}!
-          </Text>
-          <Text style={globalStyles.dateText}>
-            Today is {formatDate(new Date())}.
-          </Text>
-        </View>
-
-        {/* Grocery Stats */}
-        <View style={globalStyles.statsCard}>
-          <Text style={globalStyles.statsTitle}>Your Grocery Stats</Text>
-          {statsLoading ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <>
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <MaterialIcons name="shopping-cart" size={18} color={colors.primary} />
-                <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
-                  You have {groceryLists.length} past grocery{" "}
-                  {groceryLists.length === 1 ? "list" : "lists"} saved.
-                </Text>
-              </View>
-
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <MaterialIcons name="calendar-today" size={18} color={colors.primary} />
-                <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
-                  Last grocery list: {getLastListDate()}
-                </Text>
-              </View>
-
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <MaterialIcons name="star" size={18} color={colors.primary} />
-                <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
-                  Frequently purchased: {getFrequentItems().join(", ")}
-                </Text>
-              </View>
-            </>
-          )}
-        </View>
-
-        <Text style={globalStyles.optionsText}>What would you like to do?</Text>
-
-        <View style={globalStyles.optionsContainer}>
-          {/* Previous Buys */}
-          <Pressable
-            style={globalStyles.previousBuysButton}
-            onPress={() => navigation.navigate("PreviousListScreen")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialIcons name="shopping-cart" size={24} color={colors.primary} />
-              <Text style={[globalStyles.previousBuysTitle, { marginLeft: 8 }]}>Previous Buys</Text>
-            </View>
-            <Text style={globalStyles.previousBuysSubtitle}>
-              View your past grocery lists and reorder quickly.
+    <LinearGradient colors={["#f0f4f8", "#d9e2ec"]} style={{ flex: 1 }}>
+      <SafeAreaView style={globalStyles.safeArea}>
+        <ScrollView contentContainerStyle={globalStyles.scrollContent}>
+          <View style={globalStyles.headerContainer}>
+            <Text style={globalStyles.greetingText}>
+              {getGreeting()}, {userData?.displayName || "User"}!
             </Text>
-          </Pressable>
-
-          {/* New Grocery List */}
-          <Pressable
-            style={globalStyles.newListButton}
-            onPress={() => navigation.navigate("CreateScreen")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialIcons name="note" size={24} color={colors.primary} />
-              <Text style={[globalStyles.newListTitle, { marginLeft: 8 }]}>New Grocery List</Text>
-            </View>
-            <Text style={globalStyles.newListSubtitle}>
-              Start a fresh grocery list from scratch.
+            <Text style={globalStyles.dateText}>
+              Today is {formatDate(new Date())}.
             </Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          </View>
+
+          {/* Grocery Stats */}
+          <View style={globalStyles.statsCard}>
+            <Text style={globalStyles.statsTitle}>Your Grocery Stats</Text>
+            {statsLoading ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginVertical: 4,
+                  }}
+                >
+                  <MaterialIcons
+                    name="shopping-cart"
+                    size={18}
+                    color={colors.primary}
+                  />
+                  <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
+                    You have {groceryLists.length} past grocery{" "}
+                    {groceryLists.length === 1 ? "list" : "lists"} saved.
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginVertical: 4,
+                  }}
+                >
+                  <MaterialIcons
+                    name="calendar-today"
+                    size={18}
+                    color={colors.primary}
+                  />
+                  <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
+                    Last grocery list: {getLastListDate()}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginVertical: 4,
+                  }}
+                >
+                  <MaterialIcons name="star" size={18} color={colors.primary} />
+                  <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
+                    Frequently purchased: {getFrequentItems().join(", ")}
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
+
+          <Text style={globalStyles.optionsText}>What would you like to do?</Text>
+
+          <View style={globalStyles.optionsContainer}>
+            {/* Previous Buys */}
+            <Pressable
+              style={globalStyles.previousBuysButton}
+              onPress={() => navigation.navigate("PreviousListScreen")}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialIcons
+                  name="shopping-cart"
+                  size={24}
+                  color={colors.primary}
+                />
+                <Text
+                  style={[globalStyles.previousBuysTitle, { marginLeft: 8 }]}
+                >
+                  Previous Buys
+                </Text>
+              </View>
+              <Text style={globalStyles.previousBuysSubtitle}>
+                View your past grocery lists and reorder quickly.
+              </Text>
+            </Pressable>
+
+            {/* New Grocery List */}
+            <Pressable
+              style={globalStyles.newListButton}
+              onPress={() => navigation.navigate("CreateScreen")}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialIcons name="note" size={24} color={colors.white} />
+                <Text style={[globalStyles.newListTitle, { marginLeft: 8 }]}>
+                  New Grocery List
+                </Text>
+              </View>
+              <Text style={globalStyles.newListSubtitle}>
+                Start a fresh grocery list from scratch.
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
