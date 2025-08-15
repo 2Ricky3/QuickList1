@@ -271,8 +271,26 @@ const PreviousListScreen = () => {
               </Text>
             ) : (
               filteredLists.map((list) => (
-                <View key={list.id} style={styles.listCard}>
-                  <View style={styles.listCardHeader}>
+                <View
+                  key={list.id}
+                  style={[
+                    styles.listCard,
+                    { borderColor: list.color || colors.primary },
+                  ]}
+                >
+                  {/* Colored bar or circle */}
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 9,
+                        backgroundColor: list.color || colors.primary,
+                        marginRight: 10,
+                        borderWidth: 1,
+                        borderColor: "#ccc",
+                      }}
+                    />
                     <Text
                       style={styles.listTitle}
                       numberOfLines={1}
@@ -280,7 +298,10 @@ const PreviousListScreen = () => {
                     >
                       {list.title}
                     </Text>
+                  </View>
 
+                  {/* Icons always on the right */}
+                  <View style={[styles.listCardHeader, { justifyContent: "flex-end" }]}>
                     <View style={styles.listCardButtons}>
                       <Pressable
                         onPress={() =>
@@ -291,7 +312,7 @@ const PreviousListScreen = () => {
                         <MaterialIcons
                           name="edit"
                           size={22}
-                          color={colors.primary}
+                          color={list.color || colors.primary}
                         />
                       </Pressable>
 
@@ -309,7 +330,7 @@ const PreviousListScreen = () => {
                         <MaterialIcons
                           name="share"
                           size={22}
-                          color={colors.primary}
+                          color={list.color || colors.primary}
                         />
                       </Pressable>
                     </View>

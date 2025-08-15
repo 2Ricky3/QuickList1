@@ -11,6 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Keyboard,
+  FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
@@ -31,11 +32,35 @@ const EXAMPLE_TAGS = [
   "beverages",
 ];
 
+const RANDOM_ITEMS = [
+  "Chocolate Bar",
+  "Ice Cream",
+  "Energy Drink",
+  "Mango",
+  "Fancy Cheese",
+  "Mystery Snack",
+  "Surprise Fruit",
+  "Gourmet Cookie",
+  "Exotic Juice",
+  "Special Treat",
+];
+
+const COLOR_OPTIONS = [
+  "#FFD700", 
+  "#FF6347", 
+  "#4CAF50", 
+  "#2196F3", 
+  "#9C27B0", 
+  "#FF9800",
+  "#E91E63", 
+];
+
 const CreateScreen = () => {
   const [listTitle, setListTitle] = useState("");
   const [items, setItems] = useState([""]);
-  const [tags, setTags] = useState(""); 
+  const [tags, setTags] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [listColor, setListColor] = useState(COLOR_OPTIONS[0]);
   const navigation = useNavigation();
 
   const getLastTag = () => {
@@ -53,7 +78,7 @@ const CreateScreen = () => {
   );
 
   const addTagFromSuggestion = (tag: string) => {
-    Keyboard.dismiss(); 
+    Keyboard.dismiss();
 
     const parts = tags.split(",");
     parts[parts.length - 1] = ` ${tag}`;
@@ -101,6 +126,7 @@ const CreateScreen = () => {
         createdAt: Timestamp.now(),
         shareId: uuidv4(),
         allowPublicEdit: false,
+        color: listColor, 
       });
 
       Alert.alert("Success", "List created!");
@@ -109,6 +135,18 @@ const CreateScreen = () => {
       Alert.alert("Error", "Could not save list.");
       console.error(error);
     }
+  };
+
+  const handleSurpriseMe = () => {
+    const available = RANDOM_ITEMS.filter(
+      (item) => !items.some((i) => i.trim().toLowerCase() === item.toLowerCase())
+    );
+    if (available.length === 0) {
+      Alert.alert("All surprises already added!");
+      return;
+    }
+    const randomItem = available[Math.floor(Math.random() * available.length)];
+    setItems([...items, randomItem]);
   };
 
   const renderRightActions = (index: number) => (
@@ -197,6 +235,37 @@ const CreateScreen = () => {
               </ScrollView>
             )}
           </View>
+
+          {/* Color Picker */}
+          <Text style={{ fontWeight: "bold", marginBottom: 6, marginTop: 12 }}>
+            List Color
+          </Text>
+          <View style={{ flexDirection: "row", marginBottom: 16 }}>
+            {COLOR_OPTIONS.map((color) => (
+              <Pressable
+                key={color}
+                onPress={() => setListColor(color)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: color,
+                  marginRight: 12,
+                  borderWidth: listColor === color ? 3 : 1,
+                  borderColor: listColor === color ? "#333" : "#ccc",
+                }}
+              />
+            ))}
+          </View>
+
+          <Pressable
+            style={[globalStyles.buttonContainer, { marginBottom: 8, backgroundColor: "#FFD700" }]}
+            onPress={handleSurpriseMe}
+          >
+            <Text style={[globalStyles.buttonText, { color: "#C20200" }]}>
+              🎲 Surprise Me!
+            </Text>
+          </Pressable>
 
           <Pressable
             style={[globalStyles.buttonContainer, { marginBottom: 16 }]}
