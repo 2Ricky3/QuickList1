@@ -20,6 +20,7 @@ import "react-native-get-random-values";
 import { globalStyles, colors, createScreenStyles } from "../GlobalStyleSheet";
 import { createList } from "../services/listService";
 
+
 const EXAMPLE_TAGS = [
   "sales",
   "monthly buy",
@@ -195,7 +196,7 @@ const CreateScreen = () => {
             </Swipeable>
           ))}
 
-          <View style={{ marginBottom: 8 }}>
+          <View style={{ marginBottom: 8, position: "relative" }}>
             <TextInput
               style={globalStyles.inputField}
               placeholder="Tags (comma separated)"
@@ -212,8 +213,18 @@ const CreateScreen = () => {
               autoCorrect={false}
               returnKeyType="done"
             />
+            <FontAwesome
+              name="chevron-down"
+              size={18}
+              color={colors.primary} 
+              style={{
+                position: "absolute",
+                right: 18,
+                top: 24 - 9,
+                pointerEvents: "none",
+              }}
+            />
 
-            {/* Suggestions dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
               <ScrollView
                 style={createScreenStyles.suggestionsContainer}
@@ -233,7 +244,6 @@ const CreateScreen = () => {
             )}
           </View>
 
-          {/* Color Picker */}
           <Text style={{ fontWeight: "bold", marginBottom: 6, marginTop: 12 }}>
             List Color
           </Text>
@@ -245,39 +255,75 @@ const CreateScreen = () => {
                 style={{
                   width: 32,
                   height: 32,
-                  borderRadius: 16,
+                  borderRadius: 8, 
                   backgroundColor: color,
                   marginRight: 12,
                   borderWidth: listColor === color ? 3 : 1,
-                  borderColor: listColor === color ? "#333" : "#ccc",
+                  borderColor: listColor === color ? "#000000ff" : "#ffffffff",
                 }}
               />
             ))}
           </View>
 
           <Pressable
-            style={[globalStyles.buttonContainer, { marginBottom: 8, backgroundColor: "#FFD700" }]}
-            onPress={handleSurpriseMe}
+            style={{
+              backgroundColor: "#C20200",
+              paddingVertical: 14,
+              borderRadius: 12,
+              alignItems: "center",
+              marginBottom: 16,
+              marginTop: 0,
+              marginHorizontal: 0,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+              elevation: 4,
+            }}
+            onPress={() => navigation.navigate("Home")}
           >
-            <Text style={[globalStyles.buttonText, { color: "#C20200" }]}>
-              🎲 Surprise Me!
+            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
+              Delete List
             </Text>
           </Pressable>
+        </ScrollView>
 
+        <View style={styles.bottomBar}>
           <Pressable
-            style={[globalStyles.buttonContainer, { marginBottom: 16 }]}
+            style={[globalStyles.buttonContainer, styles.bottomButton, { marginRight: 8 }]}
             onPress={handleAddItem}
           >
             <Text style={globalStyles.buttonText}>+ Add Item</Text>
           </Pressable>
-
-          <Pressable style={globalStyles.buttonContainer} onPress={handleSaveList}>
+          <Pressable
+            style={[globalStyles.buttonContainer, styles.bottomButton, { backgroundColor: "#2ECC71" }]}
+            onPress={handleSaveList}
+          >
             <Text style={globalStyles.buttonText}>Save List</Text>
           </Pressable>
-        </ScrollView>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 };
 
 export default CreateScreen;
+
+const styles = {
+  bottomBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 15,
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  bottomButton: {
+    flex: 1,
+  },
+};

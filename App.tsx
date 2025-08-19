@@ -10,6 +10,7 @@ import HomeScreen from "./screens/HomeScreen";
 import CreateScreen from "./screens/CreateScreen";
 import PreviousListScreen from "./screens/PreviousListScreen";
 import EditListScreen from "./screens/EditListScreen";
+import SplashScreen from "./screens/SplashScreen";
 
 import { RootStackParamList } from "./types"; 
 
@@ -21,7 +22,7 @@ export default function App() {
       <NavigationContainer>
         <StatusBar style="dark" />
         <Stack.Navigator
-          initialRouteName="Login"
+          initialRouteName="Splash"
           screenOptions={{
             headerStyle: { backgroundColor: "#ffffffff" },
             headerTintColor: "#520600",
@@ -29,6 +30,11 @@ export default function App() {
             headerShadowVisible: false,
           }}
         >
+          <Stack.Screen
+            name="Splash"
+            component={SplashScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="Login"
             component={LoginScreen}
@@ -47,7 +53,7 @@ export default function App() {
           <Stack.Screen
             name="CreateScreen"
             component={CreateScreen}
-            options={{ title: "Create List" }}
+            options={{ title: "" }}
           />
             <Stack.Screen
             name="PreviousListScreen"

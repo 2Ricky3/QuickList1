@@ -212,7 +212,6 @@ const HomeScreen = () => {
           <Text style={globalStyles.optionsText}>What would you like to do?</Text>
 
           <View style={globalStyles.optionsContainer}>
-            {/* Previous Buys */}
             <Pressable
               style={globalStyles.previousBuysButton}
               onPress={() => navigation.navigate("PreviousListScreen")}
@@ -233,8 +232,6 @@ const HomeScreen = () => {
                 View your past grocery lists and reorder quickly.
               </Text>
             </Pressable>
-
-            {/* New Grocery List */}
             <Pressable
               style={globalStyles.newListButton}
               onPress={() => navigation.navigate("CreateScreen")}

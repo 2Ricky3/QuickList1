@@ -18,10 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { registerWithEmail } from "../services/authService";
 
-type RootStackParamList = {
-  Home: undefined;
-  Login: undefined;
-};
+import { RootStackParamList } from "../types";
 
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

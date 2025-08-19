@@ -20,12 +20,13 @@ import {
   doc,
   limit,
 } from "firebase/firestore";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, NavigationProp } from "@react-navigation/native";
 import { auth, db } from "../firebaseConfig";
 import { colors, previousListStyles } from "../GlobalStyleSheet";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Clipboard from "expo-clipboard";
 
+import { RootStackParamList } from "../types";
 const PreviousListScreen = () => {
   const [lists, setLists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ const PreviousListScreen = () => {
   const [loadingShared, setLoadingShared] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const fetchLists = async () => {
     try {
@@ -215,7 +216,6 @@ const PreviousListScreen = () => {
               Your Lists
             </Text>
 
-            {/* Tags Filter */}
             <View style={previousListStyles.tagsFilterContainer}>
               {availableTags.map((tag) => {
                 const selected = selectedTags.includes(tag);
@@ -257,8 +257,6 @@ const PreviousListScreen = () => {
               )}
             </View>
           </View>
-
-          {/* Scrollable Lists Section */}
           <ScrollView
             style={previousListStyles.listsScrollView}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
