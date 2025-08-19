@@ -11,6 +11,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  TouchableOpacity,
 } from "react-native";
 import { globalStyles } from "../GlobalStyleSheet";
 import { ActivityIndicator } from "react-native-paper";
@@ -127,6 +128,18 @@ const RegisterScreen = () => {
                   Sign In
                 </Text>
               </Text>
+
+              <TouchableOpacity onPress={() => navigation.navigate("Terms")}>
+                <Text
+                  style={{
+                    color: "#C20200",
+                    textAlign: "center",
+                    marginTop: 16,
+                  }}
+                >
+                  View Terms and Conditions
+                </Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>

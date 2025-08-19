@@ -7,4 +7,5 @@ export type RootStackParamList = {
   PreviousListScreen: undefined;
   EditListScreen: { list: any };
   Splash: undefined;
+  Terms: undefined;
 };

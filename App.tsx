@@ -11,6 +11,7 @@ import CreateScreen from "./screens/CreateScreen";
 import PreviousListScreen from "./screens/PreviousListScreen";
 import EditListScreen from "./screens/EditListScreen";
 import SplashScreen from "./screens/SplashScreen";
+import TermsScreen from "./screens/TermsScreen";
 
 import { RootStackParamList } from "./types"; 
 
@@ -64,6 +65,11 @@ export default function App() {
             name="EditListScreen"
             component={EditListScreen}
             options={{ title: "Edit List Screen" }}
+          />
+          <Stack.Screen
+            name="Terms"
+            component={TermsScreen}
+            options={{ title: "Terms & Conditions" }}
           />
         </Stack.Navigator>
       </NavigationContainer>

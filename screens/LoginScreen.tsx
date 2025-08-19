@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { globalStyles } from "../GlobalStyleSheet";
 import { useNavigation } from "@react-navigation/native";
@@ -131,6 +132,12 @@ const LoginScreen = () => {
                 Register
               </Text>
             </Text>
+
+            <TouchableOpacity onPress={() => navigation.navigate("Terms")}>
+              <Text style={{ color: "#C20200", textAlign: "center", marginTop: 16 }}>
+                View Terms and Conditions
+              </Text>
+            </TouchableOpacity>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
