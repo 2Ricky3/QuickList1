@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,8 @@ const PreviousListScreen = () => {
   const [loadingShared, setLoadingShared] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const shareCodeInputRef = useRef<TextInput>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const fetchLists = async () => {
@@ -153,6 +155,12 @@ const PreviousListScreen = () => {
             list.tags && selectedTags.every((tag) => list.tags.includes(tag))
         );
 
+  const searchedLists = searchText
+    ? filteredLists.filter((list) =>
+        list.title.toLowerCase().includes(searchText.toLowerCase())
+      )
+    : filteredLists;
+
   if (loading) {
     return (
       <SafeAreaView
@@ -186,6 +194,7 @@ const PreviousListScreen = () => {
 
             <View style={previousListStyles.shareCodeContainer}>
               <TextInput
+                ref={shareCodeInputRef}
                 style={previousListStyles.shareCodeInput}
                 placeholder="Enter share code"
                 value={shareCode}
@@ -193,17 +202,30 @@ const PreviousListScreen = () => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!loadingShared}
+                returnKeyType="done"
               />
               <Pressable
-                style={previousListStyles.shareCodeButton}
+                style={[
+                  previousListStyles.shareCodeButton,
+                  { opacity: shareCode.trim() ? 1 : 0.5 },
+                ]}
                 onPress={handleFetchSharedList}
-                disabled={loadingShared}
+                disabled={loadingShared || !shareCode.trim()}
               >
                 <Text style={previousListStyles.shareCodeButtonText}>
                   {loadingShared ? "Loading..." : "Open"}
                 </Text>
               </Pressable>
             </View>
+            <TextInput
+              style={[
+                previousListStyles.shareCodeInput,
+                { marginBottom: 12, marginRight: 0 },
+              ]}
+              placeholder="Search lists..."
+              value={searchText}
+              onChangeText={setSearchText}
+            />
 
             <Text
               style={{
@@ -257,16 +279,20 @@ const PreviousListScreen = () => {
               )}
             </View>
           </View>
+
           <ScrollView
             style={previousListStyles.listsScrollView}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
           >
-            {filteredLists.length === 0 ? (
-              <Text style={{ color: "#999", fontSize: 16 }}>
-                No lists found.
-              </Text>
+            {searchedLists.length === 0 ? (
+              <View style={{ alignItems: "center", marginTop: 40 }}>
+                <MaterialIcons name="list-alt" size={48} color="#ccc" />
+                <Text style={{ color: "#999", fontSize: 16, marginTop: 12 }}>
+                  No lists found. Try creating a new one!
+                </Text>
+              </View>
             ) : (
-              filteredLists.map((list) => (
+              searchedLists.map((list) => (
                 <View
                   key={list.id}
                   style={[
@@ -287,58 +313,63 @@ const PreviousListScreen = () => {
                       }}
                     />
                     <Text
-                      style={previousListStyles.listTitle}
+                      style={[
+                        previousListStyles.listTitle,
+                        { color: list.color || colors.primary }, 
+                      ]}
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
                       {list.title}
                     </Text>
+                    <Text style={{ color: "#999", fontSize: 12, marginLeft: 8 }}>
+                      {list.items?.length || 0} items
+                    </Text>
                   </View>
-                  <View style={[previousListStyles.listCardHeader, { justifyContent: "flex-end" }]}>
-                    <View style={previousListStyles.listCardButtons}>
-                      <Pressable
-                        onPress={() =>
-                          navigation.navigate("EditListScreen", { list })
-                        }
-                        style={{ padding: 4 }}
-                      >
-                        <MaterialIcons
-                          name="edit"
-                          size={22}
-                          color={list.color || colors.primary}
-                        />
-                      </Pressable>
-
-                      <Pressable
-                        onPress={() => handleDeleteList(list.id)}
-                        style={{ padding: 4 }}
-                      >
-                        <MaterialIcons name="delete" size={22} color="red" />
-                      </Pressable>
-
-                      <Pressable
-                        onPress={() => handleCopyShareCode(list.shareId)}
-                        style={{ padding: 4 }}
-                      >
-                        <MaterialIcons
-                          name="share"
-                          size={22}
-                          color={list.color || colors.primary}
-                        />
-                      </Pressable>
-                    </View>
-                  </View>
-                  <Text style={{ marginTop: 8, fontSize: 14, color: "#555" }}>
-                    {list.items?.join(", ")}
+                  <Text style={{ marginTop: 4, fontSize: 14, color: "#555" }}>
+                    {list.items?.slice(0, 3).join(", ")}
+                    {list.items?.length > 3 ? "..." : ""}
                   </Text>
-
-                  {/* Tags Display */}
                   <View style={previousListStyles.tagsContainer}>
                     {(list.tags || []).map((tag: string) => (
                       <View key={tag} style={previousListStyles.tagBadge}>
                         <Text style={previousListStyles.tagBadgeText}>{tag}</Text>
                       </View>
                     ))}
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 12 }}>
+                    <Pressable
+                      onPress={() => navigation.navigate("EditListScreen", { list })}
+                      style={{ alignItems: "center", marginRight: 24 }}
+                      accessibilityLabel="Edit List"
+                    >
+                      <MaterialIcons
+                        name="edit"
+                        size={22}
+                        color={list.color || colors.primary}
+                      />
+                      <Text style={{ fontSize: 10, color: colors.primary }}>Edit</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => handleDeleteList(list.id)}
+                      style={{ alignItems: "center", marginRight: 24 }}
+                      accessibilityLabel="Delete List"
+                    >
+                      <MaterialIcons name="delete" size={22} color="red" />
+                      <Text style={{ fontSize: 10, color: "red" }}>Delete</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => handleCopyShareCode(list.shareId)}
+                      style={{ alignItems: "center" }}
+                      accessibilityLabel="Share List"
+                    >
+                      <MaterialIcons
+                        name="share"
+                        size={22}
+                        color={list.color || colors.primary}
+                      />
+                      <Text style={{ fontSize: 10, color: colors.primary }}>Share</Text>
+                    </Pressable>
                   </View>
                 </View>
               ))

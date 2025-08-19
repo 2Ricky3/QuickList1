@@ -59,6 +59,7 @@ const EditListScreen = () => {
             onChangeText={setTitle}
             placeholder="List Title"
             style={styles.inputField}
+            returnKeyType="next"
           />
 
           <TextInput
@@ -67,6 +68,7 @@ const EditListScreen = () => {
             placeholder="Items (comma separated)"
             style={[styles.inputField, styles.itemsInput]}
             multiline
+            returnKeyType="done"
           />
 
           <View style={styles.toggleContainer}>
@@ -78,11 +80,29 @@ const EditListScreen = () => {
               trackColor={{ false: "#767577", true: "#f4f3f4" }}
             />
           </View>
-
-          <Pressable onPress={handleSave} style={styles.buttonContainer}>
+        </ScrollView>
+        <View style={styles.bottomBar}>
+          <Pressable
+            style={[
+              styles.bottomButton,
+              {
+                backgroundColor: "#fff",
+                borderColor: "#C20200",
+                borderWidth: 1,
+                marginRight: 8,
+              },
+            ]}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={[styles.buttonText, { color: "#C20200" }]}>Cancel</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.bottomButton, { backgroundColor: "#C20200" }]}
+            onPress={handleSave}
+          >
             <Text style={styles.buttonText}>Save Changes</Text>
           </Pressable>
-        </ScrollView>
+        </View>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -92,12 +112,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 100, 
   },
   headerTitle: {
     fontSize: 24,
@@ -112,16 +134,12 @@ const styles = StyleSheet.create({
     borderColor: "#C20200",
     borderRadius: 12,
     paddingHorizontal: 16,
-    marginBottom: 16,
-
-    marginHorizontal: 8,
-
-    fontSize: 16,
+    marginBottom: 20,
+    fontSize: 18,
     backgroundColor: "#f8f8f8",
     color: "#520600",
-
+    width: "100%",
     alignSelf: "center",
-    width: "95%",
   },
   itemsInput: {
     height: 100,
@@ -130,33 +148,39 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 16,
+    marginVertical: 24,
     justifyContent: "space-between",
-    marginHorizontal: 8,
+    paddingHorizontal: 4,
   },
   toggleLabel: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     color: "#C20200",
   },
-  buttonContainer: {
-    backgroundColor: "#C20200",
+ bottomBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 15,
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  bottomButton: {
+    flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
-    marginTop: 8,
-    marginHorizontal: 8,
-
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 4,
+    justifyContent: "center",
   },
   buttonText: {
-    color: "#fff",
     fontWeight: "600",
     fontSize: 16,
+    color: "#fff",
   },
 });
 
