@@ -1,4 +1,3 @@
-// App.tsx
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -24,8 +23,8 @@ export default function App() {
         <Stack.Navigator
           initialRouteName="Login"
           screenOptions={{
-            headerStyle: { backgroundColor: "#C20200" },
-            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "#ffffffff" },
+            headerTintColor: "#520600",
             headerTitleStyle: { fontWeight: "bold", fontSize: 22 },
             headerShadowVisible: false,
           }}

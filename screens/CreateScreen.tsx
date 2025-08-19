@@ -8,10 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   Keyboard,
-  FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
@@ -20,7 +18,7 @@ import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import "react-native-get-random-values";
-import { globalStyles, colors } from "../GlobalStyleSheet";
+import { globalStyles, colors, createScreenStyles } from "../GlobalStyleSheet";
 
 const EXAMPLE_TAGS = [
   "sales",
@@ -150,9 +148,9 @@ const CreateScreen = () => {
   };
 
   const renderRightActions = (index: number) => (
-    <View style={styles.deleteButtonContainer}>
+    <View style={createScreenStyles.deleteButtonContainer}>
       <Pressable
-        style={styles.deleteButton}
+        style={createScreenStyles.deleteButton}
         onPress={() => handleDeleteItem(index)}
       >
         <FontAwesome name="trash" size={20} color={colors.white} />
@@ -219,7 +217,7 @@ const CreateScreen = () => {
             {/* Suggestions dropdown */}
             {showSuggestions && filteredSuggestions.length > 0 && (
               <ScrollView
-                style={styles.suggestionsContainer}
+                style={createScreenStyles.suggestionsContainer}
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled={true}
               >
@@ -227,9 +225,9 @@ const CreateScreen = () => {
                   <TouchableOpacity
                     key={tag}
                     onPress={() => addTagFromSuggestion(tag)}
-                    style={styles.suggestionItem}
+                    style={createScreenStyles.suggestionItem}
                   >
-                    <Text style={styles.suggestionText}>{tag}</Text>
+                    <Text style={createScreenStyles.suggestionText}>{tag}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -282,49 +280,5 @@ const CreateScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  deleteButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: 48,
-  },
-  deleteButton: {
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    width: 60,
-    height: 48,
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
-  },
-  suggestionsContainer: {
-    backgroundColor: "#fff",
-    borderColor: colors.primary,
-    borderWidth: 1,
-    borderTopWidth: 0,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    marginTop: -6,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-    width: "95%",
-    alignSelf: "center",
-    maxHeight: 140,
-  },
-  suggestionItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomColor: "#eee",
-    borderBottomWidth: 1,
-  },
-  suggestionText: {
-    color: colors.primary,
-    fontWeight: "600",
-    fontSize: 16,
-  },
-});
 
 export default CreateScreen;

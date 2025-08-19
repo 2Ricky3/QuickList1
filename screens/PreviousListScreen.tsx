@@ -10,7 +10,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
 } from "react-native";
 import {
   collection,
@@ -23,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { auth, db } from "../firebaseConfig";
-import { colors } from "../GlobalStyleSheet";
+import { colors, previousListStyles } from "../GlobalStyleSheet";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Clipboard from "expo-clipboard";
 
@@ -171,8 +170,7 @@ const PreviousListScreen = () => {
         style={{ flex: 1 }}
       >
         <View style={{ flex: 1 }}>
-          {/* Fixed Top Section */}
-          <View style={styles.topSection}>
+          <View style={previousListStyles.topSection}>
             <Text
               style={{
                 fontSize: 22,
@@ -185,9 +183,9 @@ const PreviousListScreen = () => {
               Open Shared List by Code
             </Text>
 
-            <View style={styles.shareCodeContainer}>
+            <View style={previousListStyles.shareCodeContainer}>
               <TextInput
-                style={styles.shareCodeInput}
+                style={previousListStyles.shareCodeInput}
                 placeholder="Enter share code"
                 value={shareCode}
                 onChangeText={setShareCode}
@@ -196,11 +194,11 @@ const PreviousListScreen = () => {
                 editable={!loadingShared}
               />
               <Pressable
-                style={styles.shareCodeButton}
+                style={previousListStyles.shareCodeButton}
                 onPress={handleFetchSharedList}
                 disabled={loadingShared}
               >
-                <Text style={styles.shareCodeButtonText}>
+                <Text style={previousListStyles.shareCodeButtonText}>
                   {loadingShared ? "Loading..." : "Open"}
                 </Text>
               </Pressable>
@@ -218,7 +216,7 @@ const PreviousListScreen = () => {
             </Text>
 
             {/* Tags Filter */}
-            <View style={styles.tagsFilterContainer}>
+            <View style={previousListStyles.tagsFilterContainer}>
               {availableTags.map((tag) => {
                 const selected = selectedTags.includes(tag);
                 return (
@@ -232,14 +230,14 @@ const PreviousListScreen = () => {
                       );
                     }}
                     style={[
-                      styles.tagButton,
-                      selected && styles.tagButtonSelected,
+                      previousListStyles.tagButton,
+                      selected && previousListStyles.tagButtonSelected,
                     ]}
                   >
                     <Text
                       style={[
-                        styles.tagButtonText,
-                        selected && styles.tagButtonTextSelected,
+                        previousListStyles.tagButtonText,
+                        selected && previousListStyles.tagButtonTextSelected,
                       ]}
                     >
                       {tag}
@@ -262,7 +260,7 @@ const PreviousListScreen = () => {
 
           {/* Scrollable Lists Section */}
           <ScrollView
-            style={styles.listsScrollView}
+            style={previousListStyles.listsScrollView}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
           >
             {filteredLists.length === 0 ? (
@@ -274,11 +272,10 @@ const PreviousListScreen = () => {
                 <View
                   key={list.id}
                   style={[
-                    styles.listCard,
+                    previousListStyles.listCard,
                     { borderColor: list.color || colors.primary },
                   ]}
                 >
-                  {/* Colored bar or circle */}
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <View
                       style={{
@@ -292,17 +289,15 @@ const PreviousListScreen = () => {
                       }}
                     />
                     <Text
-                      style={styles.listTitle}
+                      style={previousListStyles.listTitle}
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
                       {list.title}
                     </Text>
                   </View>
-
-                  {/* Icons always on the right */}
-                  <View style={[styles.listCardHeader, { justifyContent: "flex-end" }]}>
-                    <View style={styles.listCardButtons}>
+                  <View style={[previousListStyles.listCardHeader, { justifyContent: "flex-end" }]}>
+                    <View style={previousListStyles.listCardButtons}>
                       <Pressable
                         onPress={() =>
                           navigation.navigate("EditListScreen", { list })
@@ -335,17 +330,15 @@ const PreviousListScreen = () => {
                       </Pressable>
                     </View>
                   </View>
-
-                  {/* List Items */}
                   <Text style={{ marginTop: 8, fontSize: 14, color: "#555" }}>
                     {list.items?.join(", ")}
                   </Text>
 
                   {/* Tags Display */}
-                  <View style={styles.tagsContainer}>
+                  <View style={previousListStyles.tagsContainer}>
                     {(list.tags || []).map((tag: string) => (
-                      <View key={tag} style={styles.tagBadge}>
-                        <Text style={styles.tagBadgeText}>{tag}</Text>
+                      <View key={tag} style={previousListStyles.tagBadge}>
+                        <Text style={previousListStyles.tagBadgeText}>{tag}</Text>
                       </View>
                     ))}
                   </View>
@@ -358,111 +351,5 @@ const PreviousListScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  topSection: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
-    flexShrink: 0,
-  },
-  shareCodeContainer: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
-  shareCodeInput: {
-    flex: 1,
-    borderColor: colors.primary,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    height: 44,
-    marginRight: 8,
-  },
-  shareCodeButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    justifyContent: "center",
-  },
-  shareCodeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  tagsFilterContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 16,
-  },
-  tagButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: "transparent",
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  tagButtonSelected: {
-    backgroundColor: colors.primary,
-  },
-  tagButtonText: {
-    color: colors.primary,
-  },
-  tagButtonTextSelected: {
-    color: "#fff",
-  },
-  listsScrollView: {
-    flex: 1,
-  },
-  listCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    borderColor: colors.primary,
-    borderWidth: 1,
-    marginBottom: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  listCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-    flex: 1,
-  },
-  listCardButtons: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 8,
-  },
-  tagBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 8,
-    marginBottom: 4,
-  },
-  tagBadgeText: {
-    color: "#fff",
-    fontSize: 12,
-  },
-});
 
 export default PreviousListScreen;

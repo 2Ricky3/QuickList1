@@ -230,3 +230,154 @@ export const globalStyles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export const createScreenStyles = StyleSheet.create({
+  deleteButtonContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 48,
+  },
+  deleteButton: {
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 60,
+    height: 48,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  suggestionsContainer: {
+    backgroundColor: "#fff",
+    borderColor: colors.primary,
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    marginTop: -6,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    width: "95%",
+    alignSelf: "center",
+    maxHeight: 140,
+  },
+  suggestionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomColor: "#eee",
+    borderBottomWidth: 1,
+  },
+  suggestionText: {
+    color: colors.primary,
+    fontWeight: "600",
+    fontSize: 16,
+  },
+});
+
+// Styles for PreviousListScreen
+export const previousListStyles = StyleSheet.create({
+  topSection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    backgroundColor: "#fff",
+    flexShrink: 0,
+  },
+  shareCodeContainer: {
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  shareCodeInput: {
+    flex: 1,
+    borderColor: colors.primary,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    height: 44,
+    marginRight: 8,
+  },
+  shareCodeButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    justifyContent: "center",
+  },
+  shareCodeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  tagsFilterContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+  tagButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: "transparent",
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagButtonSelected: {
+    backgroundColor: colors.primary,
+  },
+  tagButtonText: {
+    color: colors.primary,
+  },
+  tagButtonTextSelected: {
+    color: "#fff",
+  },
+  listsScrollView: {
+    flex: 1,
+  },
+  listCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderColor: colors.primary,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  listCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.primary,
+    flex: 1,
+  },
+  listCardButtons: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
+  tagBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 8,
+    marginBottom: 4,
+  },
+  tagBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+});
