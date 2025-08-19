@@ -16,9 +16,7 @@ import { globalStyles } from "../GlobalStyleSheet";
 import { ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
+import { registerWithEmail } from "../services/authService";
 
 type RootStackParamList = {
   Home: undefined;
@@ -40,15 +38,7 @@ const RegisterScreen = () => {
 
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      await setDoc(doc(db, "users", user.uid), {
-        email,
-        displayName: name,
-        createdAt: serverTimestamp(),
-      });
-
+      await registerWithEmail(email, password, name);
       setLoading(false);
       navigation.navigate("Home");
     } catch (error: any) {

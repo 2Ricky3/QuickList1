@@ -12,9 +12,8 @@ import {
   Switch,
   StyleSheet,
 } from "react-native";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { updateList } from "../services/listService";
 
 const EditListScreen = () => {
   const route = useRoute();
@@ -29,8 +28,7 @@ const EditListScreen = () => {
 
   const handleSave = async () => {
     try {
-      const listRef = doc(db, "lists", list.id);
-      await updateDoc(listRef, {
+      await updateList(list.id, {
         title: title.trim(),
         items: items.split(",").map((i: string) => i.trim()),
         allowPublicEdit: allowPublicEdit,
@@ -90,12 +88,11 @@ const EditListScreen = () => {
   );
 };
 
-
- const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 24, 
+    paddingHorizontal: 24,
     paddingTop: 20,
   },
   scrollContent: {
@@ -124,7 +121,7 @@ const EditListScreen = () => {
     color: "#520600",
 
     alignSelf: "center",
-    width: "95%", 
+    width: "95%",
   },
   itemsInput: {
     height: 100,
@@ -162,6 +159,5 @@ const EditListScreen = () => {
     fontSize: 16,
   },
 });
-
 
 export default EditListScreen;

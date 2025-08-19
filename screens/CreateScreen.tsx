@@ -14,11 +14,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
+import { auth } from "../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import "react-native-get-random-values";
 import { globalStyles, colors, createScreenStyles } from "../GlobalStyleSheet";
+import { createList } from "../services/listService";
 
 const EXAMPLE_TAGS = [
   "sales",
@@ -116,15 +116,14 @@ const CreateScreen = () => {
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
 
-      await addDoc(collection(db, "lists"), {
+      await createList({
         uid: user.uid,
         title: listTitle,
         items: items.filter((i) => i.trim() !== ""),
         tags: tagsArray,
-        createdAt: Timestamp.now(),
+        color: listColor,
         shareId: uuidv4(),
         allowPublicEdit: false,
-        color: listColor, 
       });
 
       Alert.alert("Success", "List created!");

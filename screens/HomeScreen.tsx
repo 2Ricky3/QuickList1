@@ -25,6 +25,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import { colors, globalStyles } from "../GlobalStyleSheet";
 import { LinearGradient } from "expo-linear-gradient";
+import { fetchUserLists } from "../services/listService";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -59,24 +60,10 @@ const HomeScreen = () => {
     });
   };
 
-  const fetchUserLists = async (userId: string) => {
+  const fetchUserListsAndSet = async (userId: string) => {
     setStatsLoading(true);
     try {
-      const q = query(
-        collection(db, "lists"),
-        where("uid", "==", userId),
-        limit(15)
-      );
-      const querySnapshot = await getDocs(q);
-      const lists: GroceryList[] = [];
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        lists.push({
-          id: docSnap.id,
-          createdAt: data.createdAt,
-          items: data.items || [],
-        });
-      });
+      const lists = await fetchUserLists(userId, 15);
       setGroceryLists(lists);
     } catch (error) {
       console.warn("Failed to fetch grocery lists:", error);
@@ -103,7 +90,7 @@ const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       if (auth.currentUser) {
-        fetchUserLists(auth.currentUser.uid);
+        fetchUserListsAndSet(auth.currentUser.uid);
       }
     }, [])
   );

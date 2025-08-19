@@ -16,7 +16,7 @@ import {
 import { globalStyles } from "../GlobalStyleSheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { loginWithEmail } from "../services/authService";
 import { auth } from "../firebaseConfig";
 import { RootStackParamList } from "../types";
 
@@ -37,7 +37,7 @@ const LoginScreen = () => {
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await loginWithEmail(email, password);
       navigation.navigate("Home");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Login failed";
