@@ -18,6 +18,8 @@ import { ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { registerWithEmail } from "../services/authService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { auth } from "../firebaseConfig";
 
 import { RootStackParamList } from "../types";
 
@@ -36,9 +38,14 @@ const RegisterScreen = () => {
 
     setLoading(true);
     try {
-      await registerWithEmail(email, password, name);
+      const user = await registerWithEmail(email, password, name);
       setLoading(false);
-      navigation.navigate("Home");
+      const onboardingSeen = await AsyncStorage.getItem(`onboardingSeen:${user.uid}`);
+      if (!onboardingSeen) {
+        navigation.replace("Onboarding", { userId: user.uid });
+      } else {
+        navigation.navigate("Home");
+      }
     } catch (error: any) {
       setLoading(false);
       alert(error.message || "Registration failed");

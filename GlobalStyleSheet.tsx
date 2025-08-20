@@ -274,8 +274,6 @@ export const createScreenStyles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-// Styles for PreviousListScreen
 export const previousListStyles = StyleSheet.create({
   topSection: {
     paddingHorizontal: 20,
@@ -381,3 +379,68 @@ export const previousListStyles = StyleSheet.create({
     fontSize: 12,
   },
 });
+export const onboardingStyles = StyleSheet.create({
+  skipContainer: {
+    alignItems: "flex-end",
+    paddingHorizontal: 24,
+    marginTop: 8,
+  },
+  skipText: {
+    color: colors.primary,
+    fontWeight: "600",
+    fontSize: 16,
+    opacity: 0.8,
+  },
+  contentWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    width: "85%",
+  },
+  image: {
+    width: 120,
+    height: 120,
+    marginBottom: 28,
+    resizeMode: "contain",
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: colors.primary,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  description: {
+    fontSize: 16,
+    color: colors.gray,
+    textAlign: "center",
+    paddingHorizontal: 8,
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  dots: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 24,
+    marginTop: 12,
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    margin: 6,
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+});
+
