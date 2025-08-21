@@ -6,8 +6,8 @@ It makes shopping simple, fast, and collaborative whether you’re at the store 
 ---
 
 ## 📌 Table of Contents
-- [Features](#features)
-- [Tech Stack](#tech-stack)
+- [Features](#✨features)
+- [Tech Stack](#🛠️tech-stack)
 - [Installation](#installation)
   - [Clone the Repository](#1-clone-the-repository)
   - [Required Dependencies](#2-required-dependencies)
