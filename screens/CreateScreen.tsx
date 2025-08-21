@@ -20,7 +20,6 @@ import "react-native-get-random-values";
 import { globalStyles, colors, createScreenStyles } from "../GlobalStyleSheet";
 import { createList } from "../services/listService";
 
-
 const EXAMPLE_TAGS = [
   "sales",
   "monthly buy",
@@ -35,7 +34,7 @@ const RANDOM_ITEMS = [
   "Chocolate Bar",
   "Ice Cream",
   "Energy Drink",
-  "Mango",
+  "Water",
   "Fancy Cheese",
   "Mystery Snack",
   "Surprise Fruit",
@@ -295,6 +294,14 @@ const CreateScreen = () => {
           >
             <Text style={globalStyles.buttonText}>+ Add Item</Text>
           </Pressable>
+
+          <Pressable
+            style={[globalStyles.buttonContainer, styles.bottomButton, { marginRight: 8, backgroundColor: "#F39C12" }]}
+            onPress={handleSurpriseMe}
+          >
+            <Text style={globalStyles.buttonText}>Surprise Me</Text>
+          </Pressable>
+
           <Pressable
             style={[globalStyles.buttonContainer, styles.bottomButton, { backgroundColor: "#2ECC71" }]}
             onPress={handleSaveList}
