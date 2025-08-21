@@ -117,12 +117,28 @@ Shopping lists shouldn’t be a hassle. QuickList helps you:
 ---
 
 # 🎯 Mobile Mockups
-<img width="1920" height="1440" alt="486shots_so" src="https://github.com/user-attachments/assets/3f39918f-65c9-4060-b2f1-8871cfa495ce" />
-<img width="1920" height="1440" alt="380shots_so" src="https://github.com/user-attachments/assets/50e99ae9-1c4d-4103-8c8a-975a402f1b7d" />
-<img width="1920" height="1440" alt="265shots_so" src="https://github.com/user-attachments/assets/37a72cb5-0284-4235-b904-b2cea15a7eb9" />
-<img width="1920" height="1440" alt="557shots_so" src="https://github.com/user-attachments/assets/6fd8b197-d8a0-47ff-a881-cc913a2d0ebc" />
-<img width="1920" height="1440" alt="728shots_so" src="https://github.com/user-attachments/assets/991c133d-c0ff-40c7-ad9a-ccc99dc14397" />
+### 1️⃣ Mockup
+![Home Screen](https://github.com/user-attachments/assets/3f39918f-65c9-4060-b2f1-8871cfa495ce)
 
+---
+
+### 2️⃣ Mockup
+![Dashboard Overview](https://github.com/user-attachments/assets/50e99ae9-1c4d-4103-8c8a-975a402f1b7d)
+
+---
+
+### 3️⃣ Mockup
+![Activity Tracking](https://github.com/user-attachments/assets/37a72cb5-0284-4235-b904-b2cea15a7eb9)
+
+---
+
+### 4️⃣ Mockup
+![Notifications & Alerts](https://github.com/user-attachments/assets/6fd8b197-d8a0-47ff-a881-cc913a2d0ebc)
+
+---
+
+### 5️⃣ Mockup
+![Analytics & Insights](https://github.com/user-attachments/assets/991c133d-c0ff-40c7-ad9a-ccc99dc14397)
 # 👨‍💻 Author
 
 
