@@ -6,19 +6,19 @@ It makes shopping simple, fast, and collaborative whether you’re at the store 
 ---
 
 ## 📌 Table of Contents
-- [Features](#✨-Features)
-- [Tech Stack](#🛠️-tech-stack)
-- [Installation](#🚀-installation)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
   - [Clone the Repository](#1-clone-the-repository)
   - [Required Dependencies](#2-required-dependencies)
   - [Firebase Setup](#3-required-dependencies)
-  - [Running the app IOS](#4-running-the-app-ios)
-  - [Running the app Android](#41-running-the-app-andriod)
-  - [Quick start](#5-quick-start)
-- [Security](#🔒-security)
-- [Why QuickList?](#🎯-why-quicklist)
-- [Mobile App Mockups](#📱-mobile-app-mockups)
-- [Author](#👨‍💻-author)
+  - [Running the App IOS](#4-running-the-app-ios)
+  - [Running the App Android](#41-running-the-app-andriod)
+  - [Quick Start](#5-quick-start)
+- [Security](#security)
+- [Why QuickList?](#why-quicklist)
+- [Mobile App Mockups](#mobile-app-mockups)
+- [Author](#author)
 
 ---
 
