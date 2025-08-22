@@ -171,8 +171,6 @@ QuickList is an ongoing project, and here are some ideas for future versions to 
 - 🏷️ **More List Features:** Advanced list management, including sorting, priority levels, and recurring items.  
 - 👤 **Profile Page:** Allow users to manage their account, view activity history, and customize settings.  
 - 🔔 **Notifications:** Reminders for items on your lists or shared lists.  
-- 🌐 **Cross-Device Sync:** Ensure seamless real-time syncing across multiple devices.  
-- 📊 **Analytics & Insights:** Show trends, most frequently bought items, and spending summaries.  
 - ⚡ **Performance Improvements:** Faster loading, smoother animations, and offline support.  
 
 This section demonstrates the vision for QuickList as a full-featured, user-friendly grocery management app.
