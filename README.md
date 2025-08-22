@@ -6,19 +6,20 @@ It makes shopping simple, fast, and collaborative whether you’re at the store 
 ---
 
 ## 📌 Table of Contents
-- [Features](#✨features)
-- [Tech Stack](#🛠️tech-stack)
-- [Installation](#installation)
-  - [Clone the Repository](#1-clone-the-repository)
-  - [Required Dependencies](#2-required-dependencies)
-  - [Firebase Setup](#3-required-dependencies)
-  - [Running the App IOS](#4-running-the-app-ios)
-  - [Running the App Android](#41-running-the-app-andriod)
-  - [Quick Start](#5-quick-start)
-- [Security](#security)
-- [Why QuickList?](#why-quicklist)
-- [Mobile App Mockups](#mobile-app-mockups)
-- [Author](#author)
+- [Features](#✨-features)  
+- [Tech Stack](#🛠️-tech-stack)  
+- [Installation](#🚀-installation)  
+  - [Clone the Repository](#1-clone-the-repository)  
+  - [Required Dependencies](#2-required-dependencies)  
+  - [Firebase Setup](#3-required-dependencies)  
+  - [Running the App IOS](#4-running-the-app-ios)  
+  - [Running the App Android](#41-running-the-app-andriod)  
+  - [Quick Start](#5-quick-start)  
+- [Security](#-security)  
+- [Why QuickList?](#-why-quicklist)  
+- [Mobile App Mockups](#-mobile-app-mockups)  
+- [Demo Video](#-demo-video)  
+- [Author](#-author)  
 
 ---
 
@@ -156,6 +157,9 @@ Shopping lists shouldn’t be a hassle. QuickList helps you:
 
 ### 5️⃣ Splash Screen & Sign in
 ![Analytics & Insights](https://github.com/user-attachments/assets/991c133d-c0ff-40c7-ad9a-ccc99dc14397)
+
+### 3.🎥 Demo Video 
+https://drive.google.com/drive/folders/1tqHqu4rQAwF-nPOQwAn0FkPmnRvGKCuf?usp=drive_link
 
 
 # 👨‍💻 Author
