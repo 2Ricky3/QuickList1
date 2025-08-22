@@ -150,8 +150,6 @@ const HomeScreen = () => {
               Today is {formatDate(new Date())}.
             </Text>
           </View>
-
-          {/* Grocery Stats */}
           <View style={globalStyles.statsCard}>
             <Text style={globalStyles.statsTitle}>Your Grocery Stats</Text>
             {statsLoading ? (
