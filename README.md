@@ -6,19 +6,20 @@ It makes shopping simple, fast, and collaborative whether you’re at the store 
 ---
 
 ## 📌 Table of Contents
-- [Features](#✨features)
-- [Tech Stack](#🛠️tech-stack)
-- [Installation](#installation)
-  - [Clone the Repository](#1-clone-the-repository)
-  - [Required Dependencies](#2-required-dependencies)
-  - [Firebase Setup](#3-required-dependencies)
-  - [Running the App IOS](#4-running-the-app-ios)
-  - [Running the App Android](#41-running-the-app-andriod)
-  - [Quick Start](#5-quick-start)
-- [Security](#security)
-- [Why QuickList?](#why-quicklist)
-- [Mobile App Mockups](#mobile-app-mockups)
-- [Author](#author)
+- [Features](#✨-features)  
+- [Tech Stack](#🛠️-tech-stack)  
+- [Installation](#🚀-installation)  
+  - [Clone the Repository](#1-clone-the-repository)  
+  - [Required Dependencies](#2-required-dependencies)  
+  - [Firebase Setup](#3-required-dependencies)  
+  - [Running the App IOS](#4-running-the-app-ios)  
+  - [Running the App Android](#41-running-the-app-andriod)  
+  - [Quick Start](#5-quick-start)  
+- [Security](#-security)  
+- [Why QuickList?](#-why-quicklist)  
+- [Mobile App Mockups](#-mobile-app-mockups)  
+- [Demo Video](#-demo-video)  
+- [Author](#-author)  
 
 ---
 
@@ -157,6 +158,22 @@ Shopping lists shouldn’t be a hassle. QuickList helps you:
 ### 5️⃣ Splash Screen & Sign in
 ![Analytics & Insights](https://github.com/user-attachments/assets/991c133d-c0ff-40c7-ad9a-ccc99dc14397)
 
+### 3.🎥 Demo Video 
+https://drive.google.com/drive/folders/1tqHqu4rQAwF-nPOQwAn0FkPmnRvGKCuf?usp=drive_link
+
+---
+
+# 🚀 Future Improvements
+
+QuickList is an ongoing project, and here are some ideas for future versions to make it even better:  
+
+- ✨ **Enhanced UI/UX:** Cleaner, more modern interface for smoother navigation.  
+- 🏷️ **More List Features:** Advanced list management, including sorting, priority levels, and recurring items.  
+- 👤 **Profile Page:** Allow users to manage their account, view activity history, and customize settings.  
+- 🔔 **Notifications:** Reminders for items on your lists or shared lists.  
+- ⚡ **Performance Improvements:** Faster loading, smoother animations, and offline support.  
+
+This section demonstrates the vision for QuickList as a full-featured, user-friendly grocery management app.
 
 # 👨‍💻 Author
 
