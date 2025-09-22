@@ -163,6 +163,26 @@ https://drive.google.com/drive/folders/1tqHqu4rQAwF-nPOQwAn0FkPmnRvGKCuf?usp=dri
 
 ---
 
+# 🙏 Acknowledgments, Highlights & Challenges
+
+## Acknowledgments
+I would like to express my gratitude to:  
+- **Online communities and resources** (Stack Overflow, React Native & Firebase documentation) for support with technical challenges.  
+- **Friends and family** who tested the app and provided valuable user feedback.  
+
+## Highlights
+- Implemented **real-time grocery list syncing** using Firebase Firestore.  
+- Developed a **cross-platform app** that works seamlessly on both iOS and Android.  
+- Added **color-coded and tag-based list customization** for better organization.  
+- Enabled **collaborative editing**, allowing multiple users to contribute to shared lists.  
+- Modern UI/UX with **smooth swipe gestures, onboarding, and animations**.  
+
+## Challenges
+- **Authentication handling:** Initially displayed Firebase errors directly to users, requiring improvements for safer user experience.  
+- **Real-time updates:** Integrating snapshot listeners for live updates was complex and took iterative testing.  
+- **Component modularity:** Refactoring large components into reusable, smaller components while maintaining functionality.  
+- **CRUD logic for shared lists:** Handling edit permissions and ensuring data persistence across users.  
+
 # 🚀 Future Improvements
 
 QuickList is an ongoing project, and here are some ideas for future versions to make it even better:  
