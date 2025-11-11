@@ -11,15 +11,13 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  TouchableOpacity,
 } from "react-native";
-import { globalStyles } from "../GlobalStyleSheet";
-import { ActivityIndicator } from "react-native-paper";
+import { globalStyles, colors } from "../GlobalStyleSheet";
+import { ModernLoader } from "../components/ModernLoader";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { registerWithEmail } from "../services/authService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { auth } from "../firebaseConfig";
 
 import { RootStackParamList } from "../types";
 
@@ -29,6 +27,7 @@ const RegisterScreen = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const handleRegister = async () => {
     if (!email || !password || !name) {
@@ -53,24 +52,29 @@ const RegisterScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1 }}
+            contentContainerStyle={{ 
+              flexGrow: 1, 
+              paddingHorizontal: 20,
+              paddingVertical: 40,
+            }}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <View style={globalStyles.container}>
+            <View style={{ flex: 1, justifyContent: "center" }}>
               <Image
                 source={require("../assets/Logo.png")}
                 style={{
-                  width: 120,
-                  height: 120,
+                  width: 100,
+                  height: 100,
                   alignSelf: "center",
-                  marginBottom: 20,
+                  marginBottom: 24,
                 }}
                 resizeMode="contain"
               />
@@ -79,24 +83,42 @@ const RegisterScreen = () => {
               <View style={globalStyles.formWrapper}>
                 <TextInput
                   placeholder="Name"
+                  placeholderTextColor={colors.textLight}
                   value={name}
                   onChangeText={setName}
-                  style={globalStyles.inputField}
+                  onFocus={() => setFocusedInput('name')}
+                  onBlur={() => setFocusedInput(null)}
+                  style={[
+                    globalStyles.inputField,
+                    focusedInput === 'name' && globalStyles.inputFieldFocused
+                  ]}
                 />
                 <TextInput
                   placeholder="Email"
+                  placeholderTextColor={colors.textLight}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={email}
                   onChangeText={setEmail}
-                  style={globalStyles.inputField}
+                  onFocus={() => setFocusedInput('email')}
+                  onBlur={() => setFocusedInput(null)}
+                  style={[
+                    globalStyles.inputField,
+                    focusedInput === 'email' && globalStyles.inputFieldFocused
+                  ]}
                 />
                 <TextInput
                   placeholder="Password"
+                  placeholderTextColor={colors.textLight}
                   secureTextEntry
                   value={password}
                   onChangeText={setPassword}
-                  style={globalStyles.inputField}
+                  onFocus={() => setFocusedInput('password')}
+                  onBlur={() => setFocusedInput(null)}
+                  style={[
+                    globalStyles.inputField,
+                    focusedInput === 'password' && globalStyles.inputFieldFocused
+                  ]}
                 />
 
                 <Pressable
@@ -104,18 +126,14 @@ const RegisterScreen = () => {
                   disabled={loading}
                   style={({ pressed }) => [
                     globalStyles.buttonContainer,
-                    pressed && {
-                      backgroundColor: "#fff",
-                      borderWidth: 1,
-                      borderColor: "#C20200",
-                    },
+                    pressed && globalStyles.buttonContainerSecondary,
                   ]}
                 >
                   {({ pressed }) => (
                     <Text
                       style={[
                         globalStyles.buttonText,
-                        pressed && { color: "#C20200" },
+                        pressed && globalStyles.buttonTextSecondary,
                       ]}
                     >
                       {loading ? "Registering..." : "Register"}
@@ -123,7 +141,7 @@ const RegisterScreen = () => {
                   )}
                 </Pressable>
 
-                {loading && <ActivityIndicator size="large" color="#C20200" />}
+                {loading && <ModernLoader size="large" style={{ marginTop: 20 }} />}
               </View>
 
               <Text style={globalStyles.footerText}>
@@ -136,17 +154,14 @@ const RegisterScreen = () => {
                 </Text>
               </Text>
 
-              <TouchableOpacity onPress={() => navigation.navigate("Terms")}>
-                <Text
-                  style={{
-                    color: "#C20200",
-                    textAlign: "center",
-                    marginTop: 16,
-                  }}
-                >
+              <Pressable 
+                onPress={() => navigation.navigate("Terms")}
+                style={globalStyles.linkButton}
+              >
+                <Text style={globalStyles.linkButtonText}>
                   View Terms and Conditions
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>

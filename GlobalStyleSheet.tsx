@@ -1,16 +1,161 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export const colors = {
   primary: "#C20200",
-  dark: "#520600",
-  gray: "#736F73",
+  primaryDark: "#520600",
+  primaryLight: "#E63946",
+  
+  success: "#2ECC71",
+  warning: "#F39C12",
+  danger: "#E74C3C",
+  
+  textDark: "#520600",
+  textMedium: "#736F73",
+  textLight: "#999999",
+  
   white: "#FFFFFF",
+  backgroundLight: "#F8F9FA",
+  border: "#E0E0E0",
+  
+  shadowColor: "#000000",
+};
+
+export const tagColors = {
+  red: { bg: "#FFE5E5", text: "#C20200", border: "#C20200" },
+  pink: { bg: "#FCE4EC", text: "#AD1457", border: "#EC407A" },
+  purple: { bg: "#F3E5F5", text: "#6A1B9A", border: "#AB47BC" },
+  blue: { bg: "#E3F2FD", text: "#1565C0", border: "#42A5F5" },
+  cyan: { bg: "#E0F7FA", text: "#00838F", border: "#26C6DA" },
+  teal: { bg: "#E0F2F1", text: "#00695C", border: "#26A69A" },
+  green: { bg: "#E8F5E9", text: "#2E7D32", border: "#66BB6A" },
+  lime: { bg: "#F9FBE7", text: "#827717", border: "#D4E157" },
+  yellow: { bg: "#FFFDE7", text: "#F57F17", border: "#FFEE58" },
+  orange: { bg: "#FFF3E0", text: "#E65100", border: "#FFA726" },
+  brown: { bg: "#EFEBE9", text: "#4E342E", border: "#8D6E63" },
+  gray: { bg: "#F5F5F5", text: "#424242", border: "#9E9E9E" },
+};
+
+export const getTagColor = (tag: string): typeof tagColors.red => {
+  const tagLower = tag.toLowerCase();
+  
+  if (tagLower.includes("sale") || tagLower.includes("deal")) return tagColors.red;
+  if (tagLower.includes("health") || tagLower.includes("organic")) return tagColors.green;
+  if (tagLower.includes("snack") || tagLower.includes("treat")) return tagColors.pink;
+  if (tagLower.includes("weekly") || tagLower.includes("daily")) return tagColors.blue;
+  if (tagLower.includes("party") || tagLower.includes("celebration")) return tagColors.purple;
+  if (tagLower.includes("clean") || tagLower.includes("household")) return tagColors.cyan;
+  if (tagLower.includes("beverage") || tagLower.includes("drink")) return tagColors.orange;
+  if (tagLower.includes("grocery") || tagLower.includes("essential")) return tagColors.teal;
+  
+  const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const colorKeys = Object.keys(tagColors) as Array<keyof typeof tagColors>;
+  const colorKey = colorKeys[hash % colorKeys.length];
+  return tagColors[colorKey];
+};
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+};
+
+export const safeAreaPadding = {
+  bottom: {
+    ios: 34, // iPhone with notch
+    android: 16,
+  },
+};
+
+export const borderRadius = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  round: 999,
+};
+
+export const elevation = {
+  sm: {
+    shadowColor: colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: colors.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  lg: {
+    shadowColor: colors.shadowColor,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+};
+
+export const typography = {
+  h1: {
+    fontSize: 32,
+    fontWeight: "700" as const,
+    letterSpacing: 0.5,
+    lineHeight: 40,
+  },
+  h2: {
+    fontSize: 24,
+    fontWeight: "700" as const,
+    letterSpacing: 0.4,
+    lineHeight: 32,
+  },
+  h3: {
+    fontSize: 20,
+    fontWeight: "600" as const,
+    letterSpacing: 0.3,
+    lineHeight: 28,
+  },
+  body: {
+    fontSize: 16,
+    fontWeight: "400" as const,
+    letterSpacing: 0.2,
+    lineHeight: 24,
+  },
+  bodyBold: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    letterSpacing: 0.2,
+    lineHeight: 24,
+  },
+  bodySmall: {
+    fontSize: 14,
+    fontWeight: "400" as const,
+    letterSpacing: 0.2,
+    lineHeight: 20,
+  },
+  caption: {
+    fontSize: 12,
+    fontWeight: "400" as const,
+    letterSpacing: 0.1,
+    lineHeight: 16,
+  },
+  button: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    letterSpacing: 0.3,
+  },
 };
 
 export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: spacing.xl,
     backgroundColor: colors.white,
     justifyContent: "center",
   },
@@ -19,6 +164,7 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: colors.white,
   },
 
   safeArea: {
@@ -27,159 +173,62 @@ export const globalStyles = StyleSheet.create({
   },
 
   scrollContent: {
-    padding: 20,
+    padding: spacing.xl,
+    paddingBottom: spacing.xxxl,
+  },
+
+  scrollContentWithBottomBar: {
+    padding: spacing.xl,
+    paddingBottom: 120, 
+  },
+
+  formWrapper: {
+    paddingHorizontal: spacing.xxl,
+    width: "100%",
+    maxWidth: 500, 
+    alignSelf: "center",
   },
 
   headerContainer: {
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
 
   greetingText: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: colors.dark,
-    letterSpacing: 0.5,
+    ...typography.h1,
+    color: colors.textDark,
   },
 
   dateText: {
-    fontSize: 18,
-    color: colors.gray,
-    marginTop: 6,
-    letterSpacing: 0.3,
-  },
-
-  statsCard: {
-    marginBottom: 24,
-    padding: 20,
-    borderRadius: 20,
-    backgroundColor: "#ffffffcc", 
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-
-  statsTitle: {
-    fontWeight: "700",
-    fontSize: 20,
-    marginBottom: 12,
-    color: colors.dark,
-    letterSpacing: 0.5,
-  },
-
-  statsText: {
-    fontSize: 15,
-    color: colors.gray,
-    marginBottom: 6,
-    letterSpacing: 0.3,
-  },
-
-  optionsText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.dark,
-    marginBottom: 20,
-    letterSpacing: 0.4,
-  },
-
-  optionsContainer: {
-    gap: 20,
-  },
-
-  previousBuysButton: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  previousBuysTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.primary,
-    marginBottom: 8,
-    letterSpacing: 0.6,
-  },
-
-  previousBuysSubtitle: {
-    color: colors.gray,
-    fontSize: 16,
-    lineHeight: 22,
-  },
-
-  newListButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-    padding: 28,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  newListTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.white,
-    marginBottom: 8,
-    letterSpacing: 0.6,
-  },
-
-  newListSubtitle: {
-    color: "#f0f0f0",
-    fontSize: 16,
-    lineHeight: 22,
+    ...typography.body,
+    color: colors.textMedium,
+    marginTop: spacing.sm,
   },
 
   titleText: {
-    fontSize: 32,
-    fontWeight: "bold",
+    ...typography.h1,
     color: colors.primary,
-    marginBottom: 24,
+    marginBottom: spacing.xxl,
     textAlign: "center",
   },
 
-  inputField: {
-    height: 48,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: "#f8f8f8",
-    color: colors.dark,
+  headerTitle: {
+    ...typography.h2,
+    color: colors.primary,
+    marginBottom: spacing.lg,
+    textAlign: "center",
   },
 
-  buttonContainer: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 4,
-  },
-
-  buttonText: {
-    color: colors.white,
-    fontWeight: "600",
-    fontSize: 16,
+  sectionTitle: {
+    ...typography.h3,
+    color: colors.primary,
+    marginBottom: spacing.lg,
   },
 
   footerText: {
-    marginTop: 20,
+    ...typography.bodySmall,
+    marginTop: spacing.xl,
     textAlign: "center",
-    color: colors.gray,
-    fontSize: 14,
+    color: colors.textMedium,
   },
 
   footerLink: {
@@ -187,164 +236,350 @@ export const globalStyles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  formWrapper: {
-    paddingHorizontal: 24,
-  },
-
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 10,
-  },
-
-  inputFieldSmall: {
+  statsCard: {
+    marginBottom: spacing.xxl,
+    padding: spacing.xl,
+    borderRadius: borderRadius.xl,
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 8,
-    marginHorizontal: 8,
-    fontSize: 16,
-    backgroundColor: "#f8f8f8",
-    color: colors.dark,
+    borderColor: colors.border,
   },
 
-  buttonContainerSmall: {
-    backgroundColor: colors.primary,
-    padding: 12,
-    borderRadius: 8,
-    marginHorizontal: 8,
-    alignItems: "center",
-    marginTop: 10,
-    shadowColor: "#000",
+  statsTitle: {
+    ...typography.h3,
+    marginBottom: spacing.md,
+    color: colors.textDark,
+  },
+
+  statsText: {
+    ...typography.body,
+    color: colors.textMedium,
+    marginBottom: spacing.sm,
+  },
+
+  optionsText: {
+    ...typography.h3,
+    color: colors.textDark,
+    marginBottom: spacing.xl,
+  },
+
+  optionsContainer: {
+    gap: spacing.lg,
+  },
+
+  previousBuysButton: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xxl,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    elevation: 3,
+  },
+
+  previousBuysTitle: {
+    ...typography.h3,
+    fontSize: 20,
+    color: colors.primary,
+    marginBottom: spacing.sm,
+  },
+
+  previousBuysSubtitle: {
+    ...typography.body,
+    color: colors.textMedium,
+    lineHeight: 22,
+  },
+
+  newListButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xxl,
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
 
-  buttonTextSmall: {
+  newListTitle: {
+    ...typography.h3,
+    fontSize: 20,
     color: colors.white,
-    fontWeight: "bold",
+    marginBottom: spacing.sm,
+  },
+
+  newListSubtitle: {
+    ...typography.body,
+    color: "#f0f0f0",
+    lineHeight: 22,
+  },
+
+  inputField: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
     fontSize: 16,
+    backgroundColor: colors.backgroundLight,
+    color: colors.textDark,
+    ...elevation.sm,
+  },
+
+  inputFieldFocused: {
+    borderWidth: 2,
+    borderColor: colors.primary,
+    backgroundColor: colors.white,
+  },
+
+  buttonContainer: {
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: spacing.xxl,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.sm,
+    shadowColor: colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    minHeight: 56,
+    minWidth: 100,
+  },
+
+  buttonContainerSecondary: {
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+
+  buttonContainerSuccess: {
+    backgroundColor: colors.success,
+  },
+
+  buttonContainerWarning: {
+    backgroundColor: colors.warning,
+  },
+
+  buttonContainerDanger: {
+    backgroundColor: colors.danger,
+  },
+
+  buttonText: {
+    ...typography.button,
+    color: colors.white,
+  },
+
+  buttonTextSecondary: {
+    color: colors.primary,
+  },
+
+  linkButton: {
+    paddingVertical: spacing.md,
+    alignItems: "center",
+  },
+
+  linkButtonText: {
+    ...typography.button,
+    color: colors.primary,
   },
 });
 
 export const createScreenStyles = StyleSheet.create({
+  sectionLabel: {
+    ...typography.h3,
+    fontSize: 16,
+    color: colors.textDark,
+    marginBottom: spacing.md,
+    fontWeight: "600",
+  },
   deleteButtonContainer: {
     justifyContent: "center",
-    alignItems: "center",
-    height: 48,
+    alignItems: "flex-end",
+    marginBottom: 12,
   },
   deleteButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.danger,
     justifyContent: "center",
     alignItems: "center",
-    width: 60,
+    flexDirection: "row",
+    paddingHorizontal: spacing.lg,
     height: 48,
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
+    borderRadius: borderRadius.md,
+    marginLeft: spacing.sm,
+    minWidth: 100,
+    ...elevation.md,
+  },
+  deleteButtonText: {
+    ...typography.bodyBold,
+    color: colors.white,
+    marginLeft: spacing.xs,
   },
   suggestionsContainer: {
-    backgroundColor: "#fff",
-    borderColor: colors.primary,
-    borderWidth: 1,
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderWidth: 1.5,
     borderTopWidth: 0,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    marginTop: -6,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-    width: "95%",
-    alignSelf: "center",
-    maxHeight: 140,
+    borderBottomLeftRadius: borderRadius.md,
+    borderBottomRightRadius: borderRadius.md,
+    marginTop: -spacing.sm,
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+    maxHeight: 160,
+    overflow: "hidden",
   },
   suggestionItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomColor: "#eee",
-    borderBottomWidth: 1,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 0.5,
+    backgroundColor: colors.white,
+    minHeight: 48, 
   },
   suggestionText: {
-    color: colors.primary,
-    fontWeight: "600",
-    fontSize: 16,
+    ...typography.body,
+    color: colors.textDark,
+    fontWeight: "500",
+  },
+  bottomBar: {
+    position: "absolute" as const,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: "row",
+    backgroundColor: colors.white,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: Platform.OS === "ios" ? spacing.xxl : spacing.lg,
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.md, 
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -2 },
+    elevation: 8,
+  },
+  bottomButton: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 56, 
+  },
+  colorOption: {
+    width: 56,
+    height: 56,
+    borderRadius: borderRadius.md,
+    marginRight: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 2,
+  },
+  colorOptionSelected: {
+    borderWidth: 3,
+    borderColor: colors.textDark,
+  },
+  colorOptionUnselected: {
+    borderColor: colors.border,
   },
 });
+
 export const previousListStyles = StyleSheet.create({
   topSection: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.white,
     flexShrink: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   shareCodeContainer: {
     flexDirection: "row",
-    marginBottom: 12,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
   shareCodeInput: {
     flex: 1,
     borderColor: colors.primary,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
     fontSize: 16,
-    height: 44,
-    marginRight: 8,
+    height: 52,
+    backgroundColor: colors.backgroundLight,
   },
   shareCodeButton: {
     backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingHorizontal: 16,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.xl,
     justifyContent: "center",
+    minWidth: 80,
+    minHeight: 52,
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   shareCodeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    ...typography.button,
+    color: colors.white,
   },
   tagsFilterContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
+    alignItems: "center",
   },
   tagButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1.5,
     borderColor: colors.primary,
     backgroundColor: "transparent",
-    marginRight: 8,
-    marginBottom: 8,
+    minHeight: 32, 
   },
   tagButtonSelected: {
     backgroundColor: colors.primary,
   },
   tagButtonText: {
+    ...typography.bodySmall,
     color: colors.primary,
+    fontWeight: "600",
   },
   tagButtonTextSelected: {
-    color: "#fff",
+    color: colors.white,
   },
   listsScrollView: {
     flex: 1,
+    backgroundColor: colors.backgroundLight,
   },
   listCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    borderColor: colors.primary,
-    borderWidth: 1,
-    marginBottom: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    borderWidth: 2,
+    marginBottom: spacing.lg,
+    padding: spacing.lg,
+    ...elevation.md,
   },
   listCardHeader: {
     flexDirection: "row",
@@ -352,95 +587,114 @@ export const previousListStyles = StyleSheet.create({
     alignItems: "center",
   },
   listTitle: {
+    ...typography.h3,
     fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
     flex: 1,
   },
   listCardButtons: {
     flexDirection: "row",
-    gap: 16,
+    gap: spacing.lg,
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 8,
+    marginTop: spacing.sm,
+    gap: spacing.xs,
   },
   tagBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 8,
-    marginBottom: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1.5,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   tagBadgeText: {
-    color: "#fff",
     fontSize: 12,
+    fontWeight: "600",
+  },
+  tagColorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  actionButton: {
+    alignItems: "center",
+    padding: spacing.sm,
+  },
+  actionButtonText: {
+    fontSize: 10,
+    marginTop: spacing.xs,
+    fontWeight: "600",
   },
 });
+
 export const onboardingStyles = StyleSheet.create({
   skipContainer: {
     alignItems: "flex-end",
-    paddingHorizontal: 24,
-    marginTop: 8,
+    paddingHorizontal: spacing.xxl,
+    paddingTop: spacing.md,
   },
   skipText: {
+    ...typography.button,
     color: colors.primary,
-    fontWeight: "600",
-    fontSize: 16,
     opacity: 0.8,
   },
   contentWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: spacing.lg,
   },
   card: {
     backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: 32,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xxl,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    width: "85%",
+    shadowColor: colors.shadowColor,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+    width: "90%",
+    maxWidth: 400, 
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   image: {
-    width: 120,
-    height: 120,
-    marginBottom: 28,
+    width: 100,
+    height: 100,
+    marginBottom: spacing.xl,
     resizeMode: "contain",
   },
   title: {
-    fontSize: 26,
-    fontWeight: "700",
+    ...typography.h2,
     color: colors.primary,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     textAlign: "center",
   },
   description: {
-    fontSize: 16,
-    color: colors.gray,
+    ...typography.body,
+    color: colors.textMedium,
     textAlign: "center",
-    paddingHorizontal: 8,
-    marginBottom: 8,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.sm,
     lineHeight: 22,
   },
   dots: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 24,
-    marginTop: 12,
+    marginBottom: spacing.xxl,
+    marginTop: spacing.md,
+    gap: spacing.sm,
   },
   dot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    margin: 6,
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.border,
   },
 });
 

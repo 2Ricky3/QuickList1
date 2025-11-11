@@ -5,27 +5,22 @@ import {
   SafeAreaView,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   Alert,
 } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { auth, db } from "../firebaseConfig";
 import {
   doc,
   getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  limit,
 } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
-import { colors, globalStyles } from "../GlobalStyleSheet";
+import { colors, globalStyles, spacing } from "../GlobalStyleSheet";
 import { LinearGradient } from "expo-linear-gradient";
 import { fetchUserLists } from "../services/listService";
+import { ModernLoader } from "../components/ModernLoader";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -133,7 +128,7 @@ const HomeScreen = () => {
   if (loading) {
     return (
       <SafeAreaView style={globalStyles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ModernLoader size="large" />
       </SafeAreaView>
     );
   }
@@ -141,7 +136,10 @@ const HomeScreen = () => {
   return (
     <LinearGradient colors={["#f0f4f8", "#d9e2ec"]} style={{ flex: 1 }}>
       <SafeAreaView style={globalStyles.safeArea}>
-        <ScrollView contentContainerStyle={globalStyles.scrollContent}>
+        <ScrollView 
+          contentContainerStyle={globalStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={globalStyles.headerContainer}>
             <Text style={globalStyles.greetingText}>
               {getGreeting()}, {userData?.displayName || "User"}!
@@ -153,14 +151,14 @@ const HomeScreen = () => {
           <View style={globalStyles.statsCard}>
             <Text style={globalStyles.statsTitle}>Your Grocery Stats</Text>
             {statsLoading ? (
-              <ActivityIndicator size="small" color={colors.primary} />
+              <ModernLoader size="small" />
             ) : (
               <>
                 <View
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginVertical: 4,
+                    marginVertical: spacing.xs,
                   }}
                 >
                   <MaterialIcons
@@ -168,7 +166,7 @@ const HomeScreen = () => {
                     size={18}
                     color={colors.primary}
                   />
-                  <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
+                  <Text style={[globalStyles.statsText, { marginLeft: spacing.sm }]}>
                     You have {groceryLists.length} past grocery{" "}
                     {groceryLists.length === 1 ? "list" : "lists"} saved.
                   </Text>
@@ -178,7 +176,7 @@ const HomeScreen = () => {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginVertical: 4,
+                    marginVertical: spacing.xs,
                   }}
                 >
                   <MaterialIcons
@@ -186,7 +184,7 @@ const HomeScreen = () => {
                     size={18}
                     color={colors.primary}
                   />
-                  <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
+                  <Text style={[globalStyles.statsText, { marginLeft: spacing.sm }]}>
                     Last grocery list: {getLastListDate()}
                   </Text>
                 </View>
@@ -195,11 +193,11 @@ const HomeScreen = () => {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginVertical: 4,
+                    marginVertical: spacing.xs,
                   }}
                 >
                   <MaterialIcons name="star" size={18} color={colors.primary} />
-                  <Text style={[globalStyles.statsText, { marginLeft: 8 }]}>
+                  <Text style={[globalStyles.statsText, { marginLeft: spacing.sm }]}>
                     Frequently purchased: {getFrequentItems().join(", ")}
                   </Text>
                 </View>
@@ -221,7 +219,7 @@ const HomeScreen = () => {
                   color={colors.primary}
                 />
                 <Text
-                  style={[globalStyles.previousBuysTitle, { marginLeft: 8 }]}
+                  style={[globalStyles.previousBuysTitle, { marginLeft: spacing.sm }]}
                 >
                   Previous Buys
                 </Text>
@@ -236,7 +234,7 @@ const HomeScreen = () => {
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <MaterialIcons name="note" size={24} color={colors.white} />
-                <Text style={[globalStyles.newListTitle, { marginLeft: 8 }]}>
+                <Text style={[globalStyles.newListTitle, { marginLeft: spacing.sm }]}>
                   New Grocery List
                 </Text>
               </View>
@@ -245,6 +243,23 @@ const HomeScreen = () => {
               </Text>
             </Pressable>
           </View>
+
+      
+          <Pressable
+            style={[
+              globalStyles.buttonContainer,
+              globalStyles.buttonContainerDanger,
+              { marginTop: spacing.xxxl, marginBottom: spacing.xl }
+            ]}
+            onPress={handleLogout}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <MaterialIcons name="logout" size={20} color={colors.white} />
+              <Text style={[globalStyles.buttonText, { marginLeft: spacing.sm }]}>
+                Logout
+              </Text>
+            </View>
+          </Pressable>
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

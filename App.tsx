@@ -30,6 +30,8 @@ export default function App() {
             headerTintColor: "#520600",
             headerTitleStyle: { fontWeight: "bold", fontSize: 22 },
             headerShadowVisible: false,
+            animation: "slide_from_right",
+            animationDuration: 300,
           }}
         >
           <Stack.Screen

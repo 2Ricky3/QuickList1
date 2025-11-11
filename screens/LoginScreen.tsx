@@ -11,15 +11,14 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { globalStyles } from "../GlobalStyleSheet";
+import { globalStyles, colors } from "../GlobalStyleSheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { loginWithEmail } from "../services/authService";
-import { auth } from "../firebaseConfig";
 import { RootStackParamList } from "../types";
+import { ModernLoader } from "../components/ModernLoader";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
@@ -29,6 +28,7 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -49,24 +49,30 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 20 }}
+            contentContainerStyle={{ 
+              flexGrow: 1, 
+              justifyContent: "center", 
+              paddingHorizontal: 20,
+              paddingVertical: 40,
+            }}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             <Image
               source={require("../assets/Logo.png")}
               style={{
-                width: 120,
-                height: 120,
+                width: 100,
+                height: 100,
                 alignSelf: "center",
-                marginBottom: 20,
+                marginBottom: 24,
               }}
               resizeMode="contain"
             />
@@ -76,18 +82,30 @@ const LoginScreen = () => {
             <View style={globalStyles.formWrapper}>
               <TextInput
                 placeholder="Email"
+                placeholderTextColor={colors.textLight}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
-                style={globalStyles.inputField}
+                onFocus={() => setFocusedInput('email')}
+                onBlur={() => setFocusedInput(null)}
+                style={[
+                  globalStyles.inputField,
+                  focusedInput === 'email' && globalStyles.inputFieldFocused
+                ]}
               />
               <TextInput
                 placeholder="Password"
+                placeholderTextColor={colors.textLight}
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
-                style={globalStyles.inputField}
+                onFocus={() => setFocusedInput('password')}
+                onBlur={() => setFocusedInput(null)}
+                style={[
+                  globalStyles.inputField,
+                  focusedInput === 'password' && globalStyles.inputFieldFocused
+                ]}
               />
 
               <Pressable
@@ -95,18 +113,14 @@ const LoginScreen = () => {
                 disabled={loading}
                 style={({ pressed }) => [
                   globalStyles.buttonContainer,
-                  pressed && {
-                    backgroundColor: "#fff",
-                    borderWidth: 1,
-                    borderColor: "#C20200",
-                  },
+                  pressed && globalStyles.buttonContainerSecondary,
                 ]}
               >
                 {({ pressed }) => (
                   <Text
                     style={[
                       globalStyles.buttonText,
-                      pressed && { color: "#C20200" },
+                      pressed && globalStyles.buttonTextSecondary,
                     ]}
                   >
                     {loading ? "Logging in..." : "Login"}
@@ -115,16 +129,15 @@ const LoginScreen = () => {
               </Pressable>
 
               {loading && (
-                <ActivityIndicator
+                <ModernLoader
                   size="large"
-                  color="#C20200"
                   style={{ marginTop: 20 }}
                 />
               )}
             </View>
 
             <Text style={globalStyles.footerText}>
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <Text
                 style={globalStyles.footerLink}
                 onPress={() => navigation.navigate("Register")}
@@ -133,11 +146,14 @@ const LoginScreen = () => {
               </Text>
             </Text>
 
-            <TouchableOpacity onPress={() => navigation.navigate("Terms")}>
-              <Text style={{ color: "#C20200", textAlign: "center", marginTop: 16 }}>
+            <Pressable 
+              onPress={() => navigation.navigate("Terms")}
+              style={globalStyles.linkButton}
+            >
+              <Text style={globalStyles.linkButtonText}>
                 View Terms and Conditions
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
