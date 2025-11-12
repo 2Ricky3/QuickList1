@@ -3,7 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StyleSheet } from "react-native";
-
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
@@ -13,11 +12,8 @@ import EditListScreen from "./screens/EditListScreen";
 import SplashScreen from "./screens/SplashScreen";
 import TermsScreen from "./screens/TermsScreen";
 import OnboardingScreen from "./screens/OnboardingScreen";
-
-import { RootStackParamList } from "./types"; 
-
+import { RootStackParamList } from "./types";
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -57,17 +53,17 @@ export default function App() {
           <Stack.Screen
             name="CreateScreen"
             component={CreateScreen}
-            options={{ title: "" }}
+            options={{ title: "New List" }}
           />
             <Stack.Screen
             name="PreviousListScreen"
             component={PreviousListScreen}
-            options={{ title: "Previous Lists" }}
+            options={{ headerShown: false }}
           />
            <Stack.Screen
             name="EditListScreen"
             component={EditListScreen}
-            options={{ title: "Edit List Screen" }}
+            options={{ title: "Edit List" }}
           />
           <Stack.Screen
             name="Terms"
@@ -84,7 +80,6 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

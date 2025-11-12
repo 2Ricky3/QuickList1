@@ -1,6 +1,5 @@
 import { collection, addDoc, Timestamp, doc, updateDoc, getDocs, query, where, limit, deleteDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-
 export const createList = async ({
   uid,
   title,
@@ -29,7 +28,6 @@ export const createList = async ({
     color,
   });
 };
-
 export const updateList = async (
   listId: string,
   data: {
@@ -43,7 +41,6 @@ export const updateList = async (
   const listRef = doc(db, "lists", listId);
   await updateDoc(listRef, data);
 };
-
 export const fetchUserLists = async (userId: string, max: number = 15) => {
   const q = query(
     collection(db, "lists"),
@@ -60,7 +57,6 @@ export const fetchUserLists = async (userId: string, max: number = 15) => {
     };
   });
 };
-
 export const fetchListsByUser = async (uid: string) => {
   const q = query(collection(db, "lists"), where("uid", "==", uid));
   const querySnapshot = await getDocs(q);
@@ -69,11 +65,9 @@ export const fetchListsByUser = async (uid: string) => {
     ...docSnap.data(),
   }));
 };
-
 export const deleteListById = async (listId: string) => {
   await deleteDoc(doc(db, "lists", listId));
 };
-
 export const fetchListByShareCode = async (shareId: string) => {
   const q = query(
     collection(db, "lists"),

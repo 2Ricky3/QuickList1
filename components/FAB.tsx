@@ -3,22 +3,19 @@ import { Pressable, StyleSheet, Animated } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, elevation } from "../GlobalStyleSheet";
 import * as Haptics from "expo-haptics";
-
 interface FABProps {
   onPress: () => void;
   icon?: keyof typeof MaterialIcons.glyphMap;
   disabled?: boolean;
   loading?: boolean;
 }
-
-export const FAB: React.FC<FABProps> = ({ 
-  onPress, 
+export const FAB: React.FC<FABProps> = ({
+  onPress,
   icon = "check",
   disabled = false,
-  loading = false 
+  loading = false
 }) => {
   const scaleValue = new Animated.Value(1);
-
   const handlePressIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Animated.spring(scaleValue, {
@@ -28,7 +25,6 @@ export const FAB: React.FC<FABProps> = ({
       useNativeDriver: true,
     }).start();
   };
-
   const handlePressOut = () => {
     Animated.spring(scaleValue, {
       toValue: 1,
@@ -37,14 +33,12 @@ export const FAB: React.FC<FABProps> = ({
       useNativeDriver: true,
     }).start();
   };
-
   const handlePress = () => {
     if (!disabled && !loading) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       onPress();
     }
   };
-
   return (
     <Animated.View
       style={[
@@ -69,11 +63,10 @@ export const FAB: React.FC<FABProps> = ({
     </Animated.View>
   );
 };
-
 const styles = StyleSheet.create({
   fabContainer: {
     position: "absolute",
-    bottom: 100, 
+    bottom: 100,
     right: spacing.lg,
     zIndex: 1000,
   },

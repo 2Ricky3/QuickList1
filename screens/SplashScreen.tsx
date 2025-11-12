@@ -2,23 +2,18 @@ import React, { useEffect } from "react";
 import { View, Image, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
 type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
 };
-
 const SplashScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace("Login");
     }, 4000);
-
     return () => clearTimeout(timer);
   }, [navigation]);
-
   return (
     <View style={styles.container}>
       <Image
@@ -30,7 +25,6 @@ const SplashScreen = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -50,5 +44,4 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
 });
-
 export default SplashScreen;

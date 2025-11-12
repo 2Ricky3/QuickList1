@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, typography, borderRadius } from "../GlobalStyleSheet";
-
 interface EmptyStateProps {
   icon: string;
   title: string;
@@ -10,7 +9,6 @@ interface EmptyStateProps {
   actionText?: string;
   onAction?: () => void;
 }
-
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   title,
@@ -33,7 +31,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

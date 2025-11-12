@@ -7,5 +7,5 @@ export type RootStackParamList = {
   EditListScreen: { list: any };
   Splash: undefined;
   Terms: undefined;
-  Onboarding: { userId?: string }; // <-- updated line
+  Onboarding: { userId?: string };
 };

@@ -1,0 +1,115 @@
+/**
+ * Firebase Firestore Security Rules
+ * 
+ * IMPORTANT: These rules must be deployed to Firebase Console
+ * Go to: Firebase Console > Firestore Database > Rules
+ * 
+ * Copy the content below and paste it into the rules editor
+ */
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isValidListName(name) {
+      return name is string 
+        && name.size() >= 2 
+        && name.size() <= 100;
+    }
+    
+    function isValidItem(item) {
+      return item is string 
+        && item.size() >= 1 
+        && item.size() <= 200;
+    }
+    
+    function isValidTag(tag) {
+      return tag is string 
+        && tag.size() >= 1 
+        && tag.size() <= 50;
+    }
+    
+    function isValidItemsArray(items) {
+      return items is list 
+        && items.size() >= 1 
+        && items.size() <= 500;
+    }
+    
+    function isValidTagsArray(tags) {
+      return tags is list 
+        && tags.size() <= 20;
+    }
+    
+    function hasValidListData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'items', 'userId', 'createdAt'])
+        && isValidListName(data.title)
+        && isValidItemsArray(data.items)
+        && data.userId == request.auth.uid
+        && (!('tags' in data) || isValidTagsArray(data.tags));
+    }
+    
+    // User profiles
+    match /users/{userId} {
+      // Users can only read and write their own profile
+      allow read, write: if isOwner(userId);
+      
+      // User stats subcollection
+      match /stats/{statId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // User achievements subcollection
+      match /achievements/{achievementId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Grocery lists
+    match /lists/{listId} {
+      // Anyone can read a list if they have the ID (for sharing)
+      // But only the owner can write/delete
+      allow read: if isSignedIn();
+      
+      // Only owner can create lists with valid data
+      allow create: if isSignedIn() 
+        && hasValidListData()
+        && request.resource.data.userId == request.auth.uid;
+      
+      // Only owner can update their own lists
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && hasValidListData();
+      
+      // Only owner can delete their own lists
+      allow delete: if isSignedIn() 
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // Shared lists (if you add this feature)
+    match /sharedLists/{listId} {
+      allow read: if isSignedIn() 
+        && (resource.data.userId == request.auth.uid 
+          || resource.data.sharedWith.hasAny([request.auth.uid]));
+      
+      allow write: if isSignedIn() 
+        && (resource.data.userId == request.auth.uid 
+          || resource.data.editors.hasAny([request.auth.uid]));
+    }
+    
+    // Prevent access to all other documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

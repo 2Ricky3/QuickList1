@@ -2,9 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Text, StyleSheet, ViewStyle } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, borderRadius, elevation, typography } from "../GlobalStyleSheet";
-
 type ToastType = "success" | "error" | "info" | "warning";
-
 interface ToastProps {
   message: string;
   type?: ToastType;
@@ -12,7 +10,6 @@ interface ToastProps {
   onHide?: () => void;
   visible: boolean;
 }
-
 export const Toast: React.FC<ToastProps> = ({
   message,
   type = "success",
@@ -22,10 +19,8 @@ export const Toast: React.FC<ToastProps> = ({
 }) => {
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
     if (visible) {
-    
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
@@ -38,16 +33,12 @@ export const Toast: React.FC<ToastProps> = ({
           useNativeDriver: true,
         }),
       ]).start();
-
-  
       const timer = setTimeout(() => {
         hideToast();
       }, duration);
-
       return () => clearTimeout(timer);
     }
   }, [visible]);
-
   const hideToast = () => {
     Animated.parallel([
       Animated.timing(translateY, {
@@ -64,7 +55,6 @@ export const Toast: React.FC<ToastProps> = ({
       if (onHide) onHide();
     });
   };
-
   const getToastStyle = (): ViewStyle => {
     switch (type) {
       case "success":
@@ -79,7 +69,6 @@ export const Toast: React.FC<ToastProps> = ({
         return { backgroundColor: colors.success };
     }
   };
-
   const getIcon = () => {
     switch (type) {
       case "success":
@@ -94,9 +83,7 @@ export const Toast: React.FC<ToastProps> = ({
         return "check-circle";
     }
   };
-
   if (!visible) return null;
-
   return (
     <Animated.View
       style={[
@@ -113,7 +100,6 @@ export const Toast: React.FC<ToastProps> = ({
     </Animated.View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     position: "absolute",

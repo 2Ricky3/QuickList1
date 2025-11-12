@@ -1,12 +1,10 @@
 import React, { useRef } from "react";
 import { Pressable, Animated, PressableProps, StyleProp, ViewStyle } from "react-native";
-
 interface AnimatedPressableProps extends PressableProps {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   scaleValue?: number;
 }
-
 export const AnimatedPressable: React.FC<AnimatedPressableProps> = ({
   children,
   style,
@@ -16,7 +14,6 @@ export const AnimatedPressable: React.FC<AnimatedPressableProps> = ({
   ...props
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
-
   const handlePressIn = (event: any) => {
     Animated.spring(scaleAnim, {
       toValue: scaleValue,
@@ -26,7 +23,6 @@ export const AnimatedPressable: React.FC<AnimatedPressableProps> = ({
     }).start();
     if (onPressIn) onPressIn(event);
   };
-
   const handlePressOut = (event: any) => {
     Animated.spring(scaleAnim, {
       toValue: 1,
@@ -36,7 +32,6 @@ export const AnimatedPressable: React.FC<AnimatedPressableProps> = ({
     }).start();
     if (onPressOut) onPressOut(event);
   };
-
   return (
     <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} {...props}>
       <Animated.View style={[style, { transform: [{ scale: scaleAnim }] }]}>

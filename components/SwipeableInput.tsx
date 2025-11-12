@@ -4,7 +4,6 @@ import { Swipeable } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, borderRadius, elevation, globalStyles } from "../GlobalStyleSheet";
 import * as Haptics from "expo-haptics";
-
 interface SwipeableInputProps extends TextInputProps {
   value: string;
   onChangeText: (text: string) => void;
@@ -13,7 +12,6 @@ interface SwipeableInputProps extends TextInputProps {
   onFocus?: () => void;
   onBlur?: () => void;
 }
-
 export const SwipeableInput: React.FC<SwipeableInputProps> = ({
   value,
   onChangeText,
@@ -24,13 +22,11 @@ export const SwipeableInput: React.FC<SwipeableInputProps> = ({
   ...textInputProps
 }) => {
   const swipeableRef = useRef<Swipeable>(null);
-
   const handleDelete = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     swipeableRef.current?.close();
     onDelete();
   };
-
   const renderRightActions = (
     progress: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
@@ -40,13 +36,11 @@ export const SwipeableInput: React.FC<SwipeableInputProps> = ({
       outputRange: [1, 0.9, 0.8],
       extrapolate: "clamp",
     });
-
     const opacity = dragX.interpolate({
       inputRange: [-100, 0],
       outputRange: [1, 0],
       extrapolate: "clamp",
     });
-
     return (
       <Animated.View
         style={[
@@ -69,7 +63,6 @@ export const SwipeableInput: React.FC<SwipeableInputProps> = ({
       </Animated.View>
     );
   };
-
   return (
     <Swipeable
       ref={swipeableRef}
@@ -96,7 +89,6 @@ export const SwipeableInput: React.FC<SwipeableInputProps> = ({
     </Swipeable>
   );
 };
-
 const styles = StyleSheet.create({
   swipeableContainer: {
     marginBottom: spacing.md,

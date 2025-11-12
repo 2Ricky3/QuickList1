@@ -1,25 +1,19 @@
 import { StyleSheet, Platform } from "react-native";
-
 export const colors = {
   primary: "#C20200",
   primaryDark: "#520600",
   primaryLight: "#E63946",
-  
   success: "#2ECC71",
   warning: "#F39C12",
   danger: "#E74C3C",
-  
   textDark: "#520600",
   textMedium: "#736F73",
   textLight: "#999999",
-  
   white: "#FFFFFF",
   backgroundLight: "#F8F9FA",
   border: "#E0E0E0",
-  
   shadowColor: "#000000",
 };
-
 export const tagColors = {
   red: { bg: "#FFE5E5", text: "#C20200", border: "#C20200" },
   pink: { bg: "#FCE4EC", text: "#AD1457", border: "#EC407A" },
@@ -34,10 +28,8 @@ export const tagColors = {
   brown: { bg: "#EFEBE9", text: "#4E342E", border: "#8D6E63" },
   gray: { bg: "#F5F5F5", text: "#424242", border: "#9E9E9E" },
 };
-
 export const getTagColor = (tag: string): typeof tagColors.red => {
   const tagLower = tag.toLowerCase();
-  
   if (tagLower.includes("sale") || tagLower.includes("deal")) return tagColors.red;
   if (tagLower.includes("health") || tagLower.includes("organic")) return tagColors.green;
   if (tagLower.includes("snack") || tagLower.includes("treat")) return tagColors.pink;
@@ -46,13 +38,11 @@ export const getTagColor = (tag: string): typeof tagColors.red => {
   if (tagLower.includes("clean") || tagLower.includes("household")) return tagColors.cyan;
   if (tagLower.includes("beverage") || tagLower.includes("drink")) return tagColors.orange;
   if (tagLower.includes("grocery") || tagLower.includes("essential")) return tagColors.teal;
-  
   const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const colorKeys = Object.keys(tagColors) as Array<keyof typeof tagColors>;
   const colorKey = colorKeys[hash % colorKeys.length];
   return tagColors[colorKey];
 };
-
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -62,14 +52,12 @@ export const spacing = {
   xxl: 24,
   xxxl: 32,
 };
-
 export const safeAreaPadding = {
   bottom: {
-    ios: 34, // iPhone with notch
+    ios: 34,
     android: 16,
   },
 };
-
 export const borderRadius = {
   sm: 8,
   md: 12,
@@ -77,7 +65,6 @@ export const borderRadius = {
   xl: 20,
   round: 999,
 };
-
 export const elevation = {
   sm: {
     shadowColor: colors.shadowColor,
@@ -101,7 +88,6 @@ export const elevation = {
     elevation: 6,
   },
 };
-
 export const typography = {
   h1: {
     fontSize: 32,
@@ -151,7 +137,6 @@ export const typography = {
     letterSpacing: 0.3,
   },
 };
-
 export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
@@ -159,83 +144,69 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: colors.white,
     justifyContent: "center",
   },
-
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.white,
   },
-
   safeArea: {
     flex: 1,
-    backgroundColor: "transparent", 
+    backgroundColor: "transparent",
   },
-
   scrollContent: {
     padding: spacing.xl,
     paddingBottom: spacing.xxxl,
   },
-
   scrollContentWithBottomBar: {
     padding: spacing.xl,
-    paddingBottom: 120, 
+    paddingBottom: 120,
   },
-
   formWrapper: {
     paddingHorizontal: spacing.xxl,
     width: "100%",
-    maxWidth: 500, 
+    maxWidth: 500,
     alignSelf: "center",
   },
-
   headerContainer: {
     marginBottom: spacing.md,
   },
-
   greetingText: {
     ...typography.h1,
     color: colors.textDark,
   },
-
   dateText: {
     ...typography.body,
     color: colors.textMedium,
     marginTop: spacing.sm,
   },
-
   titleText: {
     ...typography.h1,
     color: colors.primary,
     marginBottom: spacing.xxl,
     textAlign: "center",
   },
-
   headerTitle: {
     ...typography.h2,
     color: colors.primary,
     marginBottom: spacing.lg,
     textAlign: "center",
   },
-
   sectionTitle: {
     ...typography.h3,
     color: colors.primary,
     marginBottom: spacing.lg,
   },
-
   footerText: {
     ...typography.bodySmall,
     marginTop: spacing.xl,
     textAlign: "center",
     color: colors.textMedium,
   },
-
   footerLink: {
     color: colors.primary,
     fontWeight: "600",
   },
-
   statsCard: {
     marginBottom: spacing.xxl,
     padding: spacing.xl,
@@ -249,29 +220,24 @@ export const globalStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-
   statsTitle: {
     ...typography.h3,
     marginBottom: spacing.md,
     color: colors.textDark,
   },
-
   statsText: {
     ...typography.body,
     color: colors.textMedium,
     marginBottom: spacing.sm,
   },
-
   optionsText: {
     ...typography.h3,
     color: colors.textDark,
     marginBottom: spacing.xl,
   },
-
   optionsContainer: {
     gap: spacing.lg,
   },
-
   previousBuysButton: {
     backgroundColor: colors.white,
     borderRadius: borderRadius.xl,
@@ -284,20 +250,17 @@ export const globalStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-
   previousBuysTitle: {
     ...typography.h3,
     fontSize: 20,
     color: colors.primary,
     marginBottom: spacing.sm,
   },
-
   previousBuysSubtitle: {
     ...typography.body,
     color: colors.textMedium,
     lineHeight: 22,
   },
-
   newListButton: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.xl,
@@ -308,20 +271,17 @@ export const globalStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-
   newListTitle: {
     ...typography.h3,
     fontSize: 20,
     color: colors.white,
     marginBottom: spacing.sm,
   },
-
   newListSubtitle: {
     ...typography.body,
     color: "#f0f0f0",
     lineHeight: 22,
   },
-
   inputField: {
     height: 48,
     borderWidth: 1,
@@ -334,13 +294,11 @@ export const globalStyles = StyleSheet.create({
     color: colors.textDark,
     ...elevation.sm,
   },
-
   inputFieldFocused: {
     borderWidth: 2,
     borderColor: colors.primary,
     backgroundColor: colors.white,
   },
-
   buttonContainer: {
     backgroundColor: colors.primary,
     paddingVertical: 16,
@@ -357,45 +315,36 @@ export const globalStyles = StyleSheet.create({
     minHeight: 56,
     minWidth: 100,
   },
-
   buttonContainerSecondary: {
     backgroundColor: colors.white,
     borderWidth: 2,
     borderColor: colors.primary,
   },
-
   buttonContainerSuccess: {
     backgroundColor: colors.success,
   },
-
   buttonContainerWarning: {
     backgroundColor: colors.warning,
   },
-
   buttonContainerDanger: {
     backgroundColor: colors.danger,
   },
-
   buttonText: {
     ...typography.button,
     color: colors.white,
   },
-
   buttonTextSecondary: {
     color: colors.primary,
   },
-
   linkButton: {
     paddingVertical: spacing.md,
     alignItems: "center",
   },
-
   linkButtonText: {
     ...typography.button,
     color: colors.primary,
   },
 });
-
 export const createScreenStyles = StyleSheet.create({
   sectionLabel: {
     ...typography.h3,
@@ -448,7 +397,7 @@ export const createScreenStyles = StyleSheet.create({
     borderBottomColor: colors.border,
     borderBottomWidth: 0.5,
     backgroundColor: colors.white,
-    minHeight: 48, 
+    minHeight: 48,
   },
   suggestionText: {
     ...typography.body,
@@ -462,12 +411,12 @@ export const createScreenStyles = StyleSheet.create({
     bottom: 0,
     flexDirection: "row",
     backgroundColor: colors.white,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: Platform.OS === "ios" ? spacing.xxl : spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: Platform.OS === "ios" ? spacing.lg : spacing.md,
     borderTopWidth: 1,
     borderColor: colors.border,
-    gap: spacing.md, 
+    gap: spacing.sm,
     shadowColor: colors.shadowColor,
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -476,12 +425,12 @@ export const createScreenStyles = StyleSheet.create({
   },
   bottomButton: {
     flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.md,
+    paddingVertical: 10,
+    paddingHorizontal: spacing.xs,
+    borderRadius: borderRadius.sm,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 56, 
+    minHeight: 44,
   },
   colorOption: {
     width: 56,
@@ -499,7 +448,6 @@ export const createScreenStyles = StyleSheet.create({
     borderColor: colors.border,
   },
 });
-
 export const previousListStyles = StyleSheet.create({
   topSection: {
     paddingHorizontal: spacing.xl,
@@ -556,7 +504,7 @@ export const previousListStyles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.primary,
     backgroundColor: "transparent",
-    minHeight: 32, 
+    minHeight: 32,
   },
   tagButtonSelected: {
     backgroundColor: colors.primary,
@@ -629,7 +577,6 @@ export const previousListStyles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
 export const onboardingStyles = StyleSheet.create({
   skipContainer: {
     alignItems: "flex-end",
@@ -658,7 +605,7 @@ export const onboardingStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
     width: "90%",
-    maxWidth: 400, 
+    maxWidth: 400,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -697,4 +644,3 @@ export const onboardingStyles = StyleSheet.create({
     borderColor: colors.border,
   },
 });
-

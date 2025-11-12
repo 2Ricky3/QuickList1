@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, SafeAreaView, Pressable, Image } from "react-native";
+import { View, Text, SafeAreaView, Image } from "react-native";
 import { useNavigation, RouteProp, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import { globalStyles, onboardingStyles, colors } from "../GlobalStyleSheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { AnimatedPressable } from "../components/AnimatedPressable";
 const steps = [
   {
     title: "Create Lists",
@@ -23,15 +23,12 @@ const steps = [
     image: require("../assets/Logo.png"),
   },
 ];
-
 const OnboardingScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, "Onboarding">>();
   const userId = route.params?.userId;
-
   const [step, setStep] = useState(0);
-
   const handleNext = async () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
@@ -42,24 +39,21 @@ const OnboardingScreen = () => {
       navigation.replace("Home");
     }
   };
-
   const handleSkip = async () => {
     if (userId) {
       await AsyncStorage.setItem(`onboardingSeen:${userId}`, "true");
     }
     navigation.replace("Home");
   };
-
   return (
     <SafeAreaView style={globalStyles.container}>
       <View style={onboardingStyles.skipContainer}>
         {step < steps.length - 1 && (
-          <Pressable onPress={handleSkip}>
+          <AnimatedPressable onPress={handleSkip}>
             <Text style={onboardingStyles.skipText}>Skip</Text>
-          </Pressable>
+          </AnimatedPressable>
         )}
       </View>
-
       <View style={onboardingStyles.contentWrapper}>
         <View style={onboardingStyles.card}>
           <Image source={steps[step].image} style={onboardingStyles.image} />
@@ -80,13 +74,12 @@ const OnboardingScreen = () => {
           />
         ))}
       </View>
-      <Pressable style={globalStyles.buttonContainer} onPress={handleNext}>
+      <AnimatedPressable style={globalStyles.buttonContainer} onPress={handleNext}>
         <Text style={globalStyles.buttonText}>
           {step === steps.length - 1 ? "Get Started" : "Next"}
         </Text>
-      </Pressable>
+      </AnimatedPressable>
     </SafeAreaView>
   );
 };
-
 export default OnboardingScreen;

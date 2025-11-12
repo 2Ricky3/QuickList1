@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, View, StyleSheet, Dimensions } from "react-native";
-
 const { width, height } = Dimensions.get("window");
-
 interface ConfettiPiece {
   id: number;
   x: Animated.Value;
@@ -10,19 +8,15 @@ interface ConfettiPiece {
   rotation: Animated.Value;
   color: string;
 }
-
 interface ConfettiCelebrationProps {
   show: boolean;
   onComplete?: () => void;
 }
-
 export const ConfettiCelebration: React.FC<ConfettiCelebrationProps> = ({ show, onComplete }) => {
   const confettiPieces = useRef<ConfettiPiece[]>([]);
   const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8", "#F7DC6F", "#BB8FCE"];
-
   useEffect(() => {
     if (show) {
-  
       const pieces: ConfettiPiece[] = [];
       for (let i = 0; i < 50; i++) {
         const startX = Math.random() * width;
@@ -35,8 +29,6 @@ export const ConfettiCelebration: React.FC<ConfettiCelebrationProps> = ({ show, 
         });
       }
       confettiPieces.current = pieces;
-
-   
       const animations = pieces.map((piece, index) => {
         const startX = (index * width) / 50;
         return Animated.parallel([
@@ -57,15 +49,12 @@ export const ConfettiCelebration: React.FC<ConfettiCelebrationProps> = ({ show, 
           }),
         ]);
       });
-
       Animated.stagger(20, animations).start(() => {
         if (onComplete) onComplete();
       });
     }
   }, [show]);
-
   if (!show) return null;
-
   return (
     <View style={styles.container} pointerEvents="none">
       {confettiPieces.current.map((piece) => (
@@ -92,7 +81,6 @@ export const ConfettiCelebration: React.FC<ConfettiCelebrationProps> = ({ show, 
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     position: "absolute",

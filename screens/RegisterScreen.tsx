@@ -14,13 +14,14 @@ import {
 } from "react-native";
 import { globalStyles, colors } from "../GlobalStyleSheet";
 import { ModernLoader } from "../components/ModernLoader";
+import { AnimatedPressable } from "../components/AnimatedPressable";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { registerWithEmail } from "../services/authService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { validateEmail, validatePassword, sanitizeString } from "../utils/validation";
+import { logAuthError, errorLogger } from "../services/errorLogger";
 import { RootStackParamList } from "../types";
-
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState("");
@@ -28,16 +29,30 @@ const RegisterScreen = () => {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
-
   const handleRegister = async () => {
-    if (!email || !password || !name) {
-      alert("All fields are required");
+    const sanitizedName = sanitizeString(name.trim());
+    if (sanitizedName.length < 2) {
+      alert("Name must be at least 2 characters");
       return;
     }
-
+    if (sanitizedName.length > 50) {
+      alert("Name must be less than 50 characters");
+      return;
+    }
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      alert(emailValidation.error);
+      return;
+    }
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      alert(passwordValidation.error);
+      return;
+    }
     setLoading(true);
     try {
-      const user = await registerWithEmail(email, password, name);
+      const user = await registerWithEmail(email, password, sanitizedName);
+      errorLogger.setUserContext(user.uid, user.email || undefined);
       setLoading(false);
       const onboardingSeen = await AsyncStorage.getItem(`onboardingSeen:${user.uid}`);
       if (!onboardingSeen) {
@@ -46,11 +61,11 @@ const RegisterScreen = () => {
         navigation.navigate("Home");
       }
     } catch (error: any) {
+      logAuthError(error, 'Register with email');
       setLoading(false);
       alert(error.message || "Registration failed");
     }
   };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
       <KeyboardAvoidingView
@@ -59,8 +74,8 @@ const RegisterScreen = () => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{ 
-              flexGrow: 1, 
+            contentContainerStyle={{
+              flexGrow: 1,
               paddingHorizontal: 20,
               paddingVertical: 40,
             }}
@@ -79,7 +94,6 @@ const RegisterScreen = () => {
                 resizeMode="contain"
               />
               <Text style={globalStyles.titleText}>Create Account</Text>
-
               <View style={globalStyles.formWrapper}>
                 <TextInput
                   placeholder="Name"
@@ -120,30 +134,17 @@ const RegisterScreen = () => {
                     focusedInput === 'password' && globalStyles.inputFieldFocused
                   ]}
                 />
-
-                <Pressable
+                <AnimatedPressable
                   onPress={handleRegister}
                   disabled={loading}
-                  style={({ pressed }) => [
-                    globalStyles.buttonContainer,
-                    pressed && globalStyles.buttonContainerSecondary,
-                  ]}
+                  style={globalStyles.buttonContainer}
                 >
-                  {({ pressed }) => (
-                    <Text
-                      style={[
-                        globalStyles.buttonText,
-                        pressed && globalStyles.buttonTextSecondary,
-                      ]}
-                    >
-                      {loading ? "Registering..." : "Register"}
-                    </Text>
-                  )}
-                </Pressable>
-
+                  <Text style={globalStyles.buttonText}>
+                    {loading ? "Registering..." : "Register"}
+                  </Text>
+                </AnimatedPressable>
                 {loading && <ModernLoader size="large" style={{ marginTop: 20 }} />}
               </View>
-
               <Text style={globalStyles.footerText}>
                 Already have an account?{" "}
                 <Text
@@ -153,15 +154,14 @@ const RegisterScreen = () => {
                   Sign In
                 </Text>
               </Text>
-
-              <Pressable 
+              <AnimatedPressable
                 onPress={() => navigation.navigate("Terms")}
                 style={globalStyles.linkButton}
               >
                 <Text style={globalStyles.linkButtonText}>
                   View Terms and Conditions
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -169,5 +169,4 @@ const RegisterScreen = () => {
     </SafeAreaView>
   );
 };
-
 export default RegisterScreen;

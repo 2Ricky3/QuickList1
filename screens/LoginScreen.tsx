@@ -19,35 +19,39 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { loginWithEmail } from "../services/authService";
 import { RootStackParamList } from "../types";
 import { ModernLoader } from "../components/ModernLoader";
-
+import { AnimatedPressable } from "../components/AnimatedPressable";
+import { validateEmail, validatePassword } from "../utils/validation";
+import { logAuthError } from "../services/errorLogger";
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
-
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
-
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Please enter email and password");
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      alert(emailValidation.error);
       return;
     }
-
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      alert(passwordValidation.error);
+      return;
+    }
     setLoading(true);
     try {
       await loginWithEmail(email, password);
       navigation.navigate("Home");
     } catch (error: unknown) {
+      logAuthError(error, 'Login with email');
       const message = error instanceof Error ? error.message : "Login failed";
       alert(message);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
       <KeyboardAvoidingView
@@ -57,9 +61,9 @@ const LoginScreen = () => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{ 
-              flexGrow: 1, 
-              justifyContent: "center", 
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "center",
               paddingHorizontal: 20,
               paddingVertical: 40,
             }}
@@ -76,9 +80,7 @@ const LoginScreen = () => {
               }}
               resizeMode="contain"
             />
-
             <Text style={globalStyles.titleText}>Sign In</Text>
-
             <View style={globalStyles.formWrapper}>
               <TextInput
                 placeholder="Email"
@@ -107,27 +109,15 @@ const LoginScreen = () => {
                   focusedInput === 'password' && globalStyles.inputFieldFocused
                 ]}
               />
-
-              <Pressable
+              <AnimatedPressable
                 onPress={handleLogin}
                 disabled={loading}
-                style={({ pressed }) => [
-                  globalStyles.buttonContainer,
-                  pressed && globalStyles.buttonContainerSecondary,
-                ]}
+                style={globalStyles.buttonContainer}
               >
-                {({ pressed }) => (
-                  <Text
-                    style={[
-                      globalStyles.buttonText,
-                      pressed && globalStyles.buttonTextSecondary,
-                    ]}
-                  >
-                    {loading ? "Logging in..." : "Login"}
-                  </Text>
-                )}
-              </Pressable>
-
+                <Text style={globalStyles.buttonText}>
+                  {loading ? "Logging in..." : "Login"}
+                </Text>
+              </AnimatedPressable>
               {loading && (
                 <ModernLoader
                   size="large"
@@ -135,7 +125,6 @@ const LoginScreen = () => {
                 />
               )}
             </View>
-
             <Text style={globalStyles.footerText}>
               Don't have an account?{" "}
               <Text
@@ -145,20 +134,18 @@ const LoginScreen = () => {
                 Register
               </Text>
             </Text>
-
-            <Pressable 
+            <AnimatedPressable
               onPress={() => navigation.navigate("Terms")}
               style={globalStyles.linkButton}
             >
               <Text style={globalStyles.linkButtonText}>
                 View Terms and Conditions
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
 export default LoginScreen;

@@ -1,15 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, ViewStyle } from "react-native";
 import { colors } from "../GlobalStyleSheet";
-
 interface ModernLoaderProps {
   size?: "small" | "medium" | "large";
   color?: string;
   style?: ViewStyle;
 }
-
-export const ModernLoader: React.FC<ModernLoaderProps> = ({ 
-  size = "medium", 
+export const ModernLoader: React.FC<ModernLoaderProps> = ({
+  size = "medium",
   color = colors.primary,
   style
 }) => {
@@ -17,7 +15,6 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
   const scaleValue1 = useRef(new Animated.Value(1)).current;
   const scaleValue2 = useRef(new Animated.Value(1)).current;
   const scaleValue3 = useRef(new Animated.Value(1)).current;
-
   useEffect(() => {
     const spinAnimation = Animated.loop(
       Animated.timing(spinValue, {
@@ -26,7 +23,6 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
         useNativeDriver: true,
       })
     );
-
     const dotAnimation1 = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleValue1, {
@@ -41,7 +37,6 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
         }),
       ])
     );
-
     const dotAnimation2 = Animated.loop(
       Animated.sequence([
         Animated.delay(200),
@@ -57,7 +52,6 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
         }),
       ])
     );
-
     const dotAnimation3 = Animated.loop(
       Animated.sequence([
         Animated.delay(400),
@@ -73,12 +67,10 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
         }),
       ])
     );
-
     spinAnimation.start();
     dotAnimation1.start();
     dotAnimation2.start();
     dotAnimation3.start();
-
     return () => {
       spinAnimation.stop();
       dotAnimation1.stop();
@@ -86,20 +78,16 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
       dotAnimation3.stop();
     };
   }, []);
-
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
   });
-
   const sizes = {
     small: 8,
     medium: 12,
     large: 16,
   };
-
   const dotSize = sizes[size];
-
   return (
     <View style={[styles.container, style]}>
       <View style={styles.dotsContainer}>
@@ -140,7 +128,6 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
