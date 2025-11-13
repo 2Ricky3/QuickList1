@@ -17,7 +17,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import { colors, globalStyles, spacing, borderRadius, elevation, typography } from "../GlobalStyleSheet";
@@ -97,7 +97,12 @@ const HomeScreen = () => {
         }
       } else {
         errorLogger.clearUserContext();
-        navigation.navigate("Login");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Login" }],
+          })
+        );
       }
       setLoading(false);
     });

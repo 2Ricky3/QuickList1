@@ -24,56 +24,89 @@ export default function App() {
           screenOptions={{
             headerStyle: { backgroundColor: "#ffffffff" },
             headerTintColor: "#520600",
-            headerTitleStyle: { fontWeight: "bold", fontSize: 22 },
+            headerTitleStyle: { fontWeight: "bold", fontSize: 20 },
             headerShadowVisible: false,
             animation: "slide_from_right",
-            animationDuration: 300,
+            animationDuration: 250,
+            contentStyle: { backgroundColor: "#ffffff" },
           }}
         >
           <Stack.Screen
             name="Splash"
             component={SplashScreen}
-            options={{ headerShown: false }}
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
+              animation: "fade",
+            }}
           />
           <Stack.Screen
             name="Login"
             component={LoginScreen}
-            options={{ headerShown: false }}
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
+              animation: "fade",
+            }}
           />
           <Stack.Screen
             name="Register"
             component={RegisterScreen}
-            options={{ headerShown: false }}
+            options={{ 
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
           />
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ headerShown: false }}
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
+              animation: "fade",
+            }}
           />
           <Stack.Screen
             name="CreateScreen"
             component={CreateScreen}
-            options={{ title: "New List" }}
+            options={{ 
+              title: "New List",
+              animation: "slide_from_bottom",
+            }}
           />
             <Stack.Screen
             name="PreviousListScreen"
             component={PreviousListScreen}
-            options={{ headerShown: false }}
+            options={{ 
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
           />
            <Stack.Screen
             name="EditListScreen"
             component={EditListScreen}
-            options={{ title: "Edit List" }}
+            options={{ 
+              title: "Edit List",
+              animation: "slide_from_bottom",
+            }}
           />
           <Stack.Screen
             name="Terms"
             component={TermsScreen}
-            options={{ title: "Terms & Conditions" }}
+            options={{ 
+              title: "Terms & Conditions",
+              presentation: "modal",
+              animation: "slide_from_bottom",
+            }}
           />
           <Stack.Screen
             name="Onboarding"
             component={OnboardingScreen}
-            options={{ headerShown: false }}
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
+              animation: "fade",
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

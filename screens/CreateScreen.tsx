@@ -587,7 +587,7 @@ const CreateScreen = () => {
     const exotic = getExoticIngredientSuggestion(allUsedItems);
     if (exotic) {
       Alert.alert(
-        `${exotic.emoji} Try Something New!`,
+        ` Try Something New!`,
         `${exotic.item}\n\n${exotic.reason}`,
         [
           { text: "Maybe Later", style: "cancel" },

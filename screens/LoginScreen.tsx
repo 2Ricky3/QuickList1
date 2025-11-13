@@ -4,17 +4,15 @@ import {
   View,
   TextInput,
   SafeAreaView,
-  Pressable,
   Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
-  TouchableOpacity,
 } from "react-native";
 import { globalStyles, colors } from "../GlobalStyleSheet";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { loginWithEmail } from "../services/authService";
 import { RootStackParamList } from "../types";
@@ -23,6 +21,7 @@ import { AnimatedPressable } from "../components/AnimatedPressable";
 import { validateEmail, validatePassword } from "../utils/validation";
 import { logAuthError } from "../services/errorLogger";
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
+
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [email, setEmail] = useState("");
@@ -43,11 +42,15 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       await loginWithEmail(email, password);
-      navigation.navigate("Home");
-    } catch (error: unknown) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        })
+      );
+    } catch (error: any) {
       logAuthError(error, 'Login with email');
-      const message = error instanceof Error ? error.message : "Login failed";
-      alert(message);
+      alert(error.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   SafeAreaView,
-  Pressable,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -15,13 +14,14 @@ import {
 import { globalStyles, colors } from "../GlobalStyleSheet";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { registerWithEmail } from "../services/authService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { validateEmail, validatePassword, sanitizeString } from "../utils/validation";
 import { logAuthError, errorLogger } from "../services/errorLogger";
 import { RootStackParamList } from "../types";
+
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState("");
@@ -58,12 +58,17 @@ const RegisterScreen = () => {
       if (!onboardingSeen) {
         navigation.replace("Onboarding", { userId: user.uid });
       } else {
-        navigation.navigate("Home");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Home" }],
+          })
+        );
       }
     } catch (error: any) {
       logAuthError(error, 'Register with email');
       setLoading(false);
-      alert(error.message || "Registration failed");
+      alert(error.message || 'Registration failed. Please try again.');
     }
   };
   return (
