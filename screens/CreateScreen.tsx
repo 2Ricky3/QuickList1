@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+﻿import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { auth } from "../firebaseConfig";
-import { v4 as uuidv4 } from "uuid";
 import "react-native-get-random-values";
 import {
   globalStyles,
@@ -56,6 +55,17 @@ import {
   validateChallenge,
   Challenge
 } from "../services/challengeService";
+
+// Generate a simple 6-character share code
+const generateShareCode = (): string => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars like I, O, 0, 1
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
 const PREDEFINED_TAGS = [
   "Groceries",
   "Weekly",
@@ -109,59 +119,59 @@ const THEMED_ITEMS = {
   ],
   "Adventure Mode": [
     "Dragon Fruit", "Jackfruit", "Kimchi", "Matcha Powder", "Truffle Oil", "Edamame",
-    "Kombucha", "Seaweed Snacks", "Miso Paste", "Star Fruit", "AÃƒÂ§aÃƒÂ­", "Tahini"
+    "Kombucha", "Seaweed Snacks", "Miso Paste", "Star Fruit", "Acai", "Tahini"
   ],
-  "Picnic Party Ã°Å¸Â§Âº": [
+  "Picnic Party 🎁": [
     "Sandwiches", "Fresh Fruit", "Cheese & Crackers", "Lemonade", "Potato Salad",
     "Watermelon", "Chips", "Cookies", "Grapes", "Hummus", "Pita Chips", "Pasta Salad"
   ],
-  "Dessert Decadence Ã°Å¸ÂÂ°": [
+  "Dessert Decadence 🍰": [
     "Chocolate Chips", "Heavy Cream", "Vanilla Extract", "Butter", "Sugar", "Eggs",
     "Flour", "Cocoa Powder", "Sprinkles", "Ice Cream", "Caramel Sauce", "Whipped Cream"
   ],
-  "Breakfast Bonanza Ã°Å¸ÂÂ³": [
+  "Breakfast Bonanza 🍳": [
     "Eggs", "Bacon", "Pancake Mix", "Maple Syrup", "Fresh Berries", "Orange Juice",
     "Yogurt", "Granola", "Coffee", "Bagels", "Cream Cheese", "Avocado Toast"
   ],
-  "Kitchen Experiments Ã°Å¸Â§Âª": [
+  "Kitchen Experiments 🧪": [
     "Liquid Smoke", "Saffron", "Nutritional Yeast", "Gochujang", "Fish Sauce", "Mirin",
     "Harissa", "Tahini", "Black Garlic", "Sumac", "Za'atar", "Cardamom"
   ],
-  "Italian Journey Ã°Å¸â€¡Â®Ã°Å¸â€¡Â¹": [
+  "Italian Journey 🇮🇹": [
     "Fresh Mozzarella", "San Marzano Tomatoes", "Arborio Rice", "Proscuitto", "Balsamic Vinegar",
     "Parmigiano Reggiano", "Fresh Basil", "Pine Nuts", "Pancetta", "Mascarpone", "Espresso", "Olive Oil"
   ],
-  "Mexican Fiesta Ã°Å¸â€¡Â²Ã°Å¸â€¡Â½": [
-    "Corn Tortillas", "Black Beans", "JalapeÃƒÂ±os", "Cilantro", "Lime", "Cotija Cheese",
+  "Mexican Fiesta 🇲🇽": [
+    "Corn Tortillas", "Black Beans", "Jalapenos", "Cilantro", "Lime", "Cotija Cheese",
     "Avocados", "Salsa Verde", "Chipotle Peppers", "Queso Fresco", "Mexican Crema", "Chorizo"
   ],
-  "Asian Fusion Ã°Å¸Â¥Â¢": [
+  "Asian Fusion 🥢": [
     "Rice Noodles", "Bok Choy", "Sesame Oil", "Rice Vinegar", "Sriracha", "Hoisin Sauce",
     "Bamboo Shoots", "Water Chestnuts", "Thai Basil", "Fish Sauce", "Lemongrass", "Ginger"
   ],
-  "Mediterranean Magic Ã°Å¸Ââ€“Ã¯Â¸Â": [
+  "Mediterranean Magic 🌊": [
     "Feta Cheese", "Kalamata Olives", "Tzatziki", "Pita Bread", "Hummus", "Cucumber",
     "Cherry Tomatoes", "Red Onion", "Oregano", "Lemon", "Chickpeas", "Tahini"
   ],
-  "Spring Fresh Ã°Å¸Å’Â¸": [
+  "Spring Fresh 🌸": [
     "Asparagus", "Peas", "Strawberries", "Radishes", "Spring Lettuce", "Fresh Herbs",
     "Baby Carrots", "Artichokes", "Green Beans", "Mint", "Lemon", "New Potatoes"
   ],
-  "Summer BBQ Ã¢Ëœâ‚¬Ã¯Â¸Â": [
+  "Summer BBQ ☀️": [
     "Hamburger Buns", "Ground Beef", "Hot Dogs", "BBQ Sauce", "Corn on the Cob", "Watermelon",
     "Coleslaw Mix", "Baked Beans", "Pickles", "Potato Chips", "Ketchup", "Mustard"
   ],
-  "Fall Harvest Ã°Å¸Ââ€š": [
+  "Fall Harvest 🍂": [
     "Pumpkin", "Sweet Potatoes", "Brussels Sprouts", "Butternut Squash", "Apples", "Cinnamon",
     "Cranberries", "Pecans", "Maple Syrup", "Pears", "Sage", "Nutmeg"
   ],
-  "Winter Warmth Ã¢Ââ€žÃ¯Â¸Â": [
+  "Winter Warmth ❄️": [
     "Hot Chocolate", "Marshmallows", "Beef Stew Meat", "Root Vegetables", "Hearty Bread",
     "Chicken Broth", "Ginger", "Cinnamon Sticks", "Oatmeal", "Honey", "Tea", "Soup Mix"
   ],
-  "Taco Tuesday Ã°Å¸Å’Â®": [
+  "Taco Tuesday 🌮": [
     "Taco Shells", "Ground Beef", "Lettuce", "Tomatoes", "Cheese", "Sour Cream",
-    "Salsa", "Guacamole", "JalapeÃƒÂ±os", "Taco Seasoning", "Cilantro", "Lime"
+    "Salsa", "Guacamole", "Jalapenos", "Taco Seasoning", "Cilantro", "Lime"
   ]
 };
 const COLOR_OPTIONS = [
@@ -372,7 +382,7 @@ const CreateScreen = () => {
         items: filteredItems,
         tags: tagsArray,
         color: serializeColor(listColor),
-        shareId: uuidv4(),
+        shareId: generateShareCode(),
         allowPublicEdit: false,
       });
       const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu;
@@ -415,14 +425,14 @@ const CreateScreen = () => {
         const achievementTitles = newlyUnlocked.map(a => a.title).join(", ");
         setTimeout(() => {
           Alert.alert(
-            "Ã°Å¸Å½â€° Achievement Unlocked!",
+            "🎉 Achievement Unlocked!",
             `${achievementTitles}\n\n${getEncouragingMessage(achievements)}`,
             [{ text: "Awesome!", style: "default" }]
           );
         }, 500);
       }
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Success", "List created!" + (newlyUnlocked.length > 0 ? " Ã°Å¸Å½â€°" : ""));
+      Alert.alert("Success", "List created!" + (newlyUnlocked.length > 0 ? " 🎉" : ""));
       navigation.goBack();
     } catch (error) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -454,7 +464,7 @@ const CreateScreen = () => {
     setItems([...items, ...randomItems]);
     setShowThemePicker(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast(`Added ${randomItems.length} themed items! Ã°Å¸Å½â€°`, "success");
+    showToast(`Added ${randomItems.length} themed items! 🎉`, "success");
     if (auth.currentUser) {
       updateUserStats(auth.currentUser.uid, { surprisesUsed: 1 });
     }
@@ -477,24 +487,24 @@ const CreateScreen = () => {
   };
   const handleStartChallenge = () => {
     Alert.alert(
-      "Choose a Challenge Ã°Å¸Ââ€ ",
+      "Choose a Challenge 🏆",
       "Select a creative challenge to try:",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Color Challenges Ã°Å¸Å½Â¨",
+          text: "Color Challenges 🎨",
           onPress: () => showChallengeOptions('color')
         },
         {
-          text: "Size Challenges Ã°Å¸â€œÂ",
+          text: "Size Challenges 📏",
           onPress: () => showChallengeOptions('size')
         },
         {
-          text: "Speed Challenges Ã¢Å¡Â¡",
+          text: "Speed Challenges ⚡",
           onPress: () => showChallengeOptions('speed')
         },
         {
-          text: "Creative Challenges Ã°Å¸Å’Å¸",
+          text: "Creative Challenges 🌟",
           onPress: () => showChallengeOptions('creative')
         },
       ]
@@ -567,7 +577,7 @@ const CreateScreen = () => {
     } else {
       setItems([...items, suggestion.item]);
     }
-    showToast(`Added "${suggestion.item}" Ã¢Å“â€œ`, "success");
+    showToast(`Added "${suggestion.item}" âœ“`, "success");
     setSmartSuggestions(smartSuggestions.filter(s => s.item !== suggestion.item));
   };
   const handleExoticIngredient = () => {
@@ -592,7 +602,7 @@ const CreateScreen = () => {
         ]
       );
     } else {
-      Alert.alert("Wow!", "You've tried all our exotic ingredients! Ã°Å¸Å½â€°");
+      Alert.alert("Wow!", "You've tried all our exotic ingredients! 🎉");
     }
   };
   return (
@@ -1039,7 +1049,7 @@ const CreateScreen = () => {
                       })}
                     >
                       <Text style={{ fontSize: 18, marginRight: spacing.sm }}>
-                        {suggestion.emoji || "Ã°Å¸â€™Â¡"}
+                        {suggestion.emoji || "💡"}
                       </Text>
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: 15, fontWeight: "600", color: colors.textDark }}>
@@ -1080,7 +1090,7 @@ const CreateScreen = () => {
                     borderRadius: borderRadius.md,
                   }}>
                     <Text style={{ fontSize: 18, fontWeight: "700", color: speedTimer < 10 ? "#FF0000" : activeChallenge.color }}>
-                      Ã¢ÂÂ±Ã¯Â¸Â {speedTimer}s
+                      ⏱️ {speedTimer}s
                     </Text>
                   </View>
                 )}
@@ -1109,14 +1119,14 @@ const CreateScreen = () => {
             }}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md }}>
                 <Text style={[typography.h3, { marginBottom: 0, color: colors.textDark }]}>
-                  Choose Your Theme Ã°Å¸Å½Â²
+                  Choose Your Theme 🎲
                 </Text>
                 <Pressable onPress={() => setShowThemePicker(false)}>
                   <MaterialIcons name="close" size={24} color={colors.textMedium} />
                 </Pressable>
               </View>
               <Text style={{ fontSize: 13, color: colors.textMedium, marginBottom: spacing.lg }}>
-                Swipe to explore themes Ã¢â€ â€™
+                Swipe to explore themes
               </Text>
               <ScrollView
                 horizontal
@@ -1136,7 +1146,7 @@ const CreateScreen = () => {
                     justifyContent: "center",
                   })}
                 >
-                  <Text style={{ fontSize: 32, marginBottom: spacing.sm }}>Ã°Å¸Å½â€°</Text>
+                  <Text style={{ fontSize: 32, marginBottom: spacing.sm }}>🎉</Text>
                   <Text style={{ fontSize: 14, fontWeight: "700", color: colors.primary, textAlign: "center" }}>
                     Random Surprise
                   </Text>
@@ -1144,7 +1154,7 @@ const CreateScreen = () => {
                 {(Object.keys(THEMED_ITEMS) as Array<keyof typeof THEMED_ITEMS>).map((theme) => {
                   const themeText = theme.toString();
                   const emojiMatch = themeText.match(/[\u{1F300}-\u{1F9FF}]/u);
-                  const emoji = emojiMatch ? emojiMatch[0] : "Ã°Å¸Å½Â¯";
+                  const emoji = emojiMatch ? emojiMatch[0] : "🎯";
                   const themeName = themeText.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim();
                   return (
                     <Pressable
@@ -1347,3 +1357,4 @@ const CreateScreen = () => {
   );
 };
 export default CreateScreen;
+

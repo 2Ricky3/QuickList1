@@ -64,21 +64,21 @@ const HEALTHIER_ALTERNATIVES: Record<string, string> = {
   "french fries": "sweet potato fries",
 };
 const EXOTIC_INGREDIENTS = [
-  { name: "Dragon Fruit", emoji: "Ã°Å¸Ââ€°", description: "Vibrant pink superfood" },
-  { name: "Jackfruit", emoji: "Ã°Å¸Å’Â´", description: "Tropical meat substitute" },
-  { name: "Sumac", emoji: "Ã¢Å“Â¨", description: "Tangy Middle Eastern spice" },
-  { name: "Gochujang", emoji: "Ã°Å¸Å’Â¶Ã¯Â¸Â", description: "Korean fermented chili paste" },
-  { name: "Black Garlic", emoji: "Ã°Å¸Â§â€ž", description: "Sweet aged garlic" },
-  { name: "Miso Paste", emoji: "Ã°Å¸ÂÅ“", description: "Umami-rich fermented soybean" },
-  { name: "Harissa", emoji: "Ã°Å¸â€Â¥", description: "North African hot chili paste" },
-  { name: "Za'atar", emoji: "Ã°Å¸Å’Â¿", description: "Mediterranean herb blend" },
-  { name: "Tahini", emoji: "Ã°Å¸Â¥Å“", description: "Sesame seed butter" },
-  { name: "Matcha Powder", emoji: "Ã°Å¸ÂÂµ", description: "Japanese green tea powder" },
-  { name: "Truffle Oil", emoji: "Ã°Å¸Ââ€ž", description: "Luxurious aromatic oil" },
-  { name: "Nutritional Yeast", emoji: "Ã¢Â­Â", description: "Cheesy vegan seasoning" },
-  { name: "Kimchi", emoji: "Ã°Å¸Â¥Â¬", description: "Spicy fermented cabbage" },
-  { name: "AÃƒÂ§aÃƒÂ­", emoji: "Ã°Å¸Â«Â", description: "Antioxidant-rich berry" },
-  { name: "Pomegranate Molasses", emoji: "Ã°Å¸â€™Å½", description: "Sweet-tart syrup" },
+  { name: "Dragon Fruit", description: "Vibrant pink superfood" },
+  { name: "Jackfruit", description: "Tropical meat substitute" },
+  { name: "Sumac", description: "Tangy Middle Eastern spice" },
+  { name: "Gochujang", description: "Korean fermented chili paste" },
+  { name: "Black Garlic", description: "Sweet aged garlic" },
+  { name: "Miso Paste", description: "Umami-rich fermented soybean" },
+  { name: "Harissa", description: "North African hot chili paste" },
+  { name: "Za'atar", description: "Mediterranean herb blend" },
+  { name: "Tahini", description: "Sesame seed butter" },
+  { name: "Matcha Powder", description: "Japanese green tea powder" },
+  { name: "Truffle Oil", description: "Luxurious aromatic oil" },
+  { name: "Nutritional Yeast", description: "Cheesy vegan seasoning" },
+  { name: "Kimchi", description: "Spicy fermented cabbage" },
+  { name: "Açaí", description: "Antioxidant-rich berry" },
+  { name: "Pomegranate Molasses", description: "Sweet-tart syrup" },
 ];
 const SEASONAL_ITEMS: Record<string, string[]> = {
   "winter": ["hot chocolate", "marshmallows", "root vegetables", "citrus fruits", "hearty soups", "cinnamon"],
@@ -130,7 +130,7 @@ export const getComplementaryItems = (item: string): ItemSuggestion[] => {
 export const getRecipeSuggestions = (currentItems: string[]): ItemSuggestion[] => {
   const suggestions: ItemSuggestion[] = [];
   const itemsLower = currentItems.map(i => i.toLowerCase().trim());
-  for (const [key, recipe] of Object.entries(RECIPE_SUGGESTIONS)) {
+  for (const recipe of Object.values(RECIPE_SUGGESTIONS)) {
     const matchCount = recipe.items.filter(recipeItem =>
       itemsLower.some(item => item.includes(recipeItem) || recipeItem.includes(item))
     ).length;
@@ -143,8 +143,7 @@ export const getRecipeSuggestions = (currentItems: string[]): ItemSuggestion[] =
           item,
           reason: `Complete your ${recipe.recipe}`,
           category: "recipe",
-          emoji: "Ã°Å¸â€˜Â¨Ã¢â‚¬ÂÃ°Å¸ÂÂ³",
-        });
+          });
       });
     }
   }
@@ -158,8 +157,7 @@ export const getHealthierAlternative = (item: string): ItemSuggestion | null => 
         item: healthy,
         reason: `Healthier alternative to ${item}`,
         category: "healthier",
-        emoji: "Ã°Å¸â€™Å¡",
-      };
+        };
     }
   }
   return null;
@@ -171,7 +169,6 @@ export const getSeasonalSuggestions = (): ItemSuggestion[] => {
     item,
     reason: `Fresh this ${season}`,
     category: "seasonal",
-    emoji: season === "spring" ? "Ã°Å¸Å’Â¸" : season === "summer" ? "Ã¢Ëœâ‚¬Ã¯Â¸Â" : season === "fall" ? "Ã°Å¸Ââ€š" : "Ã¢Ââ€žÃ¯Â¸Â",
   }));
 };
 export const getWeatherSuggestions = (): ItemSuggestion[] => {
@@ -180,12 +177,10 @@ export const getWeatherSuggestions = (): ItemSuggestion[] => {
   if (month >= 10 || month <= 1) weatherType = "cold";
   if (month >= 5 && month <= 7) weatherType = "hot";
   const weatherItems = WEATHER_SUGGESTIONS[weatherType] || [];
-  const emoji = weatherType === "cold" ? "Ã°Å¸Â¥Â¶" : weatherType === "hot" ? "Ã°Å¸â€Â¥" : "Ã°Å¸Å’Â§Ã¯Â¸Â";
   return weatherItems.map(item => ({
     item,
     reason: weatherType === "cold" ? "It's cold outside!" : weatherType === "hot" ? "Perfect for hot weather" : "Rainy day comfort",
     category: "weather",
-    emoji,
   }));
 };
 export const getDayOfWeekSuggestions = (): ItemSuggestion[] => {
@@ -193,9 +188,8 @@ export const getDayOfWeekSuggestions = (): ItemSuggestion[] => {
   const dayItems = DAY_SUGGESTIONS[day] || [];
   return dayItems.map(item => ({
     item,
-    reason: day === "tuesday" ? "Taco Tuesday! Ã°Å¸Å’Â®" : `Perfect for ${day}`,
+    reason: day === "tuesday" ? "Taco Tuesday!" : `Perfect for ${day}`,
     category: "dayOfWeek",
-    emoji: day === "tuesday" ? "Ã°Å¸Å’Â®" : "Ã°Å¸â€œâ€¦",
   }));
 };
 export const getExoticIngredientSuggestion = (usedItems: string[]): ItemSuggestion | null => {
@@ -209,7 +203,6 @@ export const getExoticIngredientSuggestion = (usedItems: string[]): ItemSuggesti
     item: randomExotic.name,
     reason: `New ingredient to try! ${randomExotic.description}`,
     category: "exotic",
-    emoji: randomExotic.emoji,
   };
 };
 export const getPatternSuggestions = (
@@ -246,8 +239,7 @@ export const getPatternSuggestions = (
             item,
             reason: `You usually add this with ${currentItem}`,
             category: "complementary",
-            emoji: "Ã°Å¸â€œÅ ",
-          });
+            });
         }
       });
     }
@@ -281,3 +273,4 @@ export const getAllSuggestions = (
   );
   return uniqueSuggestions;
 };
+

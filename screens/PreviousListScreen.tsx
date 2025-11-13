@@ -23,13 +23,13 @@ import {
   deleteDoc,
   doc,
   limit,
+  updateDoc,
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect, NavigationProp } from "@react-navigation/native";
 import { auth, db } from "../firebaseConfig";
 import { colors, previousListStyles, spacing, typography, borderRadius, getTagColor, elevation } from "../GlobalStyleSheet";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
-import { ModernLoader } from "../components/ModernLoader";
 import { CardSkeleton } from "../components/SkeletonLoader";
 import { EmptyState } from "../components/EmptyState";
 import { ColorDisplay, getColorValue } from "../components/ColorDisplay";
@@ -119,6 +119,45 @@ const PreviousListScreen = () => {
       }
       return newSet;
     });
+  };
+
+  const handleRemoveItem = async (listId: string, itemIndex: number) => {
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      
+      // Find the list to update
+      const listToUpdate = lists.find(l => l.id === listId);
+      if (!listToUpdate) return;
+
+      const newItems = listToUpdate.items.filter((_: string, idx: number) => idx !== itemIndex);
+      
+      // Update local state immediately for better UX
+      setLists((prev) => 
+        prev.map((list) => {
+          if (list.id === listId) {
+            return { ...list, items: newItems };
+          }
+          return list;
+        })
+      );
+
+      // Update Firestore
+      if (newItems.length > 0) {
+        await updateDoc(doc(db, "lists", listId), {
+          items: newItems,
+        });
+      } else {
+        // If no items left, delete the entire list
+        await deleteDoc(doc(db, "lists", listId));
+        setLists((prev) => prev.filter((item) => item.id !== listId));
+      }
+    } catch (error) {
+      logFirestoreError(error, 'Remove item from list', 'lists');
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("Error", "Failed to remove item from list.");
+      // Revert local state on error
+      fetchLists();
+    }
   };
   const fetchLists = async () => {
     try {
@@ -319,16 +358,18 @@ const PreviousListScreen = () => {
                     { flex: 1 },
                     focusedInput === 'shareCode' && styles.inputFocused
                   ]}
-                  placeholder="Enter share code"
+                  placeholder="Enter share code (e.g., ABC123)"
                   placeholderTextColor={colors.textLight}
                   value={shareCode}
-                  onChangeText={setShareCode}
+                  onChangeText={(text) => setShareCode(text.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
                   onFocus={() => setFocusedInput('shareCode')}
                   onBlur={() => setFocusedInput(null)}
-                  autoCapitalize="none"
+                  autoCapitalize="characters"
                   autoCorrect={false}
                   editable={!loadingShared}
                   returnKeyType="done"
+                  maxLength={6}
+                  onSubmitEditing={handleFetchSharedList}
                 />
                 <Pressable
                   style={[
@@ -504,7 +545,7 @@ const PreviousListScreen = () => {
               searchedLists.map((list) => {
                 const listColor = getColorValue(list.color, colors.primary);
                 const isExpanded = expandedLists.has(list.id);
-                const hasMoreItems = (list.items?.length || 0) > 3;
+                const hasItems = (list.items?.length || 0) > 0;
                 const cardAnimation = getCardAnimation(list.id);
                 const scaleAnim = getCardScaleAnimation(list.id);
                 const handlePressIn = () => {
@@ -557,7 +598,7 @@ const PreviousListScreen = () => {
                     <View style={styles.cardContent}>
                       <View style={{ flexDirection: "row", marginBottom: spacing.md }}>
                         <Pressable
-                          onPress={() => hasMoreItems && toggleListExpansion(list.id)}
+                          onPress={() => hasItems && toggleListExpansion(list.id)}
                           onPressIn={handlePressIn}
                           onPressOut={handlePressOut}
                           style={{ flexDirection: "row", alignItems: "flex-start", flex: 1 }}
@@ -577,7 +618,7 @@ const PreviousListScreen = () => {
                               </Text>
                               {list.createdAt && (
                                 <>
-                                  <Text style={styles.metadataDot}>Ã¢â‚¬Â¢</Text>
+                                  <Text style={styles.metadataDot}>•</Text>
                                   <Text style={styles.metadata}>
                                     {formatDate(list.createdAt)}
                                   </Text>
@@ -585,7 +626,7 @@ const PreviousListScreen = () => {
                               )}
                             </View>
                           </View>
-                          {hasMoreItems && (
+                          {hasItems && (
                             <Animated.View
                               style={{
                                 transform: [{
@@ -603,7 +644,7 @@ const PreviousListScreen = () => {
                         </Pressable>
                         {list.tags && list.tags.length > 0 && (
                           <View style={styles.tagsTopRight}>
-                            {list.tags.slice(0, 2).map((tag: string, tagIndex: number) => {
+                            {list.tags.slice(0, 2).map((tag: string) => {
                               const tagColor = getTagColor(tag);
                               return (
                                 <View
@@ -655,23 +696,47 @@ const PreviousListScreen = () => {
                     }}>
                       {isExpanded ? (
                         <View style={{ gap: spacing.xs }}>
+                          <View style={styles.clickHintContainer}>
+                            <MaterialIcons name="info-outline" size={16} color={colors.primary} />
+                            <Text style={styles.clickHintText}>Tap an item to remove it</Text>
+                          </View>
                           {(list.items || []).map((item: string, index: number) => (
-                            <View
+                            <Pressable
                               key={index}
-                              style={styles.expandedItem}
+                              onPress={async () => {
+                                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                Alert.alert(
+                                  "Remove Item",
+                                  `Remove "${item}" from this list?`,
+                                  [
+                                    { text: "Cancel", style: "cancel" },
+                                    {
+                                      text: "Remove",
+                                      style: "destructive",
+                                      onPress: () => handleRemoveItem(list.id, index),
+                                    },
+                                  ],
+                                  { cancelable: true }
+                                );
+                              }}
+                              style={({ pressed }) => [
+                                styles.expandedItem,
+                                pressed && styles.expandedItemPressed,
+                              ]}
                             >
                               <View style={[styles.itemBullet, { backgroundColor: listColor }]} />
                               <Text style={styles.itemText}>
                                 {item}
                               </Text>
-                            </View>
+                              <MaterialIcons name="close" size={18} color={colors.textLight} style={{ marginLeft: 'auto' }} />
+                            </Pressable>
                           ))}
                         </View>
                       ) : (
                         <View style={styles.previewContainer}>
                           <Text style={styles.previewText} numberOfLines={2}>
-                            {list.items?.slice(0, 3).join(" Ã¢â‚¬Â¢ ")}
-                            {hasMoreItems ? "..." : ""}
+                            {list.items?.slice(0, 3).join(" • ")}
+                            {(list.items?.length || 0) > 3 ? "..." : ""}
                           </Text>
                         </View>
                       )}
@@ -889,6 +954,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
   },
+  clickHintContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: `${colors.primary}08`,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.xs,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+  },
+  clickHintText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: "500",
+  },
   expandedItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -896,6 +978,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  expandedItemPressed: {
+    backgroundColor: colors.danger + '10',
+    borderColor: colors.danger + '30',
   },
   itemBullet: {
     width: 7,

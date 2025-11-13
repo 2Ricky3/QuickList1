@@ -25,7 +25,6 @@ import {
   typography,
   getTagColor
 } from "../GlobalStyleSheet";
-import { ModernLoader } from "../components/ModernLoader";
 import { SwipeableInput } from "../components/SwipeableInput";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import { FAB } from "../components/FAB";
@@ -372,23 +371,34 @@ const EditListScreen = () => {
             }}>
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.sm }}>
                 <MaterialIcons name="info-outline" size={18} color={listColor} />
-                <Text style={{
-                  fontSize: 14,
-                  fontWeight: "600",
-                  color: listColor,
-                  marginLeft: spacing.xs,
-                }}>
-                  Share Code
-                </Text>
-              </View>
               <Text style={{
                 fontSize: 16,
                 fontWeight: "700",
                 color: listColor,
                 letterSpacing: 1,
               }}>
-                {list.shareId}
+                Share Code
               </Text>
+              </View>
+              <View style={{ 
+                flexDirection: "row", 
+                alignItems: "center",
+                backgroundColor: colors.white,
+                borderRadius: borderRadius.md,
+                padding: spacing.md,
+                borderWidth: 1,
+                borderColor: `${listColor}40`,
+              }}>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "800",
+                  color: listColor,
+                  letterSpacing: 4,
+                  fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+                }}>
+                  {list.shareId}
+                </Text>
+              </View>
             </View>
           )}
           <Pressable

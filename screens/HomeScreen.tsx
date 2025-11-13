@@ -604,7 +604,7 @@ const HomeScreen = () => {
                         </Text>
                       </View>
                       {isUnlocked && (
-                        <Text style={{ fontSize: 24, marginLeft: spacing.sm }}>Ã°Å¸Å½â€°</Text>
+                        <Text style={{ fontSize: 24, marginLeft: spacing.sm }}>🏆</Text>
                       )}
                     </View>
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
