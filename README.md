@@ -135,30 +135,13 @@ Shopping lists shouldn’t be a hassle. QuickList helps you:
 ---
 
 # 📱 Mobile App Mockups
-### 1️⃣ Edit list & Sign in
-![Edit List & Sign in](https://github.com/user-attachments/assets/3f39918f-65c9-4060-b2f1-8871cfa495ce)
+<img width="1920" height="1440" alt="441shots_so" src="https://github.com/user-attachments/assets/ea5532d6-b4ba-43f0-9beb-4c7c1967e92f" />
+<img width="1920" height="1440" alt="225shots_so" src="https://github.com/user-attachments/assets/125c90c0-b357-4f06-a08e-56401b3a467f" />
+<img width="1920" height="1440" alt="891shots_so" src="https://github.com/user-attachments/assets/5d80fd41-f711-4cae-91d7-dccf6eda7d8a" />
 
----
-
-### 2️⃣ Home Screen & Onboard Screen
-![Home Screen & Onboard Screen](https://github.com/user-attachments/assets/50e99ae9-1c4d-4103-8c8a-975a402f1b7d)
-
----
-
-### 3️⃣ Splash Screen & Create List screen
-![Splash Screen & Create List screen](https://github.com/user-attachments/assets/37a72cb5-0284-4235-b904-b2cea15a7eb9)
-
----
-
-### 4️⃣ Previous Lists
-![Previous Lists](https://github.com/user-attachments/assets/6fd8b197-d8a0-47ff-a881-cc913a2d0ebc)
-
----
-
-### 5️⃣ Splash Screen & Sign in
-![Analytics & Insights](https://github.com/user-attachments/assets/991c133d-c0ff-40c7-ad9a-ccc99dc14397)
 
 ### 3.🎥 Demo Video 
+This is the V1.00 demo, designed to showcase the core principles and functionality of the application.
 https://drive.google.com/drive/folders/1tqHqu4rQAwF-nPOQwAn0FkPmnRvGKCuf?usp=drive_link
 
 ---
