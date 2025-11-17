@@ -3,6 +3,9 @@
 QuickList is a **cross-platform grocery list manager** built with React Native, Firebase, and Firestore.  
 It makes shopping simple, fast, and collaborative whether you’re at the store or adding items from home.  
 
+(Mobile Application)
+Ricard Oosthuizen
+
 ---
 
 ## 📌 Table of Contents
