@@ -20,6 +20,8 @@ import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import { validateEmail, validatePassword } from "../utils/validation";
 import { logAuthError } from "../services/errorLogger";
+import { Toast } from "../components/Toast";
+import { useToast } from "../hooks/useToast";
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen = () => {
@@ -28,15 +30,16 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const { toast, showToast, hideToast } = useToast();
   const handleLogin = async () => {
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      alert(emailValidation.error);
+      showToast(emailValidation.error || "Invalid email", "error");
       return;
     }
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      alert(passwordValidation.error);
+      showToast(passwordValidation.error || "Invalid password", "error");
       return;
     }
     setLoading(true);
@@ -50,13 +53,19 @@ const LoginScreen = () => {
       );
     } catch (error: any) {
       logAuthError(error, 'Login with email');
-      alert(error.message || 'Login failed. Please try again.');
+      showToast(error.message || 'Login failed. Please try again.', "error");
     } finally {
       setLoading(false);
     }
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        visible={toast.visible}
+        onHide={hideToast}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}

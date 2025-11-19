@@ -320,27 +320,27 @@ export const updateUserStats = async (
 };
 export const getEncouragingMessage = (achievements: Achievement[]): string => {
   const messages = [
-    "Great job! Keep organizing! Ã°Å¸Å½â€°",
-    "You're on fire! Ã°Å¸â€Â¥",
-    "Amazing work! Ã°Å¸Å’Å¸",
-    "Your lists are looking fantastic! Ã¢Å“Â¨",
-    "You're a planning pro! Ã°Å¸Ââ€ ",
-    "Keep up the excellent work! Ã°Å¸â€™Âª",
-    "You're crushing it! Ã°Å¸Å½Å ",
-    "Fantastic organization skills! Ã°Å¸â€œÂ",
-    "You're becoming a list legend! Ã°Å¸â€˜â€˜",
-    "Incredible progress! Ã°Å¸Å¡â‚¬",
+    "Great job! Keep organizing! 🎉",
+    "You're on fire! 🔥",
+    "Amazing work! 💪",
+    "Your lists are looking fantastic! ✨",
+    "You're a planning pro! 🏆",
+    "Keep up the excellent work! 🎪",
+    "You're crushing it! 🎊",
+    "Fantastic organization skills! 📋",
+    "You're becoming a list legend! 👑",
+    "Incredible progress! 💯",
   ];
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   if (unlockedCount === 0) {
-    return "Start your journey to becoming a list master! Ã°Å¸Å’Å¸";
+    return "Start your journey to becoming a list master! 💪";
   } else if (unlockedCount < 3) {
-    return "Great start! Keep going! Ã°Å¸Å½Â¯";
+    return "Great start! Keep going! 🎯";
   } else if (unlockedCount < 6) {
     return messages[Math.floor(Math.random() * messages.length)];
   } else if (unlockedCount < achievements.length) {
-    return "You're almost there! Keep pushing! Ã°Å¸â€Â¥";
+    return "You're almost there! Keep pushing! 🔥";
   } else {
-    return "You've unlocked everything! You're a legend! Ã°Å¸â€˜â€˜Ã°Å¸Å½â€°";
+    return "You've unlocked everything! You're a legend! 👑🎉";
   }
 };

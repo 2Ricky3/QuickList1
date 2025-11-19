@@ -21,6 +21,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { validateEmail, validatePassword, sanitizeString } from "../utils/validation";
 import { logAuthError, errorLogger } from "../services/errorLogger";
 import { RootStackParamList } from "../types";
+import { Toast } from "../components/Toast";
+import { useToast } from "../hooks/useToast";
 
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -29,24 +31,25 @@ const RegisterScreen = () => {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const { toast, showToast, hideToast } = useToast();
   const handleRegister = async () => {
     const sanitizedName = sanitizeString(name.trim());
     if (sanitizedName.length < 2) {
-      alert("Name must be at least 2 characters");
+      showToast("Name must be at least 2 characters", "error");
       return;
     }
     if (sanitizedName.length > 50) {
-      alert("Name must be less than 50 characters");
+      showToast("Name must be less than 50 characters", "error");
       return;
     }
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
-      alert(emailValidation.error);
+      showToast(emailValidation.error || "Invalid email", "error");
       return;
     }
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      alert(passwordValidation.error);
+      showToast(passwordValidation.error || "Invalid password", "error");
       return;
     }
     setLoading(true);
@@ -68,11 +71,17 @@ const RegisterScreen = () => {
     } catch (error: any) {
       logAuthError(error, 'Register with email');
       setLoading(false);
-      alert(error.message || 'Registration failed. Please try again.');
+      showToast(error.message || 'Registration failed. Please try again.', "error");
     }
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        visible={toast.visible}
+        onHide={hideToast}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
