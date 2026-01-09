@@ -10,10 +10,13 @@ import CreateScreen from "./screens/CreateScreen";
 import PreviousListScreen from "./screens/PreviousListScreen";
 import EditListScreen from "./screens/EditListScreen";
 import SplashScreen from "./screens/SplashScreen";
+import LandingScreen from "./screens/LandingScreen";
 import TermsScreen from "./screens/TermsScreen";
 import OnboardingScreen from "./screens/OnboardingScreen";
 import { RootStackParamList } from "./types";
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -26,8 +29,8 @@ export default function App() {
             headerTintColor: "#520600",
             headerTitleStyle: { fontWeight: "bold", fontSize: 20 },
             headerShadowVisible: false,
-            animation: "slide_from_right",
-            animationDuration: 250,
+            animation: "fade",
+            animationDuration: 300,
             contentStyle: { backgroundColor: "#ffffff" },
           }}
         >
@@ -37,7 +40,14 @@ export default function App() {
             options={{ 
               headerShown: false,
               gestureEnabled: false,
-              animation: "fade",
+            }}
+          />
+          <Stack.Screen
+            name="Landing"
+            component={LandingScreen}
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
             }}
           />
           <Stack.Screen
@@ -46,7 +56,6 @@ export default function App() {
             options={{ 
               headerShown: false,
               gestureEnabled: false,
-              animation: "fade",
             }}
           />
           <Stack.Screen
@@ -54,7 +63,6 @@ export default function App() {
             component={RegisterScreen}
             options={{ 
               headerShown: false,
-              animation: "slide_from_right",
             }}
           />
           <Stack.Screen
@@ -63,7 +71,6 @@ export default function App() {
             options={{ 
               headerShown: false,
               gestureEnabled: false,
-              animation: "fade",
             }}
           />
           <Stack.Screen
@@ -71,23 +78,20 @@ export default function App() {
             component={CreateScreen}
             options={{ 
               title: "New List",
-              animation: "slide_from_bottom",
             }}
           />
-            <Stack.Screen
+          <Stack.Screen
             name="PreviousListScreen"
             component={PreviousListScreen}
             options={{ 
               headerShown: false,
-              animation: "slide_from_right",
             }}
           />
-           <Stack.Screen
+          <Stack.Screen
             name="EditListScreen"
             component={EditListScreen}
             options={{ 
               title: "Edit List",
-              animation: "slide_from_bottom",
             }}
           />
           <Stack.Screen
@@ -96,7 +100,6 @@ export default function App() {
             options={{ 
               title: "Terms & Conditions",
               presentation: "modal",
-              animation: "slide_from_bottom",
             }}
           />
           <Stack.Screen
@@ -105,7 +108,6 @@ export default function App() {
             options={{ 
               headerShown: false,
               gestureEnabled: false,
-              animation: "fade",
             }}
           />
         </Stack.Navigator>
@@ -113,6 +115,7 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

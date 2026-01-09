@@ -53,10 +53,19 @@ const PreviousListScreen = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [pressedCard, setPressedCard] = useState<string | null>(null);
   const filterAnimation = useRef(new Animated.Value(0)).current;
+  const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const cardAnimations = useRef<Map<string, Animated.Value>>(new Map()).current;
   const cardScaleAnimations = useRef<Map<string, Animated.Value>>(new Map()).current;
   const shareCodeInputRef = useRef<TextInput>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  React.useEffect(() => {
+    Animated.timing(screenFadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }, []);
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "Recently";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -324,10 +333,11 @@ const PreviousListScreen = () => {
   }
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        style={{ flex: 1 }}
+      <Animated.View style={{ flex: 1, opacity: screenFadeAnim }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+          style={{ flex: 1 }}
       >
         <View style={{ flex: 1 }}>
           <ScrollView
@@ -789,6 +799,7 @@ const PreviousListScreen = () => {
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+      </Animated.View>
     </SafeAreaView>
   );
 };

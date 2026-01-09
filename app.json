@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/Logo.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "scheme": "quicklist",
     "splash": {
       "image": "./assets/splash-icon.png",

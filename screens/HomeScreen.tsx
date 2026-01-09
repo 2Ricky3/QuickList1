@@ -27,6 +27,7 @@ import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import * as Haptics from "expo-haptics";
 import { logFirestoreError, errorLogger } from "../services/errorLogger";
+import { SkeletonLoader, CardSkeleton } from "../components/SkeletonLoader";
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "Home"
@@ -47,12 +48,21 @@ const HomeScreen = () => {
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const modalAnim = useRef(new Animated.Value(0)).current;
   const modalOverlayAnim = useRef(new Animated.Value(0)).current;
+  const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const greetingAnim = useRef(new Animated.Value(0)).current;
   const statsAnim = useRef(new Animated.Value(0)).current;
   const achievementsAnim = useRef(new Animated.Value(0)).current;
   const actionsHeaderAnim = useRef(new Animated.Value(0)).current;
   const action1Anim = useRef(new Animated.Value(0)).current;
   const action2Anim = useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(screenFadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }, []);
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -225,16 +235,48 @@ const HomeScreen = () => {
   if (loading) {
     return (
       <SafeAreaView style={globalStyles.loadingContainer}>
-        <ModernLoader size="large" />
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.xl,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Greeting Skeleton */}
+          <SkeletonLoader height={40} width="70%" style={{ marginBottom: spacing.lg }} />
+          <SkeletonLoader height={16} width="90%" style={{ marginBottom: spacing.xxxl }} />
+          
+          {/* Stats Skeleton */}
+          <View style={{ marginBottom: spacing.xxxl }}>
+            <SkeletonLoader height={20} width="40%" style={{ marginBottom: spacing.lg }} />
+            <View style={{ flexDirection: "row", gap: spacing.lg, marginBottom: spacing.lg }}>
+              <SkeletonLoader height={80} width="48%" borderRadius={12} />
+              <SkeletonLoader height={80} width="48%" borderRadius={12} />
+            </View>
+          </View>
+
+          {/* Action Buttons Skeleton */}
+          <View style={{ gap: spacing.lg, marginBottom: spacing.xxxl }}>
+            <SkeletonLoader height={48} borderRadius={12} />
+            <SkeletonLoader height={48} borderRadius={12} />
+          </View>
+
+          {/* Cards Skeleton */}
+          <SkeletonLoader height={20} width="40%" style={{ marginBottom: spacing.lg }} />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </ScrollView>
       </SafeAreaView>
     );
   }
   return (
     <SafeAreaView style={globalStyles.container}>
-      <ScrollView
-        contentContainerStyle={globalStyles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <Animated.View style={{ flex: 1, opacity: screenFadeAnim }}>
+        <ScrollView
+          contentContainerStyle={globalStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         <Animated.View
           style={{
             marginBottom: spacing.xl,
@@ -457,6 +499,7 @@ const HomeScreen = () => {
           </Text>
         </AnimatedPressable>
       </ScrollView>
+      </Animated.View>
       <Modal
         visible={showAchievementsModal}
         transparent

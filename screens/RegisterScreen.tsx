@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Text,
   View,
-  TextInput,
   SafeAreaView,
   Image,
   KeyboardAvoidingView,
@@ -10,10 +9,12 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Animated,
 } from "react-native";
 import { globalStyles, colors } from "../GlobalStyleSheet";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import { FormInput } from "../components/FormInput";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { registerWithEmail } from "../services/authService";
@@ -32,6 +33,16 @@ const RegisterScreen = () => {
   const [loading, setLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const { toast, showToast, hideToast } = useToast();
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }, []);
   const handleRegister = async () => {
     const sanitizedName = sanitizeString(name.trim());
     if (sanitizedName.length < 2) {
@@ -82,12 +93,15 @@ const RegisterScreen = () => {
         visible={toast.visible}
         onHide={hideToast}
       />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
+            ref={scrollViewRef}
             contentContainerStyle={{
               flexGrow: 1,
               paddingHorizontal: 20,
@@ -95,6 +109,8 @@ const RegisterScreen = () => {
             }}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            scrollEnabled={true}
+            decelerationRate="fast"
           >
             <View style={{ flex: 1, justifyContent: "center" }}>
               <Image
@@ -109,44 +125,36 @@ const RegisterScreen = () => {
               />
               <Text style={globalStyles.titleText}>Create Account</Text>
               <View style={globalStyles.formWrapper}>
-                <TextInput
+                <FormInput
                   placeholder="Name"
-                  placeholderTextColor={colors.textLight}
                   value={name}
                   onChangeText={setName}
                   onFocus={() => setFocusedInput('name')}
                   onBlur={() => setFocusedInput(null)}
-                  style={[
-                    globalStyles.inputField,
-                    focusedInput === 'name' && globalStyles.inputFieldFocused
-                  ]}
+                  isFocused={focusedInput === 'name'}
+                  icon="person"
                 />
-                <TextInput
+                <FormInput
                   placeholder="Email"
-                  placeholderTextColor={colors.textLight}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={email}
                   onChangeText={setEmail}
                   onFocus={() => setFocusedInput('email')}
                   onBlur={() => setFocusedInput(null)}
-                  style={[
-                    globalStyles.inputField,
-                    focusedInput === 'email' && globalStyles.inputFieldFocused
-                  ]}
+                  isFocused={focusedInput === 'email'}
+                  icon="email"
                 />
-                <TextInput
+                <FormInput
                   placeholder="Password"
-                  placeholderTextColor={colors.textLight}
-                  secureTextEntry
+                  secureTextEntry={false}
                   value={password}
                   onChangeText={setPassword}
                   onFocus={() => setFocusedInput('password')}
                   onBlur={() => setFocusedInput(null)}
-                  style={[
-                    globalStyles.inputField,
-                    focusedInput === 'password' && globalStyles.inputFieldFocused
-                  ]}
+                  isFocused={focusedInput === 'password'}
+                  isPassword={true}
+                  icon="lock"
                 />
                 <AnimatedPressable
                   onPress={handleRegister}
@@ -180,6 +188,7 @@ const RegisterScreen = () => {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+      </Animated.View>
     </SafeAreaView>
   );
 };

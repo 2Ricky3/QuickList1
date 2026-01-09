@@ -1,4 +1,5 @@
 export type RootStackParamList = {
+  Landing: undefined;
   Login: undefined;
   Register: undefined;
   Home: undefined;
@@ -7,5 +8,7 @@ export type RootStackParamList = {
   EditListScreen: { list: any };
   Splash: undefined;
   Terms: undefined;
+  Achievements: undefined;
   Onboarding: { userId?: string };
+  AdminPanel: undefined;
 };
