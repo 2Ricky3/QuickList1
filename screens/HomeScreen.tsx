@@ -35,7 +35,7 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<
 interface GroceryList {
   id: string;
   createdAt: any;
-  items: string[];
+  items: (string | { name: string; quantity?: number; unit?: string })[];
 }
 const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -48,6 +48,11 @@ const HomeScreen = () => {
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const modalAnim = useRef(new Animated.Value(0)).current;
   const modalOverlayAnim = useRef(new Animated.Value(0)).current;
+
+  // Helper function to get item name (handles both string and object formats)
+  const getItemName = (item: any): string => {
+    return typeof item === 'string' ? item : (item.name || '');
+  };
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const greetingAnim = useRef(new Animated.Value(0)).current;
   const statsAnim = useRef(new Animated.Value(0)).current;
@@ -187,7 +192,7 @@ const HomeScreen = () => {
     const freqMap: Record<string, number> = {};
     groceryLists.forEach((list) => {
       list.items.forEach((item) => {
-        const name = item.toLowerCase();
+        const name = getItemName(item).toLowerCase();
         freqMap[name] = (freqMap[name] || 0) + 1;
       });
     });
@@ -473,7 +478,7 @@ const HomeScreen = () => {
               <MaterialIcons name="history" size={32} color={colors.primary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={typography.h3}>Previous Buys</Text>
+              <Text style={typography.h3}>Lists</Text>
               <Text style={[typography.body, { color: colors.textMedium, fontSize: 14 }]}>
                 View your past grocery lists and reorder quickly
               </Text>

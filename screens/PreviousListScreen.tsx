@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -52,6 +52,7 @@ const PreviousListScreen = () => {
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [pressedCard, setPressedCard] = useState<string | null>(null);
+  const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
   const filterAnimation = useRef(new Animated.Value(0)).current;
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const cardAnimations = useRef<Map<string, Animated.Value>>(new Map()).current;
@@ -79,6 +80,25 @@ const PreviousListScreen = () => {
     if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
     return `${Math.floor(diffDays / 365)} years ago`;
   };
+
+  // Helper function to format item display (handles both string and object formats)
+  const formatItemDisplay = (item: any): string => {
+    if (typeof item === 'string') {
+      return item;
+    }
+    // Handle new item object format
+    const { name, quantity, unit } = item;
+    if (!quantity || quantity === 1) {
+      return unit ? `${name} ${unit}` : name;
+    }
+    return unit ? `${name} x${quantity} ${unit}` : `${name} x${quantity}`;
+  };
+
+  // Helper function to get item name for tracking completed items
+  const getItemName = (item: any): string => {
+    return typeof item === 'string' ? item : (item.name || '');
+  };
+
   const getCardAnimation = (listId: string) => {
     if (!cardAnimations.has(listId)) {
       cardAnimations.set(listId, new Animated.Value(0));
@@ -138,35 +158,46 @@ const PreviousListScreen = () => {
       const listToUpdate = lists.find(l => l.id === listId);
       if (!listToUpdate) return;
 
-      const newItems = listToUpdate.items.filter((_: string, idx: number) => idx !== itemIndex);
+      const item = listToUpdate.items[itemIndex];
+      const itemName = getItemName(item);
+      const itemKey = `${listId}-${itemIndex}-${itemName}`;
       
-      // Update local state immediately for better UX
-      setLists((prev) => 
-        prev.map((list) => {
-          if (list.id === listId) {
-            return { ...list, items: newItems };
-          }
-          return list;
-        })
-      );
+      // Toggle item completion (strikethrough)
+      setCompletedItems((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(itemKey)) {
+          newSet.delete(itemKey);
+        } else {
+          newSet.add(itemKey);
+        }
+        return newSet;
+      });
 
-      // Update Firestore
-      if (newItems.length > 0) {
-        await updateDoc(doc(db, "lists", listId), {
-          items: newItems,
-        });
+      // Store completed items in Firestore
+      const newCompletedItems = Array.from(completedItems);
+      if (!newCompletedItems.includes(itemKey)) {
+        newCompletedItems.push(itemKey);
       } else {
-        // If no items left, delete the entire list
-        await deleteDoc(doc(db, "lists", listId));
-        setLists((prev) => prev.filter((item) => item.id !== listId));
+        newCompletedItems.splice(newCompletedItems.indexOf(itemKey), 1);
       }
+      
+      await updateDoc(doc(db, "lists", listId), {
+        completedItems: newCompletedItems,
+      });
     } catch (error) {
-      logFirestoreError(error, 'Remove item from list', 'lists');
+      logFirestoreError(error, 'Toggle item completion', 'lists');
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Error", "Failed to remove item from list.");
-      // Revert local state on error
-      fetchLists();
+      Alert.alert("Error", "Failed to update item.");
     }
+  };
+
+  const isListComplete = (list: any) => {
+    if (!list.items || list.items.length === 0) return false;
+    return list.items.every((item: any, idx: number) => {
+      const itemName = getItemName(item);
+      const itemKey = `${list.id}-${idx}-${itemName}`;
+      return completedItems.has(itemKey);
+    });
   };
   const fetchLists = async () => {
     try {
@@ -176,12 +207,36 @@ const PreviousListScreen = () => {
       const q = query(collection(db, "lists"), where("uid", "==", user.uid));
       const querySnapshot = await getDocs(q);
       const fetchedLists: any[] = [];
+      const completedItemsSet = new Set<string>();
       querySnapshot.forEach((docSnap) => {
-        fetchedLists.push({ id: docSnap.id, ...docSnap.data() });
+        const data = docSnap.data();
+        fetchedLists.push({ id: docSnap.id, ...data });
+        // Load completed items from Firestore
+        if (data.completedItems) {
+          data.completedItems.forEach((item: string) => completedItemsSet.add(item));
+        }
       });
-      setLists(fetchedLists);
+      setCompletedItems(completedItemsSet);
+      
+      // Sort lists: incomplete first, complete at bottom
+      const sortedLists = fetchedLists.sort((a, b) => {
+        const aComplete = a.items && a.items.length > 0 && a.items.every((item: any, idx: number) => {
+          const itemName = getItemName(item);
+          const itemKey = `${a.id}-${idx}-${itemName}`;
+          return completedItemsSet.has(itemKey);
+        });
+        const bComplete = b.items && b.items.length > 0 && b.items.every((item: any, idx: number) => {
+          const itemName = getItemName(item);
+          const itemKey = `${b.id}-${idx}-${itemName}`;
+          return completedItemsSet.has(itemKey);
+        });
+        if (aComplete === bComplete) return 0;
+        return aComplete ? 1 : -1;
+      });
+      
+      setLists(sortedLists);
       const tagsSet = new Set<string>();
-      fetchedLists.forEach((list) => {
+      sortedLists.forEach((list) => {
         (list.tags || []).forEach((tag: string) => tagsSet.add(tag));
         animateCardEntrance(list.id);
       });
@@ -204,6 +259,29 @@ const PreviousListScreen = () => {
       fetchLists();
     }, [])
   );
+
+  // Re-sort lists when completedItems changes
+  useEffect(() => {
+    if (lists.length === 0) return;
+    
+    const sortedLists = [...lists].sort((a, b) => {
+      const aComplete = a.items && a.items.length > 0 && a.items.every((item: any, idx: number) => {
+        const itemName = getItemName(item);
+        const itemKey = `${a.id}-${idx}-${itemName}`;
+        return completedItems.has(itemKey);
+      });
+      const bComplete = b.items && b.items.length > 0 && b.items.every((item: any, idx: number) => {
+        const itemName = getItemName(item);
+        const itemKey = `${b.id}-${idx}-${itemName}`;
+        return completedItems.has(itemKey);
+      });
+      if (aComplete === bComplete) return 0;
+      return aComplete ? 1 : -1;
+    });
+    
+    setLists(sortedLists);
+  }, [completedItems]);
+
   const handleDeleteList = async (listId: string) => {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
@@ -353,7 +431,7 @@ const PreviousListScreen = () => {
             }
           >
             <Text style={[typography.h1, { color: colors.primary, marginBottom: spacing.xl }]}>
-              Previous Lists
+              Lists <Text style={{ fontSize: 20, fontWeight: '600' }}>({lists.length})</Text>
             </Text>
             <View style={[styles.card, { marginBottom: spacing.lg }]}>
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.md }}>
@@ -604,7 +682,7 @@ const PreviousListScreen = () => {
                       },
                     ]}
                   >
-                    <View style={[styles.colorAccent, { backgroundColor: listColor }]} />
+                    <View style={[styles.colorAccent, { backgroundColor: isListComplete(list) ? '#10b981' : listColor }]} />
                     <View style={styles.cardContent}>
                       <View style={{ flexDirection: "row", marginBottom: spacing.md }}>
                         <Pressable
@@ -613,23 +691,29 @@ const PreviousListScreen = () => {
                           onPressOut={handlePressOut}
                           style={{ flexDirection: "row", alignItems: "flex-start", flex: 1 }}
                         >
-                          <ColorDisplay
-                            colorData={list.color}
-                            style={styles.colorIndicator}
-                            fallbackColor={colors.primary}
-                          />
+                          {isListComplete(list) ? (
+                            <View style={[styles.colorIndicator, { backgroundColor: '#10b981', justifyContent: 'center', alignItems: 'center' }]}>
+                              <MaterialIcons name="check" size={20} color={colors.white} />
+                            </View>
+                          ) : (
+                            <ColorDisplay
+                              colorData={list.color}
+                              style={styles.colorIndicator}
+                              fallbackColor={colors.primary}
+                            />
+                          )}
                           <View style={{ flex: 1 }}>
-                            <Text style={[typography.h3, { color: colors.textDark, marginBottom: spacing.xs }]} numberOfLines={1}>
+                            <Text style={[typography.h3, { color: isListComplete(list) ? '#10b981' : colors.textDark, marginBottom: spacing.xs }]} numberOfLines={1}>
                               {list.title}
                             </Text>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                              <Text style={styles.metadata}>
+                              <Text style={[styles.metadata, { color: isListComplete(list) ? '#10b981' : colors.textMedium }]}>
                                 {list.items?.length || 0} item{list.items?.length !== 1 ? 's' : ''}
                               </Text>
                               {list.createdAt && (
                                 <>
-                                  <Text style={styles.metadataDot}>•</Text>
-                                  <Text style={styles.metadata}>
+                                  <Text style={[styles.metadataDot, { color: isListComplete(list) ? '#10b981' : colors.textMedium }]}>•</Text>
+                                  <Text style={[styles.metadata, { color: isListComplete(list) ? '#10b981' : colors.textMedium }]}>
                                     {formatDate(list.createdAt)}
                                   </Text>
                                 </>
@@ -708,44 +792,45 @@ const PreviousListScreen = () => {
                         <View style={{ gap: spacing.xs }}>
                           <View style={styles.clickHintContainer}>
                             <MaterialIcons name="info-outline" size={16} color={colors.primary} />
-                            <Text style={styles.clickHintText}>Tap an item to remove it</Text>
+                            <Text style={styles.clickHintText}>Tap an item to mark as done</Text>
                           </View>
-                          {(list.items || []).map((item: string, index: number) => (
-                            <Pressable
-                              key={index}
-                              onPress={async () => {
-                                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                Alert.alert(
-                                  "Remove Item",
-                                  `Remove "${item}" from this list?`,
-                                  [
-                                    { text: "Cancel", style: "cancel" },
-                                    {
-                                      text: "Remove",
-                                      style: "destructive",
-                                      onPress: () => handleRemoveItem(list.id, index),
-                                    },
-                                  ],
-                                  { cancelable: true }
-                                );
-                              }}
-                              style={({ pressed }) => [
-                                styles.expandedItem,
-                                pressed && styles.expandedItemPressed,
-                              ]}
-                            >
-                              <View style={[styles.itemBullet, { backgroundColor: listColor }]} />
-                              <Text style={styles.itemText}>
-                                {item}
-                              </Text>
-                              <MaterialIcons name="close" size={18} color={colors.textLight} style={{ marginLeft: 'auto' }} />
-                            </Pressable>
-                          ))}
+                          {(list.items || []).map((item: any, index: number) => {
+                            const itemName = getItemName(item);
+                            const itemDisplay = formatItemDisplay(item);
+                            const isCompleted = completedItems.has(`${list.id}-${index}-${itemName}`);
+                            return (
+                              <Pressable
+                                key={index}
+                                onPress={async () => {
+                                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  handleRemoveItem(list.id, index);
+                                }}
+                                style={({ pressed }) => [
+                                  styles.expandedItem,
+                                  isCompleted && {
+                                    backgroundColor: '#d1fae5',
+                                    borderWidth: 1.5,
+                                    borderColor: '#10b981',
+                                  },
+                                  pressed && styles.expandedItemPressed,
+                                ]}
+                              >
+                                <View style={[styles.itemBullet, { backgroundColor: isCompleted ? '#10b981' : listColor }]} />
+                                <Text style={[styles.itemText, { 
+                                  color: isCompleted ? '#10b981' : colors.textDark,
+                                  textDecorationLine: isCompleted ? 'line-through' : 'none',
+                                }]}>
+                                  {itemDisplay}
+                                </Text>
+                                <MaterialIcons name={isCompleted ? "check" : "close"} size={18} color={isCompleted ? '#10b981' : colors.textLight} style={{ marginLeft: 'auto' }} />
+                              </Pressable>
+                            );
+                          })}
                         </View>
                       ) : (
                         <View style={styles.previewContainer}>
                           <Text style={styles.previewText} numberOfLines={2}>
-                            {list.items?.slice(0, 3).join(" • ")}
+                            {list.items?.slice(0, 3).map(formatItemDisplay).join(" • ")}
                             {(list.items?.length || 0) > 3 ? "..." : ""}
                           </Text>
                         </View>

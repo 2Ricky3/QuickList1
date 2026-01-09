@@ -56,6 +56,12 @@ import {
   Challenge
 } from "../services/challengeService";
 
+interface ListItem {
+  name: string;
+  quantity?: number;
+  unit?: string;
+}
+
 // Generate a simple 6-character share code
 const generateShareCode = (): string => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars like I, O, 0, 1
@@ -200,7 +206,7 @@ const COLOR_OPTIONS = [
 ];
 const CreateScreen = () => {
   const [listTitle, setListTitle] = useState("");
-  const [items, setItems] = useState([""]);
+  const [items, setItems] = useState<ListItem[]>([{ name: "", quantity: 1, unit: "" }]);
   const [tags, setTags] = useState<string[]>([]);
   const [listColor, setListColor] = useState(COLOR_OPTIONS[0]);
   const [saving, setSaving] = useState(false);
@@ -287,14 +293,19 @@ const CreateScreen = () => {
       const user = auth.currentUser;
       if (!user) return;
       const lists = await fetchUserLists(user.uid, 20);
-      const allItems = lists.map(list => list.items || []);
+      // Convert items to strings, handling both old string format and new ListItem format
+      const allItems = lists.map(list => 
+        (list.items || []).map((item: any) => 
+          typeof item === 'string' ? item : (item.name || '')
+        )
+      );
       setPastListsItems(allItems);
     } catch (error) {
       logFirestoreError(error, 'Load past lists', 'lists');
     }
   };
   useEffect(() => {
-    const currentItems = items.filter(i => i.trim() !== "");
+    const currentItems = items.filter(i => i.name.trim() !== "").map(i => i.name);
     if (currentItems.length > 0) {
       const suggestions = getAllSuggestions(currentItems, pastListsItems);
       setSmartSuggestions(suggestions.slice(0, 8));
@@ -307,7 +318,7 @@ const CreateScreen = () => {
   }, [items, pastListsItems]);
   useEffect(() => {
     if (activeChallenge) {
-      const currentItems = items.filter(i => i.trim() !== "");
+      const currentItems = items.filter(i => i.name.trim() !== "").map(i => i.name);
       const allPastItems = pastListsItems.flat();
       const validation = validateChallenge(activeChallenge, currentItems, allPastItems);
       setChallengeProgress(validation.message);
@@ -331,11 +342,21 @@ const CreateScreen = () => {
   };
   const handleAddItem = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setItems([...items, ""]);
+    setItems([...items, { name: "", quantity: 1, unit: "" }]);
   };
   const handleItemChange = (text: string, index: number) => {
     const updated = [...items];
-    updated[index] = text;
+    updated[index] = { ...updated[index], name: text };
+    setItems(updated);
+  };
+  const handleQuantityChange = (quantity: string, index: number) => {
+    const updated = [...items];
+    updated[index] = { ...updated[index], quantity: quantity ? parseInt(quantity) || 1 : 1 };
+    setItems(updated);
+  };
+  const handleUnitChange = (unit: string, index: number) => {
+    const updated = [...items];
+    updated[index] = { ...updated[index], unit };
     setItems(updated);
   };
   const handleDeleteItem = (index: number) => {
@@ -347,15 +368,19 @@ const CreateScreen = () => {
   const handleSaveList = async () => {
     const sanitizedTitle = sanitizeString(listTitle.trim());
     const sanitizedItems = items
-      .map(item => sanitizeString(item))
-      .filter(item => item.length > 0);
+      .filter(item => item.name.trim().length > 0)
+      .map(item => ({
+        name: sanitizeString(item.name),
+        quantity: item.quantity || 1,
+        unit: item.unit || "",
+      }));
     const titleValidation = validateListName(sanitizedTitle);
     if (!titleValidation.isValid) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Invalid List Name", titleValidation.error);
       return;
     }
-    const itemsValidation = validateItemsArray(sanitizedItems);
+    const itemsValidation = validateItemsArray(sanitizedItems.map(i => i.name));
     if (!itemsValidation.isValid) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Invalid Items", itemsValidation.error);
@@ -375,19 +400,18 @@ const CreateScreen = () => {
       const user = auth.currentUser;
       if (!user) return;
       const tagsArray = tags;
-      const filteredItems = items.filter((i) => i.trim() !== "");
       await createList({
         uid: user.uid,
         title: listTitle,
-        items: filteredItems,
+        items: sanitizedItems,
         tags: tagsArray,
         color: serializeColor(listColor),
         shareId: generateShareCode(),
         allowPublicEdit: false,
       });
       const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu;
-      const emojiCount = filteredItems.reduce((count, item) => {
-        const matches = item.match(emojiRegex);
+      const emojiCount = sanitizedItems.reduce((count, item) => {
+        const matches = item.name.match(emojiRegex);
         return count + (matches ? matches.length : 0);
       }, 0);
       const genericNames = ["list", "shopping", "groceries", "items", "things"];
@@ -397,10 +421,10 @@ const CreateScreen = () => {
       const isThemedList = activeChallenge !== null;
       const themesUsedInList: string[] = [];
       Object.entries(THEMED_ITEMS).forEach(([themeName, themeItems]) => {
-        const matchCount = filteredItems.filter(item =>
+        const matchCount = sanitizedItems.filter(item =>
           themeItems.some(themeItem =>
-            item.toLowerCase().includes(themeItem.toLowerCase()) ||
-            themeItem.toLowerCase().includes(item.toLowerCase())
+            item.name.toLowerCase().includes(themeItem.toLowerCase()) ||
+            themeItem.toLowerCase().includes(item.name.toLowerCase())
           )
         ).length;
         if (matchCount >= 2) {
@@ -411,7 +435,7 @@ const CreateScreen = () => {
         listsCreated: 1,
         newTags: tagsArray,
         newColor: serializeColor(listColor),
-        newItems: filteredItems,
+        newItems: sanitizedItems.map(i => i.name),
         emojisAdded: emojiCount,
         creativeName: isCreativeName,
         themedListCompleted: isThemedList,
@@ -450,16 +474,16 @@ const CreateScreen = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     const themeItems = THEMED_ITEMS[theme];
     const available = themeItems.filter(
-      (item) => !items.some((i) => i.trim().toLowerCase() === item.toLowerCase())
+      (item) => !items.some((i) => i.name.toLowerCase() === item.toLowerCase())
     );
     if (available.length === 0) {
       showToast("All items from this theme are already added!", "warning");
       return;
     }
-    const randomItems = [];
+    const randomItems: ListItem[] = [];
     for (let i = 0; i < Math.min(3, available.length); i++) {
       const randomIndex = Math.floor(Math.random() * available.length);
-      randomItems.push(available.splice(randomIndex, 1)[0]);
+      randomItems.push({ name: available.splice(randomIndex, 1)[0], quantity: 1, unit: "" });
     }
     setItems([...items, ...randomItems]);
     setShowThemePicker(false);
@@ -472,14 +496,14 @@ const CreateScreen = () => {
   const handleRandomSurprise = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     const available = RANDOM_ITEMS.filter(
-      (item) => !items.some((i) => i.trim().toLowerCase() === item.toLowerCase())
+      (item) => !items.some((i) => i.name.toLowerCase() === item.toLowerCase())
     );
     if (available.length === 0) {
       Alert.alert("All surprises already added!");
       return;
     }
     const randomItem = available[Math.floor(Math.random() * available.length)];
-    setItems([...items, randomItem]);
+    setItems([...items, { name: randomItem, quantity: 1, unit: "" }]);
     setShowThemePicker(false);
     if (auth.currentUser) {
       updateUserStats(auth.currentUser.uid, { surprisesUsed: 1 });
@@ -560,7 +584,7 @@ const CreateScreen = () => {
           clearInterval(interval);
           setSpeedTimerActive(false);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          Alert.alert("Time's Up!", `You added ${items.filter(i => i.trim()).length} items!`);
+          Alert.alert("Time's Up!", `You added ${items.filter(i => i.name.trim()).length} items!`);
           return 0;
         }
         return prev - 1;
@@ -569,19 +593,19 @@ const CreateScreen = () => {
   };
   const handleAddSmartSuggestion = (suggestion: ItemSuggestion) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const emptyIndex = items.findIndex(item => item.trim() === "");
+    const emptyIndex = items.findIndex(item => item.name.trim() === "");
     if (emptyIndex !== -1) {
       const updated = [...items];
-      updated[emptyIndex] = suggestion.item;
+      updated[emptyIndex] = { name: suggestion.item, quantity: 1, unit: "" };
       setItems(updated);
     } else {
-      setItems([...items, suggestion.item]);
+      setItems([...items, { name: suggestion.item, quantity: 1, unit: "" }]);
     }
     showToast(`Added "${suggestion.item}" âœ“`, "success");
     setSmartSuggestions(smartSuggestions.filter(s => s.item !== suggestion.item));
   };
   const handleExoticIngredient = () => {
-    const currentItems = items.filter(i => i.trim() !== "");
+    const currentItems = items.filter(i => i.name.trim() !== "").map(i => i.name);
     const allPastItems = pastListsItems.flat();
     const allUsedItems = [...currentItems, ...allPastItems];
     const exotic = getExoticIngredientSuggestion(allUsedItems);
@@ -595,7 +619,7 @@ const CreateScreen = () => {
             text: "Add It!",
             style: "default",
             onPress: () => {
-              setItems([...items, exotic.item]);
+              setItems([...items, { name: exotic.item, quantity: 1, unit: "" }]);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             }
           }
@@ -730,18 +754,60 @@ const CreateScreen = () => {
               </View>
             </View>
             {items.map((item, index) => (
-              <SwipeableInput
-                key={index}
-                value={item}
-                onChangeText={(text) => handleItemChange(text, index)}
-                onDelete={() => handleDeleteItem(index)}
-                isFocused={focusedInput === `item-${index}`}
-                onFocus={() => setFocusedInput(`item-${index}`)}
-                onBlur={() => setFocusedInput(null)}
-                placeholder={`Item ${index + 1}`}
-                placeholderTextColor={colors.textLight}
-                returnKeyType="done"
-              />
+              <View key={index} style={{ marginBottom: spacing.md }}>
+                <SwipeableInput
+                  value={item.name}
+                  onChangeText={(text) => handleItemChange(text, index)}
+                  onDelete={() => handleDeleteItem(index)}
+                  isFocused={focusedInput === `item-${index}`}
+                  onFocus={() => setFocusedInput(`item-${index}`)}
+                  onBlur={() => setFocusedInput(null)}
+                  placeholder={`Item ${index + 1}`}
+                  placeholderTextColor={colors.textLight}
+                  returnKeyType="done"
+                />
+                <View style={{ flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm }}>
+                  <View style={{ flex: 0.5 }}>
+                    <TextInput
+                      value={item.quantity?.toString() || "1"}
+                      onChangeText={(text) => handleQuantityChange(text, index)}
+                      onFocus={() => setFocusedInput(`qty-${index}`)}
+                      onBlur={() => setFocusedInput(null)}
+                      placeholder="Qty"
+                      placeholderTextColor={colors.textLight}
+                      keyboardType="number-pad"
+                      style={{
+                        paddingVertical: spacing.sm,
+                        paddingHorizontal: spacing.md,
+                        backgroundColor: colors.backgroundLight,
+                        borderRadius: borderRadius.md,
+                        color: colors.textDark,
+                        fontSize: 14,
+                        fontWeight: "500",
+                      }}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TextInput
+                      value={item.unit || ""}
+                      onChangeText={(text) => handleUnitChange(text, index)}
+                      onFocus={() => setFocusedInput(`unit-${index}`)}
+                      onBlur={() => setFocusedInput(null)}
+                      placeholder="Unit (kg, liters, packs)"
+                      placeholderTextColor={colors.textLight}
+                      style={{
+                        paddingVertical: spacing.sm,
+                        paddingHorizontal: spacing.md,
+                        backgroundColor: colors.backgroundLight,
+                        borderRadius: borderRadius.md,
+                        color: colors.textDark,
+                        fontSize: 14,
+                        fontWeight: "500",
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
             ))}
             <AnimatedPressable
               style={[

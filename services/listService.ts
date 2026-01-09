@@ -1,5 +1,12 @@
 import { collection, addDoc, Timestamp, doc, updateDoc, getDocs, query, where, limit, deleteDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+
+export interface ListItem {
+  name: string;
+  quantity?: number;
+  unit?: string;
+}
+
 export const createList = async ({
   uid,
   title,
@@ -11,7 +18,7 @@ export const createList = async ({
 }: {
   uid: string;
   title: string;
-  items: string[];
+  items: (string | ListItem)[];
   tags: string[];
   color: string;
   shareId: string;
@@ -32,7 +39,7 @@ export const updateList = async (
   listId: string,
   data: {
     title?: string;
-    items?: string[];
+    items?: (string | ListItem)[];
     allowPublicEdit?: boolean;
     tags?: string[];
     color?: string;

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { updateList } from "../services/listService";
+import { updateList, ListItem } from "../services/listService";
 import {
   globalStyles,
   colors,
@@ -37,7 +37,7 @@ const EditListScreen = () => {
   const navigation = useNavigation();
   const { list } = route.params as { list: any };
   const [title, setTitle] = useState(list.title);
-  const [items, setItems] = useState<string[]>(list.items || []);
+  const [items, setItems] = useState<(string | ListItem)[]>(list.items || []);
   const [tags, setTags] = useState((list.tags || []).join(", "));
   const [allowPublicEdit, setAllowPublicEdit] = useState(
     list.allowPublicEdit ?? false
@@ -48,6 +48,21 @@ const EditListScreen = () => {
   const headerAnim = useRef(new Animated.Value(0)).current;
   const itemsAnim = useRef(new Animated.Value(0)).current;
   const settingsAnim = useRef(new Animated.Value(0)).current;
+
+  // Helper function to get item display name
+  const getItemDisplay = (item: any): string => {
+    if (typeof item === 'string') return item;
+    const { name, quantity, unit } = item;
+    if (!quantity || quantity === 1) {
+      return unit ? `${name} ${unit}` : name;
+    }
+    return unit ? `${name} x${quantity} ${unit}` : `${name} x${quantity}`;
+  };
+
+  // Helper function to get item name for editing
+  const getItemName = (item: any): string => {
+    return typeof item === 'string' ? item : (item.name || '');
+  };
   useEffect(() => {
     Animated.stagger(80, [
       Animated.spring(headerAnim, {
@@ -86,8 +101,14 @@ const EditListScreen = () => {
   };
   const handleSave = async () => {
     const sanitizedTitle = sanitizeString(title.trim());
-    const filteredItems = items.filter((item) => item.trim() !== "");
-    const sanitizedItems = filteredItems.map(item => sanitizeString(item));
+    const filteredItems = items.filter((item) => {
+      const name = getItemName(item);
+      return name.trim() !== "";
+    });
+    const sanitizedItems = filteredItems.map(item => {
+      const name = getItemName(item);
+      return sanitizeString(name);
+    });
     const tagsArray = tags
       .split(",")
       .map((tag: string) => sanitizeString(tag.trim()))
@@ -211,7 +232,7 @@ const EditListScreen = () => {
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <MaterialIcons name="shopping-cart" size={20} color={listColor} />
                 <Text style={[createScreenStyles.sectionLabel, { marginBottom: 0, marginLeft: spacing.sm }]}>
-                  Items ({items.filter(i => i.trim()).length})
+                  Items ({items.filter(i => getItemName(i).trim()).length})
                 </Text>
               </View>
               <Pressable
@@ -234,7 +255,7 @@ const EditListScreen = () => {
             {items.map((item, index) => (
               <SwipeableInput
                 key={index}
-                value={item}
+                value={getItemDisplay(item)}
                 onChangeText={(text) => handleItemChange(text, index)}
                 onDelete={() => handleDeleteItem(index)}
                 isFocused={focusedInput === `item-${index}`}
