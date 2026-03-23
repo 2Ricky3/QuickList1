@@ -1,27 +1,55 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
   Image,
   Animated,
   StatusBar,
+  StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootStackParamList } from "../types";
 import { colors, typography, spacing } from "../GlobalStyleSheet";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import TermsModal from "./TermsScreen";
 import * as Haptics from "expo-haptics";
 
 type LandingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Landing">;
 
 const LandingScreen = () => {
   const navigation = useNavigation<LandingScreenNavigationProp>();
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const logoScaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    checkTermsAcceptance();
+  }, []);
+
+  const checkTermsAcceptance = async () => {
+    try {
+      const accepted = await AsyncStorage.getItem("termsAccepted");
+      const isAccepted = accepted === "true";
+      setTermsAccepted(isAccepted);
+      
+      // Show terms modal if not accepted
+      if (!isAccepted) {
+        setShowTermsModal(true);
+      }
+    } catch (error) {
+      console.error("Error checking terms acceptance:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     Animated.parallel([
@@ -57,73 +85,71 @@ const LandingScreen = () => {
 
   const handleTerms = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Terms");
+    setShowTermsModal(true);
   };
 
+  const handleAcceptTerms = async () => {
+    try {
+      await AsyncStorage.setItem("termsAccepted", "true");
+      setTermsAccepted(true);
+      setShowTermsModal(false);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Error saving terms acceptance:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
 
-      <View style={{ flex: 1, justifyContent: "space-between", paddingHorizontal: spacing.xl }}>
-        {/* Logo and Welcome Section */}
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Animated.View
-            style={{
+      <View style={styles.content}>
+        {/* Header Section */}
+        <Animated.View
+          style={[
+            styles.headerSection,
+            {
+              opacity: fadeAnim,
               transform: [{ scale: logoScaleAnim }],
-              opacity: fadeAnim,
-              marginBottom: spacing.xxxl,
-            }}
-          >
-            <Image
-              source={require("../assets/Logo.png")}
-              style={{
-                width: 140,
-                height: 140,
-                resizeMode: "contain",
-              }}
-            />
-          </Animated.View>
-
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-              alignItems: "center",
-            }}
-          >
-            <Text style={[typography.h1, { color: colors.textDark, marginBottom: spacing.md }]}>
-              QuickList
-            </Text>
-            <Text
-              style={[
-                typography.body,
-                {
-                  color: colors.textLight,
-                  textAlign: "center",
-                  lineHeight: 24,
-                },
-              ]}
-            >
-              Create, share, and organize your lists with ease
-            </Text>
-          </Animated.View>
-        </View>
+            },
+          ]}
+        >
+          <Image
+            source={require("../assets/Logo.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.title}>QuickList</Text>
+          <Text style={styles.subtitle}>Smart Shopping, Simplified</Text>
+        </Animated.View>
 
         {/* Action Buttons Section */}
         <Animated.View
-          style={{
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-            gap: spacing.lg,
-            marginBottom: spacing.xxxl,
-          }}
+          style={[
+            styles.buttonSection,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
           <PrimaryButton
-            title="Create Account"
+            title="Sign Up"
             onPress={handleSignUp}
-            icon="app-registration"
+            icon="person-add"
             size="large"
             fullWidth
+            variant="primary"
+            disabled={!termsAccepted}
           />
 
           <PrimaryButton
@@ -133,29 +159,82 @@ const LandingScreen = () => {
             size="large"
             fullWidth
             variant="secondary"
+            disabled={!termsAccepted}
           />
 
           <AnimatedPressable
             onPress={handleTerms}
-            style={{
-              paddingVertical: spacing.lg,
-              alignItems: "center",
-            }}
+            style={styles.termsButton}
           >
-            <Text
-              style={{
-                color: colors.textLight,
-                fontSize: 13,
-                textDecorationLine: "underline",
-              }}
-            >
-              View Terms and Conditions
-            </Text>
+            <Text style={styles.termsText}>Terms and Conditions</Text>
           </AnimatedPressable>
         </Animated.View>
       </View>
+
+      <TermsModal
+        visible={showTermsModal}
+        onClose={() => {
+          if (termsAccepted) {
+            setShowTermsModal(false);
+          }
+        }}
+        onAccept={handleAcceptTerms}
+        requireAccept={!termsAccepted}
+      />
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+    justifyContent: "space-between",
+  },
+  headerSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.xxxl,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: "contain",
+    marginBottom: spacing.xxl,
+  },
+  title: {
+    ...typography.h1,
+    color: colors.primary,
+    marginBottom: spacing.md,
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    ...typography.body,
+    color: colors.textMedium,
+    textAlign: "center",
+    lineHeight: 22,
+    fontWeight: "400",
+  },
+
+  buttonSection: {
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+  },
+  termsButton: {
+    paddingVertical: spacing.lg,
+    alignItems: "center",
+  },
+  termsText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "500",
+    textDecorationLine: "underline",
+  },
+});
 
 export default LandingScreen;

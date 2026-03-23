@@ -154,7 +154,7 @@ const AdminPanelScreen: React.FC<Props> = () => {
       <ScreenHeader
         title="Admin Panel"
         subtitle="TEST ONLY - Remove before production"
-        showBackButton={false}
+        showBackButton={true}
         centered={true}
       />
 

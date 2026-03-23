@@ -10,8 +10,10 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
+  Pressable,
 } from "react-native";
-import { globalStyles, colors } from "../GlobalStyleSheet";
+import { MaterialIcons } from "@expo/vector-icons";
+import { globalStyles, colors, spacing } from "../GlobalStyleSheet";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import { FormInput } from "../components/FormInput";
@@ -100,30 +102,42 @@ const RegisterScreen = () => {
           keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingHorizontal: 20,
-              paddingVertical: 40,
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={true}
-            decelerationRate="fast"
-          >
-            <View style={{ flex: 1, justifyContent: "center" }}>
-              <Image
-                source={require("../assets/Logo.png")}
+            <ScrollView
+              ref={scrollViewRef}
+              contentContainerStyle={{
+                flexGrow: 1,
+                paddingHorizontal: 20,
+                paddingVertical: 40,
+              }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={true}
+              decelerationRate="fast"
+            >
+              <Pressable
+                onPress={() => navigation.goBack()}
                 style={{
-                  width: 100,
-                  height: 100,
-                  alignSelf: "center",
-                  marginBottom: 24,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: spacing.lg,
+                  paddingVertical: spacing.sm,
                 }}
-                resizeMode="contain"
-              />
-              <Text style={globalStyles.titleText}>Create Account</Text>
+              >
+                <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
+                <Text style={{ color: colors.primary, marginLeft: spacing.sm, fontWeight: "600" }}>Back</Text>
+              </Pressable>
+              <View style={{ flex: 1, justifyContent: "center" }}>
+                <Image
+                  source={require("../assets/Logo.png")}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    alignSelf: "center",
+                    marginBottom: 24,
+                  }}
+                  resizeMode="contain"
+                />
+                <Text style={globalStyles.titleText}>Create Account</Text>
               <View style={globalStyles.formWrapper}>
                 <FormInput
                   placeholder="Name"

@@ -9,9 +9,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalStyles, colors } from "../GlobalStyleSheet";
+import { MaterialIcons } from "@expo/vector-icons";
+import { globalStyles, colors, spacing } from "../GlobalStyleSheet";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { loginWithEmail } from "../services/authService";
@@ -100,30 +102,42 @@ const LoginScreen = () => {
           keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: "center",
-              paddingHorizontal: 20,
-              paddingVertical: 40,
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={true}
-            decelerationRate="fast"
-          >
-            <Image
-              source={require("../assets/Logo.png")}
-              style={{
-                width: 100,
-                height: 100,
-                alignSelf: "center",
-                marginBottom: 24,
+            <ScrollView
+              ref={scrollViewRef}
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "center",
+                paddingHorizontal: 20,
+                paddingVertical: 40,
               }}
-              resizeMode="contain"
-            />
-            <Text style={globalStyles.titleText}>Sign In</Text>
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={true}
+              decelerationRate="fast"
+            >
+              <Pressable
+                onPress={() => navigation.goBack()}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: spacing.lg,
+                  paddingVertical: spacing.sm,
+                }}
+              >
+                <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
+                <Text style={{ color: colors.primary, marginLeft: spacing.sm, fontWeight: "600" }}>Back</Text>
+              </Pressable>
+              <Image
+                source={require("../assets/Logo.png")}
+                style={{
+                  width: 100,
+                  height: 100,
+                  alignSelf: "center",
+                  marginBottom: 24,
+                }}
+                resizeMode="contain"
+              />
+              <Text style={globalStyles.titleText}>Sign In</Text>
             <View style={globalStyles.formWrapper}>
               <FormInput
                 placeholder="Email"

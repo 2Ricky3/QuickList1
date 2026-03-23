@@ -809,8 +809,6 @@ const PreviousListScreen = () => {
                                   styles.expandedItem,
                                   isCompleted && {
                                     backgroundColor: '#d1fae5',
-                                    borderWidth: 1.5,
-                                    borderColor: '#10b981',
                                   },
                                   pressed && styles.expandedItemPressed,
                                 ]}

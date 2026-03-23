@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, SafeAreaView, Image, Animated } from "react-native";
+import { View, Text, SafeAreaView, Image, Animated, Pressable } from "react-native";
 import { useNavigation, RouteProp, useRoute, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
-import { globalStyles, onboardingStyles, colors } from "../GlobalStyleSheet";
+import { globalStyles, onboardingStyles, colors, spacing } from "../GlobalStyleSheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -131,6 +131,17 @@ const OnboardingScreen = () => {
   return (
     <SafeAreaView style={[globalStyles.container, { backgroundColor: colors.white }]}>
       <View style={onboardingStyles.header}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.sm,
+          }}
+        >
+          <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
+        </Pressable>
         <Image 
           source={require("../assets/Logo.png")} 
           style={onboardingStyles.headerLogo}

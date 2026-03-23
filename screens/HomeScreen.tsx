@@ -282,6 +282,19 @@ const HomeScreen = () => {
           contentContainerStyle={globalStyles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", marginBottom: spacing.lg }}>
+          <Pressable
+            onPress={handleLogout}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: spacing.sm,
+              paddingHorizontal: spacing.md,
+            }}
+          >
+            <MaterialIcons name="logout" size={24} color={colors.danger} />
+          </Pressable>
+        </View>
         <Animated.View
           style={{
             marginBottom: spacing.xl,
