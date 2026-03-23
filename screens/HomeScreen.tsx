@@ -23,6 +23,7 @@ import { RootStackParamList } from "../types";
 import { colors, globalStyles, spacing, borderRadius, elevation, typography } from "../GlobalStyleSheet";
 import { fetchUserLists } from "../services/listService";
 import { getAchievements, Achievement } from "../services/achievementService";
+import { LinearGradient } from "expo-linear-gradient";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import * as Haptics from "expo-haptics";
@@ -239,7 +240,8 @@ const HomeScreen = () => {
   };
   if (loading) {
     return (
-      <SafeAreaView style={globalStyles.loadingContainer}>
+      <LinearGradient colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
@@ -273,28 +275,17 @@ const HomeScreen = () => {
           <CardSkeleton />
         </ScrollView>
       </SafeAreaView>
+      </LinearGradient>
     );
   }
   return (
-    <SafeAreaView style={globalStyles.container}>
+    <LinearGradient colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]} style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Animated.View style={{ flex: 1, opacity: screenFadeAnim }}>
         <ScrollView
           contentContainerStyle={globalStyles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", marginBottom: spacing.lg }}>
-          <Pressable
-            onPress={handleLogout}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: spacing.sm,
-              paddingHorizontal: spacing.md,
-            }}
-          >
-            <MaterialIcons name="logout" size={24} color={colors.danger} />
-          </Pressable>
-        </View>
         <Animated.View
           style={{
             marginBottom: spacing.xl,
@@ -705,14 +696,21 @@ const HomeScreen = () => {
         </Animated.View>
       </Modal>
     </SafeAreaView>
+    </LinearGradient>
   );
 };
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 20,
     padding: spacing.lg,
-    ...elevation.md,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 3,
   },
   statBadge: {
     flexDirection: "row",
@@ -737,13 +735,19 @@ const styles = StyleSheet.create({
     color: colors.textMedium,
   },
   actionCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 20,
     padding: spacing.lg,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    ...elevation.sm,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
   },
   actionIconContainer: {
     width: 56,

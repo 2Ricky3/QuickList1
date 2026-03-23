@@ -8,7 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Keyboard,
+  Modal,
+  LayoutAnimation,
+  UIManager,
   Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -18,7 +20,6 @@ import "react-native-get-random-values";
 import {
   globalStyles,
   colors,
-  createScreenStyles,
   spacing,
   borderRadius,
   elevation,
@@ -29,7 +30,6 @@ import { createList, fetchUserLists } from "../services/listService";
 import { updateUserStats, getEncouragingMessage } from "../services/achievementService";
 import { SwipeableInput } from "../components/SwipeableInput";
 import { AnimatedPressable } from "../components/AnimatedPressable";
-import { FAB } from "../components/FAB";
 import { ConfettiCelebration } from "../components/ConfettiCelebration";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
@@ -43,12 +43,7 @@ import {
 } from "../utils/validation";
 import * as Haptics from "expo-haptics";
 import {
-  getAllSuggestions,
-  getWeatherSuggestions,
-  getDayOfWeekSuggestions,
-  getSeasonalSuggestions,
   getExoticIngredientSuggestion,
-  ItemSuggestion
 } from "../services/suggestionService";
 import {
   ALL_CHALLENGES,
@@ -204,6 +199,141 @@ const COLOR_OPTIONS = [
   { id: 21, type: 'gradient', colors: ["#667EEA", "#764BA2"], name: "Purple Haze" },
   { id: 22, type: 'gradient', colors: ["#F093FB", "#F5576C"], name: "Berry Blast" },
 ];
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const WHEEL_ITEM_HEIGHT = 44;
+const WHEEL_VISIBLE_ITEMS = 5;
+
+interface NumberWheelPickerProps {
+  value: number;
+  onClose: () => void;
+  onSelect: (val: number) => void;
+  min?: number;
+  max?: number;
+}
+
+const NumberWheelPicker: React.FC<NumberWheelPickerProps> = ({
+  value,
+  onClose,
+  onSelect,
+  min = 1,
+  max = 99,
+}) => {
+  const scrollRef = useRef<ScrollView>(null);
+  const selectedValueRef = useRef(value);
+  const numbers = Array.from({ length: max - min + 1 }, (_, i) => i + min);
+
+  useEffect(() => {
+    const index = Math.max(0, value - min);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: index * WHEEL_ITEM_HEIGHT, animated: false });
+    }, 150);
+  }, []);
+
+  // Just track the value — never call scrollTo in response to a scroll event
+  const trackValue = (y: number) => {
+    const clamped = Math.max(0, Math.min(Math.round(y / WHEEL_ITEM_HEIGHT), numbers.length - 1));
+    selectedValueRef.current = numbers[clamped];
+  };
+
+  const handleDone = () => {
+    onSelect(selectedValueRef.current);
+    onClose();
+  };
+
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Pressable
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onPress={onClose}
+        />
+        <View style={{
+          backgroundColor: colors.white,
+          borderRadius: 28,
+          paddingTop: spacing.xl,
+          paddingHorizontal: spacing.xl,
+          paddingBottom: spacing.lg,
+          width: 270,
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.18,
+          shadowRadius: 24,
+          elevation: 14,
+        }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textDark, marginBottom: spacing.lg }}>
+            Quantity
+          </Text>
+          <View style={{ height: WHEEL_ITEM_HEIGHT * WHEEL_VISIBLE_ITEMS, width: 140, overflow: 'hidden', position: 'relative' }}>
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: WHEEL_ITEM_HEIGHT * 2,
+                left: 0,
+                right: 0,
+                height: WHEEL_ITEM_HEIGHT,
+                backgroundColor: `${colors.primary}12`,
+                borderRadius: 12,
+                borderWidth: 1.5,
+                borderColor: `${colors.primary}40`,
+                zIndex: 1,
+              }}
+            />
+            <ScrollView
+              ref={scrollRef}
+              showsVerticalScrollIndicator={false}
+              snapToInterval={WHEEL_ITEM_HEIGHT}
+              decelerationRate="fast"
+              onMomentumScrollEnd={(e) => trackValue(e.nativeEvent.contentOffset.y)}
+              onScrollEndDrag={(e) => trackValue(e.nativeEvent.contentOffset.y)}
+              contentContainerStyle={{ paddingVertical: WHEEL_ITEM_HEIGHT * 2 }}
+            >
+              {numbers.map((num) => (
+                <View key={num} style={{ height: WHEEL_ITEM_HEIGHT, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textDark }}>{num}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+          <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl, alignSelf: 'stretch' }}>
+            <Pressable
+              onPress={onClose}
+              style={({ pressed }) => ({
+                flex: 1,
+                paddingVertical: 14,
+                alignItems: 'center',
+                backgroundColor: pressed ? '#f0f0f0' : colors.backgroundLight,
+                borderRadius: 999,
+              })}
+            >
+              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textMedium }}>Cancel</Text>
+            </Pressable>
+            <AnimatedPressable
+              onPress={handleDone}
+              style={{ flex: 1, borderRadius: 999, overflow: 'hidden' }}
+            >
+              <LinearGradient
+                colors={["#2ECC71", "#27AE60"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ paddingVertical: 14, alignItems: 'center' }}
+              >
+                <Text style={{ color: colors.white, fontSize: 15, fontWeight: '700' }}>Done</Text>
+              </LinearGradient>
+            </AnimatedPressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const CreateScreen = () => {
   const [listTitle, setListTitle] = useState("");
   const [items, setItems] = useState<ListItem[]>([{ name: "", quantity: 1, unit: "" }]);
@@ -212,8 +342,6 @@ const CreateScreen = () => {
   const [saving, setSaving] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [smartSuggestions, setSmartSuggestions] = useState<ItemSuggestion[]>([]);
-  const [showSmartSuggestions, setShowSmartSuggestions] = useState(false);
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
   const [challengeProgress, setChallengeProgress] = useState<string>("");
   const [speedTimer, setSpeedTimer] = useState<number | null>(null);
@@ -221,9 +349,9 @@ const CreateScreen = () => {
   const [pastListsItems, setPastListsItems] = useState<string[][]>([]);
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
+  const [activeQtyIndex, setActiveQtyIndex] = useState<number | null>(null);
   const navigation = useNavigation();
   const { toast, showToast, hideToast } = useToast();
-  const fabBottom = useRef(new Animated.Value(20)).current;
   const headerAnim = useRef(new Animated.Value(0)).current;
   const colorPickerAnim = useRef(new Animated.Value(0)).current;
   const itemsAnim = useRef(new Animated.Value(0)).current;
@@ -263,30 +391,6 @@ const CreateScreen = () => {
       }),
     ]).start();
     loadPastLists();
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      (e) => {
-        Animated.timing(fabBottom, {
-          toValue: e.endCoordinates.height + 10,
-          duration: 250,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        Animated.timing(fabBottom, {
-          toValue: 20,
-          duration: 250,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
   }, []);
   const loadPastLists = async () => {
     try {
@@ -304,18 +408,6 @@ const CreateScreen = () => {
       logFirestoreError(error, 'Load past lists', 'lists');
     }
   };
-  useEffect(() => {
-    const currentItems = items.filter(i => i.name.trim() !== "").map(i => i.name);
-    if (currentItems.length > 0) {
-      const suggestions = getAllSuggestions(currentItems, pastListsItems);
-      setSmartSuggestions(suggestions.slice(0, 8));
-    } else {
-      const weatherSuggestions = getWeatherSuggestions().slice(0, 2);
-      const dayOfWeekSuggestions = getDayOfWeekSuggestions().slice(0, 2);
-      const seasonalSuggestions = getSeasonalSuggestions().slice(0, 2);
-      setSmartSuggestions([...weatherSuggestions, ...dayOfWeekSuggestions, ...seasonalSuggestions].slice(0, 6));
-    }
-  }, [items, pastListsItems]);
   useEffect(() => {
     if (activeChallenge) {
       const currentItems = items.filter(i => i.name.trim() !== "").map(i => i.name);
@@ -347,11 +439,6 @@ const CreateScreen = () => {
   const handleItemChange = (text: string, index: number) => {
     const updated = [...items];
     updated[index] = { ...updated[index], name: text };
-    setItems(updated);
-  };
-  const handleQuantityChange = (quantity: string, index: number) => {
-    const updated = [...items];
-    updated[index] = { ...updated[index], quantity: quantity ? parseInt(quantity) || 1 : 1 };
     setItems(updated);
   };
   const handleUnitChange = (unit: string, index: number) => {
@@ -591,19 +678,6 @@ const CreateScreen = () => {
       });
     }, 1000);
   };
-  const handleAddSmartSuggestion = (suggestion: ItemSuggestion) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const emptyIndex = items.findIndex(item => item.name.trim() === "");
-    if (emptyIndex !== -1) {
-      const updated = [...items];
-      updated[emptyIndex] = { name: suggestion.item, quantity: 1, unit: "" };
-      setItems(updated);
-    } else {
-      setItems([...items, { name: suggestion.item, quantity: 1, unit: "" }]);
-    }
-    showToast(`Added "${suggestion.item}" âœ“`, "success");
-    setSmartSuggestions(smartSuggestions.filter(s => s.item !== suggestion.item));
-  };
   const handleExoticIngredient = () => {
     const currentItems = items.filter(i => i.name.trim() !== "").map(i => i.name);
     const allPastItems = pastListsItems.flat();
@@ -635,7 +709,7 @@ const CreateScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      <View style={{ flex: 1, backgroundColor: colors.backgroundLight }}>
+      <LinearGradient colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]} style={{ flex: 1 }}>
         <Toast
           message={toast.message}
           type={toast.type}
@@ -768,24 +842,27 @@ const CreateScreen = () => {
                 />
                 <View style={{ flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm }}>
                   <View style={{ flex: 0.5 }}>
-                    <TextInput
-                      value={item.quantity?.toString() || "1"}
-                      onChangeText={(text) => handleQuantityChange(text, index)}
-                      onFocus={() => setFocusedInput(`qty-${index}`)}
-                      onBlur={() => setFocusedInput(null)}
-                      placeholder="Qty"
-                      placeholderTextColor={colors.textLight}
-                      keyboardType="number-pad"
+                    <Pressable
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setActiveQtyIndex(index);
+                      }}
                       style={{
                         paddingVertical: spacing.sm,
                         paddingHorizontal: spacing.md,
                         backgroundColor: colors.backgroundLight,
                         borderRadius: borderRadius.md,
-                        color: colors.textDark,
-                        fontSize: 14,
-                        fontWeight: "500",
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        minHeight: 42,
                       }}
-                    />
+                    >
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textDark }}>
+                        {item.quantity || 1}
+                      </Text>
+                      <MaterialIcons name="expand-more" size={18} color={colors.textMedium} />
+                    </Pressable>
                   </View>
                   <View style={{ flex: 1 }}>
                     <TextInput
@@ -901,6 +978,12 @@ const CreateScreen = () => {
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  LayoutAnimation.configureNext({
+                    duration: 300,
+                    create: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+                    update: { type: LayoutAnimation.Types.easeInEaseOut },
+                    delete: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+                  });
                   setShowAllTags(!showAllTags);
                 }}
                 style={{
@@ -983,85 +1066,56 @@ const CreateScreen = () => {
                 <Text style={{ fontSize: 10, fontWeight: "600", color: colors.textMedium }}>OPTIONAL</Text>
               </View>
             </View>
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              padding: spacing.md,
-              backgroundColor: colors.backgroundLight,
-              borderRadius: borderRadius.md,
-              marginBottom: spacing.md,
-            }}>
-              <View style={{
-                width: 40,
-                height: 40,
-                borderRadius: borderRadius.md,
-                overflow: 'hidden',
-                marginRight: spacing.md,
-                borderWidth: 2,
-                borderColor: colors.border,
-              }}>
-                {listColor.type === 'solid' ? (
-                  <View style={{ flex: 1, backgroundColor: listColor.color }} />
-                ) : (
-                  <LinearGradient
-                    colors={listColor.colors! as [string, string, ...string[]]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={{ flex: 1 }}
-                  />
-                )}
-              </View>
-              <Text style={{ fontSize: 15, fontWeight: "600", color: colors.textDark }}>
-                {listColor.name}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: spacing.md, paddingVertical: spacing.sm, paddingHorizontal: 2 }}
+            >
               {COLOR_OPTIONS.map((colorOption) => {
                 const isSelected = listColor.id === colorOption.id;
-                return colorOption.type === 'solid' ? (
+                return (
                   <AnimatedPressable
                     key={colorOption.id}
                     onPress={() => handleColorSelect(colorOption)}
                     scaleValue={0.9}
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: borderRadius.md,
-                      backgroundColor: colorOption.color,
-                      borderWidth: isSelected ? 3 : 2,
-                      borderColor: isSelected ? colors.textDark : colors.border,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                    style={{ alignItems: 'center', width: 64 }}
                   >
-                    {isSelected && <MaterialIcons name="check" size={24} color={colors.white} />}
-                  </AnimatedPressable>
-                ) : (
-                  <AnimatedPressable
-                    key={colorOption.id}
-                    onPress={() => handleColorSelect(colorOption)}
-                    scaleValue={0.9}
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: borderRadius.md,
-                      overflow: "hidden",
-                      borderWidth: isSelected ? 3 : 2,
+                    <View style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      overflow: 'hidden',
+                      borderWidth: isSelected ? 3 : 1.5,
                       borderColor: isSelected ? colors.textDark : colors.border,
-                    }}
-                  >
-                    <LinearGradient
-                      colors={colorOption.colors! as [string, string, ...string[]]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-                    >
-                      {isSelected && <MaterialIcons name="check" size={24} color={colors.white} />}
-                    </LinearGradient>
+                      marginBottom: 5,
+                    }}>
+                      {colorOption.type === 'solid' ? (
+                        <View style={{ flex: 1, backgroundColor: colorOption.color, alignItems: 'center', justifyContent: 'center' }}>
+                          {isSelected && <MaterialIcons name="check" size={22} color={colors.white} />}
+                        </View>
+                      ) : (
+                        <LinearGradient
+                          colors={colorOption.colors! as [string, string, ...string[]]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          {isSelected && <MaterialIcons name="check" size={22} color={colors.white} />}
+                        </LinearGradient>
+                      )}
+                    </View>
+                    <Text style={{
+                      fontSize: 9,
+                      fontWeight: isSelected ? '700' : '500',
+                      color: isSelected ? colors.textDark : colors.textMedium,
+                      textAlign: 'center',
+                    }} numberOfLines={2}>
+                      {colorOption.name}
+                    </Text>
                   </AnimatedPressable>
                 );
               })}
-            </View>
+            </ScrollView>
           </Animated.View>
           <View style={{ marginBottom: spacing.md }}>
             <Text style={{
@@ -1075,63 +1129,6 @@ const CreateScreen = () => {
               Bonus Features
             </Text>
           </View>
-          {smartSuggestions.length > 0 && (
-            <Animated.View style={{
-              backgroundColor: colors.white,
-              borderRadius: borderRadius.lg,
-              padding: spacing.xl,
-              marginBottom: spacing.lg,
-              ...elevation.sm,
-            }}>
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md }}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <MaterialIcons name="lightbulb" size={20} color="#FFB300" />
-                  <Text style={[createScreenStyles.sectionLabel, { marginBottom: 0, marginLeft: spacing.sm }]}>
-                    Smart Suggestions
-                  </Text>
-                </View>
-                <Pressable onPress={() => setShowSmartSuggestions(!showSmartSuggestions)}>
-                  <MaterialIcons
-                    name={showSmartSuggestions ? "expand-less" : "expand-more"}
-                    size={24}
-                    color={colors.textMedium}
-                  />
-                </Pressable>
-              </View>
-              {showSmartSuggestions && (
-                <View style={{ gap: spacing.sm }}>
-                  {smartSuggestions.map((suggestion, index) => (
-                    <Pressable
-                      key={index}
-                      onPress={() => handleAddSmartSuggestion(suggestion)}
-                      style={({ pressed }) => ({
-                        flexDirection: "row",
-                        alignItems: "center",
-                        padding: spacing.md,
-                        backgroundColor: pressed ? colors.backgroundLight : `${colors.primary}05`,
-                        borderRadius: borderRadius.md,
-                        borderWidth: 1,
-                        borderColor: `${colors.primary}20`,
-                      })}
-                    >
-                      <Text style={{ fontSize: 18, marginRight: spacing.sm }}>
-                        {suggestion.emoji || "💡"}
-                      </Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 15, fontWeight: "600", color: colors.textDark }}>
-                          {suggestion.item}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: colors.textMedium, marginTop: 2 }}>
-                          {suggestion.reason}
-                        </Text>
-                      </View>
-                      <MaterialIcons name="add-circle-outline" size={24} color={colors.primary} />
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-            </Animated.View>
-          )}
           {activeChallenge && (
             <Animated.View style={{
               backgroundColor: activeChallenge.color + '15',
@@ -1397,28 +1394,61 @@ const CreateScreen = () => {
               </AnimatedPressable>
             </View>
           </Animated.View>
-          <Pressable
-            style={{ paddingVertical: spacing.lg, alignItems: "center", marginBottom: spacing.xl }}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={{ color: colors.textMedium, fontSize: 15, fontWeight: "500" }}>
-              Cancel
-            </Text>
-          </Pressable>
         </ScrollView>
-        <Animated.View style={{
-          position: "absolute",
-          bottom: fabBottom,
-          right: 20,
+        <View style={{
+          paddingHorizontal: spacing.lg,
+          paddingTop: spacing.md,
+          paddingBottom: spacing.xl,
+          backgroundColor: 'rgba(255,255,255,0.97)',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(0,0,0,0.07)',
         }}>
-          <FAB
+          <AnimatedPressable
             onPress={handleSaveList}
-            icon="check"
             disabled={saving}
-            loading={saving}
+            style={{ borderRadius: 999, overflow: 'hidden', marginBottom: spacing.sm }}
+          >
+            <LinearGradient
+              colors={["#2ECC71", "#27AE60"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{
+                paddingVertical: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              {saving ? (
+                <Text style={{ color: colors.white, fontSize: 17, fontWeight: '700' }}>Saving...</Text>
+              ) : (
+                <>
+                  <MaterialIcons name="check-circle" size={22} color={colors.white} />
+                  <Text style={{ color: colors.white, fontSize: 17, fontWeight: '700' }}>Save List</Text>
+                </>
+              )}
+            </LinearGradient>
+          </AnimatedPressable>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={{ paddingVertical: 14, alignItems: 'center' }}
+          >
+            <Text style={{ color: colors.textMedium, fontSize: 14, fontWeight: '500' }}>Cancel</Text>
+          </Pressable>
+        </View>
+        {activeQtyIndex !== null && (
+          <NumberWheelPicker
+            value={items[activeQtyIndex]?.quantity || 1}
+            onClose={() => setActiveQtyIndex(null)}
+            onSelect={(val) => {
+              const updatedItems = [...items];
+              updatedItems[activeQtyIndex] = { ...updatedItems[activeQtyIndex], quantity: val };
+              setItems(updatedItems);
+            }}
           />
-        </Animated.View>
-      </View>
+        )}
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 };

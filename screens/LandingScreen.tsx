@@ -12,9 +12,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 import { RootStackParamList } from "../types";
-import { colors, typography, spacing } from "../GlobalStyleSheet";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { colors } from "../GlobalStyleSheet";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import TermsModal from "./TermsScreen";
 import * as Haptics from "expo-haptics";
@@ -101,139 +101,239 @@ const LandingScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </SafeAreaView>
+      <LinearGradient
+        colors={["#FFFFFF", "#FFF0F0", "#FFE8E8"]}
+        style={styles.loadingContainer}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+      </LinearGradient>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+    <LinearGradient
+      colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]}
+      style={styles.gradientBg}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
 
-      <View style={styles.content}>
-        {/* Header Section */}
-        <Animated.View
-          style={[
-            styles.headerSection,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: logoScaleAnim }],
-            },
-          ]}
-        >
-          <Image
-            source={require("../assets/Logo.png")}
-            style={styles.logo}
-          />
-          <Text style={styles.title}>QuickList</Text>
-          <Text style={styles.subtitle}>Smart Shopping, Simplified</Text>
-        </Animated.View>
-
-        {/* Action Buttons Section */}
-        <Animated.View
-          style={[
-            styles.buttonSection,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          <PrimaryButton
-            title="Sign Up"
-            onPress={handleSignUp}
-            icon="person-add"
-            size="large"
-            fullWidth
-            variant="primary"
-            disabled={!termsAccepted}
-          />
-
-          <PrimaryButton
-            title="Sign In"
-            onPress={handleLogin}
-            icon="login"
-            size="large"
-            fullWidth
-            variant="secondary"
-            disabled={!termsAccepted}
-          />
-
-          <AnimatedPressable
-            onPress={handleTerms}
-            style={styles.termsButton}
+        <View style={styles.content}>
+          {/* Hero Section */}
+          <Animated.View
+            style={[
+              styles.heroSection,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: logoScaleAnim }],
+              },
+            ]}
           >
-            <Text style={styles.termsText}>Terms and Conditions</Text>
-          </AnimatedPressable>
-        </Animated.View>
-      </View>
+            {/* Decorative glow ring */}
+            <View style={styles.logoGlowOuter}>
+              <View style={styles.logoGlowInner}>
+                <Image
+                  source={require("../assets/Logo.png")}
+                  style={styles.logo}
+                />
+              </View>
+            </View>
 
-      <TermsModal
-        visible={showTermsModal}
-        onClose={() => {
-          if (termsAccepted) {
-            setShowTermsModal(false);
-          }
-        }}
-        onAccept={handleAcceptTerms}
-        requireAccept={!termsAccepted}
-      />
-    </SafeAreaView>
+            <Text style={styles.title}>QuickList</Text>
+            <Text style={styles.tagline}>Smart Shopping, Simplified</Text>
+          </Animated.View>
+
+          {/* Action Buttons Section */}
+          <Animated.View
+            style={[
+              styles.buttonSection,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            {/* Sign Up — primary pill button */}
+            <AnimatedPressable
+              onPress={handleSignUp}
+              disabled={!termsAccepted}
+              style={[styles.buttonWrapper, !termsAccepted && styles.buttonDisabled]}
+            >
+              <LinearGradient
+                colors={["#D40000", "#FF3030"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.primaryButton}
+              >
+                <Text style={styles.primaryButtonText}>Create Account</Text>
+              </LinearGradient>
+            </AnimatedPressable>
+
+            {/* Sign In — soft glass button */}
+            <AnimatedPressable
+              onPress={handleLogin}
+              disabled={!termsAccepted}
+              style={[styles.buttonWrapper, !termsAccepted && styles.buttonDisabled]}
+            >
+              <View style={styles.secondaryButton}>
+                <Text style={styles.secondaryButtonText}>Sign In</Text>
+              </View>
+            </AnimatedPressable>
+
+            {/* Terms link */}
+            <AnimatedPressable
+              onPress={handleTerms}
+              style={styles.termsButton}
+            >
+              <Text style={styles.termsText}>
+                By continuing you agree to our{" "}
+                <Text style={styles.termsLink}>Terms & Conditions</Text>
+              </Text>
+            </AnimatedPressable>
+          </Animated.View>
+        </View>
+
+        <TermsModal
+          visible={showTermsModal}
+          onClose={() => {
+            if (termsAccepted) {
+              setShowTermsModal(false);
+            }
+          }}
+          onAccept={handleAcceptTerms}
+          requireAccept={!termsAccepted}
+        />
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  gradientBg: {
     flex: 1,
-    backgroundColor: colors.white,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
+    paddingHorizontal: 28,
     justifyContent: "space-between",
-  },
-  headerSection: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: spacing.xxxl,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    resizeMode: "contain",
-    marginBottom: spacing.xxl,
-  },
-  title: {
-    ...typography.h1,
-    color: colors.primary,
-    marginBottom: spacing.md,
-    letterSpacing: 0.5,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textMedium,
-    textAlign: "center",
-    lineHeight: 22,
-    fontWeight: "400",
+    paddingTop: 20,
+    paddingBottom: 12,
   },
 
+  /* ── Hero ── */
+  heroSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    gap: 12,
+  },
+  logoGlowOuter: {
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: "rgba(194,2,0,0.06)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 48,
+    elevation: 0,
+  },
+  logoGlowInner: {
+    width: 176,
+    height: 176,
+    borderRadius: 88,
+    backgroundColor: "rgba(194,2,0,0.08)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logo: {
+    width: 144,
+    height: 144,
+    resizeMode: "contain",
+  },
+  title: {
+    fontSize: 44,
+    fontWeight: "800" as const,
+    color: "#1A1A1A",
+    letterSpacing: -1.5,
+    textAlign: "center",
+  },
+  tagline: {
+    fontSize: 16,
+    fontWeight: "400" as const,
+    color: colors.textMedium,
+    textAlign: "center",
+    letterSpacing: 0.15,
+  },
+
+  /* ── Buttons ── */
   buttonSection: {
-    gap: spacing.xs,
-    marginBottom: spacing.lg,
+    gap: 12,
+    paddingBottom: 8,
+  },
+  buttonWrapper: {
+    borderRadius: 999,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  buttonDisabled: {
+    opacity: 0.4,
+  },
+  primaryButton: {
+    borderRadius: 999,
+    paddingVertical: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryButtonText: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+    letterSpacing: 0.3,
+  },
+  secondaryButton: {
+    borderRadius: 999,
+    paddingVertical: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderWidth: 1.5,
+    borderColor: "rgba(194,2,0,0.2)",
+  },
+  secondaryButtonText: {
+    fontSize: 17,
+    fontWeight: "600" as const,
+    color: colors.primary,
+    letterSpacing: 0.3,
   },
   termsButton: {
-    paddingVertical: spacing.lg,
+    paddingVertical: 10,
     alignItems: "center",
   },
   termsText: {
+    fontSize: 12.5,
+    color: colors.textLight,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  termsLink: {
     color: colors.primary,
-    fontSize: 13,
-    fontWeight: "500",
-    textDecorationLine: "underline",
+    fontWeight: "600" as const,
   },
 });
 
