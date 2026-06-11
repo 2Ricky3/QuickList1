@@ -14,10 +14,12 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { RootStackParamList } from "../types";
-import { colors } from "../GlobalStyleSheet";
+import { colors, gradients, borderRadius } from "../GlobalStyleSheet";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import { PrimaryButton } from "../components/PrimaryButton";
+import { useEntranceAnimation } from "../hooks/useEntranceAnimation";
 import TermsModal from "./TermsScreen";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 
 type LandingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Landing">;
 
@@ -26,8 +28,7 @@ const LandingScreen = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
+  const [heroStyle, buttonsStyle] = useEntranceAnimation({ count: 2 });
   const logoScaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
@@ -52,39 +53,23 @@ const LandingScreen = () => {
   };
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-      Animated.spring(logoScaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    Animated.spring(logoScaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
-  const handleLogin = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleLogin = () => {
     navigation.navigate("Login");
   };
 
-  const handleSignUp = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleSignUp = () => {
     navigation.navigate("Register");
   };
 
-  const handleTerms = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleTerms = () => {
     setShowTermsModal(true);
   };
 
@@ -93,7 +78,7 @@ const LandingScreen = () => {
       await AsyncStorage.setItem("termsAccepted", "true");
       setTermsAccepted(true);
       setShowTermsModal(false);
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptic.success();
     } catch (error) {
       console.error("Error saving terms acceptance:", error);
     }
@@ -102,7 +87,7 @@ const LandingScreen = () => {
   if (loading) {
     return (
       <LinearGradient
-        colors={["#FFFFFF", "#FFF0F0", "#FFE8E8"]}
+        colors={gradients.screenBackground}
         style={styles.loadingContainer}
       >
         <ActivityIndicator size="large" color={colors.primary} />
@@ -112,7 +97,7 @@ const LandingScreen = () => {
 
   return (
     <LinearGradient
-      colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]}
+      colors={gradients.screenBackground}
       style={styles.gradientBg}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -123,10 +108,8 @@ const LandingScreen = () => {
           <Animated.View
             style={[
               styles.heroSection,
-              {
-                opacity: fadeAnim,
-                transform: [{ scale: logoScaleAnim }],
-              },
+              { opacity: heroStyle.opacity },
+              { transform: [{ scale: logoScaleAnim }] },
             ]}
           >
             {/* Decorative glow ring */}
@@ -144,41 +127,25 @@ const LandingScreen = () => {
           </Animated.View>
 
           {/* Action Buttons Section */}
-          <Animated.View
-            style={[
-              styles.buttonSection,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
+          <Animated.View style={[styles.buttonSection, buttonsStyle]}>
             {/* Sign Up — primary pill button */}
-            <AnimatedPressable
+            <PrimaryButton
+              title="Create Account"
               onPress={handleSignUp}
               disabled={!termsAccepted}
-              style={[styles.buttonWrapper, !termsAccepted && styles.buttonDisabled]}
-            >
-              <LinearGradient
-                colors={["#D40000", "#FF3030"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryButton}
-              >
-                <Text style={styles.primaryButtonText}>Create Account</Text>
-              </LinearGradient>
-            </AnimatedPressable>
+              size="large"
+              style={styles.buttonWrapper}
+            />
 
             {/* Sign In — soft glass button */}
-            <AnimatedPressable
+            <PrimaryButton
+              title="Sign In"
               onPress={handleLogin}
               disabled={!termsAccepted}
-              style={[styles.buttonWrapper, !termsAccepted && styles.buttonDisabled]}
-            >
-              <View style={styles.secondaryButton}>
-                <Text style={styles.secondaryButtonText}>Sign In</Text>
-              </View>
-            </AnimatedPressable>
+              variant="outline"
+              size="large"
+              style={[styles.buttonWrapper, styles.secondaryWrapper]}
+            />
 
             {/* Terms link */}
             <AnimatedPressable
@@ -265,7 +232,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 44,
     fontWeight: "800" as const,
-    color: "#1A1A1A",
+    color: colors.textHeading,
     letterSpacing: -1.5,
     textAlign: "center",
   },
@@ -283,43 +250,16 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   buttonWrapper: {
-    borderRadius: 999,
+    borderRadius: borderRadius.round,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 4,
   },
-  buttonDisabled: {
-    opacity: 0.4,
-  },
-  primaryButton: {
-    borderRadius: 999,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    fontSize: 17,
-    fontWeight: "700" as const,
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
-  },
-  secondaryButton: {
-    borderRadius: 999,
-    paddingVertical: 17,
-    alignItems: "center",
-    justifyContent: "center",
+  secondaryWrapper: {
     backgroundColor: "rgba(255,255,255,0.9)",
-    borderWidth: 1.5,
-    borderColor: "rgba(194,2,0,0.2)",
-  },
-  secondaryButtonText: {
-    fontSize: 17,
-    fontWeight: "600" as const,
-    color: colors.primary,
-    letterSpacing: 0.3,
   },
   termsButton: {
     paddingVertical: 10,

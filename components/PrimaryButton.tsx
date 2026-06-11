@@ -4,6 +4,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, borderRadius, typography } from "../GlobalStyleSheet";
 import { AnimatedPressable } from "./AnimatedPressable";
+import { HapticType } from "../utils/haptics";
+
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger"
+  | "dangerOutline"
+  | "success";
 
 interface PrimaryButtonProps {
   title: string;
@@ -11,9 +21,10 @@ interface PrimaryButtonProps {
   loading?: boolean;
   disabled?: boolean;
   icon?: string;
-  variant?: "primary" | "secondary" | "danger" | "success";
+  variant?: ButtonVariant;
   size?: "small" | "medium" | "large";
   fullWidth?: boolean;
+  haptic?: HapticType;
   style?: any;
 }
 
@@ -26,20 +37,51 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   variant = "primary",
   size = "medium",
   fullWidth = true,
+  haptic,
   style,
 }) => {
   const isDisabled = disabled || loading;
   const variantConfig = variantStyles[variant];
   const sizeConfig = sizeStyles[size];
+  // Strong CTAs get a medium press, lightweight buttons a light tap
+  const defaultHaptic: HapticType =
+    variant === "primary" || variant === "danger" || variant === "success"
+      ? "press"
+      : "tap";
+
+  const content = (
+    <View style={styles.content}>
+      {icon && !loading && (
+        <MaterialIcons
+          name={icon as any}
+          size={sizeConfig.iconSize}
+          color={variantConfig.textColor}
+          style={styles.icon}
+        />
+      )}
+      <Text
+        style={[
+          typography.button,
+          styles.text,
+          { color: variantConfig.textColor },
+          sizeConfig.text,
+        ]}
+      >
+        {loading ? "Loading..." : title}
+      </Text>
+    </View>
+  );
 
   return (
     <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
+      haptic={isDisabled ? "none" : haptic ?? defaultHaptic}
       style={[
         styles.container,
         fullWidth && styles.fullWidth,
-        sizeConfig.container,
+        { borderRadius: sizeConfig.container.borderRadius },
+        isDisabled && styles.disabled,
         style,
       ]}
     >
@@ -48,51 +90,23 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
           colors={[variantConfig.colors[0], variantConfig.colors[1]]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[styles.gradient, sizeConfig.container]}
+          style={[styles.fill, sizeConfig.container]}
         >
-          <View style={styles.content}>
-            {icon && !loading && (
-              <MaterialIcons
-                name={icon as any}
-                size={sizeConfig.iconSize}
-                color={colors.white}
-                style={styles.icon}
-              />
-            )}
-            <Text style={[typography.button, styles.text, sizeConfig.text]}>
-              {loading ? "Loading..." : title}
-            </Text>
-          </View>
+          {content}
         </LinearGradient>
       ) : (
         <View
           style={[
-            styles.solidButton,
+            styles.fill,
             { backgroundColor: variantConfig.colors[0] },
-            isDisabled && styles.disabled,
+            variantConfig.borderColor != null && {
+              borderWidth: 1.5,
+              borderColor: variantConfig.borderColor,
+            },
             sizeConfig.container,
           ]}
         >
-          <View style={styles.content}>
-            {icon && !loading && (
-              <MaterialIcons
-                name={icon as any}
-                size={sizeConfig.iconSize}
-                color={variantConfig.textColor}
-                style={styles.icon}
-              />
-            )}
-            <Text
-              style={[
-                typography.button,
-                styles.text,
-                { color: variantConfig.textColor },
-                sizeConfig.text,
-              ]}
-            >
-              {loading ? "Loading..." : title}
-            </Text>
-          </View>
+          {content}
         </View>
       )}
     </AnimatedPressable>
@@ -100,8 +114,8 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 };
 
 const variantStyles: Record<
-  string,
-  { colors: [string, string]; textColor: string }
+  ButtonVariant,
+  { colors: [string, string]; textColor: string; borderColor?: string }
 > = {
   primary: {
     colors: [colors.primary, colors.primaryLight],
@@ -111,12 +125,26 @@ const variantStyles: Record<
     colors: [colors.backgroundLight, colors.backgroundLight],
     textColor: colors.textDark,
   },
+  outline: {
+    colors: ["transparent", "transparent"],
+    textColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  ghost: {
+    colors: ["transparent", "transparent"],
+    textColor: colors.textMedium,
+  },
   danger: {
-    colors: [colors.danger, "#FF6B6B"],
+    colors: [colors.danger, colors.danger],
     textColor: colors.white,
   },
+  dangerOutline: {
+    colors: ["transparent", "transparent"],
+    textColor: colors.danger,
+    borderColor: colors.danger,
+  },
   success: {
-    colors: [colors.success, "#2ECC71"],
+    colors: [colors.success, colors.success],
     textColor: colors.white,
   },
 };
@@ -158,11 +186,7 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: "100%",
   },
-  gradient: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  solidButton: {
+  fill: {
     justifyContent: "center",
     alignItems: "center",
   },

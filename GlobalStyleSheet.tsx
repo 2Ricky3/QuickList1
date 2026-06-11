@@ -4,8 +4,11 @@ export const colors = {
   primaryDark: "#520600",
   primaryLight: "#E63946",
   success: "#2ECC71",
+  successDeep: "#10B981",
+  successSoft: "#D1FAE5",
   warning: "#F39C12",
   danger: "#E74C3C",
+  textHeading: "#1A1A1A",
   textDark: "#520600",
   textMedium: "#736F73",
   textLight: "#999999",
@@ -13,6 +16,10 @@ export const colors = {
   backgroundLight: "#F8F9FA",
   border: "#E0E0E0",
   shadowColor: "#000000",
+  overlay: "rgba(0,0,0,0.5)",
+};
+export const gradients = {
+  screenBackground: ["#FFFFFF", "#FFF4F4", "#FFE8E8"] as [string, string, string],
 };
 export const tagColors = {
   red: { bg: "#FFE5E5", text: "#C20200", border: "#C20200" },
@@ -64,6 +71,27 @@ export const borderRadius = {
   lg: 16,
   xl: 20,
   round: 999,
+};
+// Motion tokens — single source of truth for animation timing so every
+// screen's transitions feel identical.
+export const motion = {
+  duration: {
+    fast: 150,
+    normal: 250,
+    slow: 400,
+  },
+  // Press feedback spring (matches AnimatedPressable)
+  pressSpring: {
+    speed: 50,
+    bounciness: 4,
+  },
+  // Section/card entrance spring
+  entranceSpring: {
+    tension: 300,
+    friction: 20,
+  },
+  stagger: 80,
+  slideDistance: 20,
 };
 export const elevation = {
   sm: {

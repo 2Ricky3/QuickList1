@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Animated } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, elevation } from "../GlobalStyleSheet";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 interface FABProps {
   onPress: () => void;
   icon?: keyof typeof MaterialIcons.glyphMap;
@@ -17,7 +17,7 @@ export const FAB: React.FC<FABProps> = ({
 }) => {
   const scaleValue = new Animated.Value(1);
   const handlePressIn = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic.tap();
     Animated.spring(scaleValue, {
       toValue: 0.9,
       speed: 50,
@@ -35,7 +35,7 @@ export const FAB: React.FC<FABProps> = ({
   };
   const handlePress = () => {
     if (!disabled && !loading) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      haptic.press();
       onPress();
     }
   };

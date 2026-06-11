@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { View, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { colors, spacing, typography } from "../GlobalStyleSheet";
+import { IconButton } from "./IconButton";
 
 interface ScreenHeaderProps {
   title: string;
@@ -29,13 +29,12 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     <View style={[styles.container, { backgroundColor }]}>
       <View style={styles.content}>
         {showBackButton && (
-          <Pressable
+          <IconButton
+            icon="arrow-back"
             onPress={() => navigation.goBack()}
+            accessibilityLabel="Go back"
             style={styles.backButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <MaterialIcons name="arrow-back" size={24} color={colors.textDark} />
-          </Pressable>
+          />
         )}
 
         <View style={[styles.textContainer, centered && styles.centered]}>
@@ -44,13 +43,11 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         </View>
 
         {rightIcon && onRightPress ? (
-          <Pressable
+          <IconButton
+            icon={rightIcon as any}
             onPress={onRightPress}
             style={styles.rightButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <MaterialIcons name={rightIcon as any} size={24} color={colors.textDark} />
-          </Pressable>
+          />
         ) : (
           <View style={styles.rightButton} />
         )}
@@ -72,14 +69,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 44,
+    height: 44,
   },
   rightButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
   },
   textContainer: {
     flex: 1,

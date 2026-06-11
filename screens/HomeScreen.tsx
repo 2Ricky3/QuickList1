@@ -20,15 +20,16 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigation, useFocusEffect, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
-import { colors, globalStyles, spacing, borderRadius, elevation, typography } from "../GlobalStyleSheet";
+import { colors, gradients, globalStyles, spacing, borderRadius, elevation, typography, motion } from "../GlobalStyleSheet";
 import { fetchUserLists } from "../services/listService";
 import { getAchievements, Achievement } from "../services/achievementService";
 import { LinearGradient } from "expo-linear-gradient";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 import { logFirestoreError, errorLogger } from "../services/errorLogger";
 import { SkeletonLoader, CardSkeleton } from "../components/SkeletonLoader";
+import { useEntranceAnimation } from "../hooks/useEntranceAnimation";
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "Home"
@@ -55,17 +56,19 @@ const HomeScreen = () => {
     return typeof item === 'string' ? item : (item.name || '');
   };
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
-  const greetingAnim = useRef(new Animated.Value(0)).current;
-  const statsAnim = useRef(new Animated.Value(0)).current;
-  const achievementsAnim = useRef(new Animated.Value(0)).current;
-  const actionsHeaderAnim = useRef(new Animated.Value(0)).current;
-  const action1Anim = useRef(new Animated.Value(0)).current;
-  const action2Anim = useRef(new Animated.Value(0)).current;
+  const [
+    greetingStyle,
+    statsStyle,
+    achievementsStyle,
+    actionsHeaderStyle,
+    action1Style,
+    action2Style,
+  ] = useEntranceAnimation({ count: 6, enabled: !loading });
 
   React.useEffect(() => {
     Animated.timing(screenFadeAnim, {
       toValue: 1,
-      duration: 400,
+      duration: motion.duration.slow,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -124,48 +127,6 @@ const HomeScreen = () => {
     });
     return unsubscribe;
   }, []);
-  useEffect(() => {
-    if (!loading) {
-      Animated.stagger(100, [
-        Animated.spring(greetingAnim, {
-          toValue: 1,
-          tension: 300,
-          friction: 20,
-          useNativeDriver: true,
-        }),
-        Animated.spring(statsAnim, {
-          toValue: 1,
-          tension: 300,
-          friction: 20,
-          useNativeDriver: true,
-        }),
-        Animated.spring(achievementsAnim, {
-          toValue: 1,
-          tension: 300,
-          friction: 20,
-          useNativeDriver: true,
-        }),
-        Animated.spring(actionsHeaderAnim, {
-          toValue: 1,
-          tension: 300,
-          friction: 20,
-          useNativeDriver: true,
-        }),
-        Animated.spring(action1Anim, {
-          toValue: 1,
-          tension: 300,
-          friction: 20,
-          useNativeDriver: true,
-        }),
-        Animated.spring(action2Anim, {
-          toValue: 1,
-          tension: 300,
-          friction: 20,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [loading]);
   useFocusEffect(
     useCallback(() => {
       if (auth.currentUser) {
@@ -204,8 +165,8 @@ const HomeScreen = () => {
     if (sortedItems.length === 0) return ["None yet"];
     return sortedItems;
   };
-  const openAchievementsModal = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const openAchievementsModal = () => {
+    haptic.press();
     setShowAchievementsModal(true);
     Animated.parallel([
       Animated.timing(modalOverlayAnim, {
@@ -221,8 +182,8 @@ const HomeScreen = () => {
       }),
     ]).start();
   };
-  const closeAchievementsModal = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const closeAchievementsModal = () => {
+    haptic.tap();
     Animated.parallel([
       Animated.timing(modalOverlayAnim, {
         toValue: 0,
@@ -240,7 +201,7 @@ const HomeScreen = () => {
   };
   if (loading) {
     return (
-      <LinearGradient colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]} style={{ flex: 1 }}>
+      <LinearGradient colors={gradients.screenBackground} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={{
@@ -279,7 +240,7 @@ const HomeScreen = () => {
     );
   }
   return (
-    <LinearGradient colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]} style={{ flex: 1 }}>
+    <LinearGradient colors={gradients.screenBackground} style={{ flex: 1 }}>
     <SafeAreaView style={{ flex: 1 }}>
       <Animated.View style={{ flex: 1, opacity: screenFadeAnim }}>
         <ScrollView
@@ -287,16 +248,7 @@ const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
         >
         <Animated.View
-          style={{
-            marginBottom: spacing.xl,
-            opacity: greetingAnim,
-            transform: [{
-              translateY: greetingAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}
+          style={[{ marginBottom: spacing.xl }, greetingStyle]}
         >
           <Text style={[typography.h1, { color: colors.primary, marginBottom: spacing.xs }]}>
             {getGreeting()}, {userData?.displayName || "User"}!
@@ -306,19 +258,7 @@ const HomeScreen = () => {
           </Text>
         </Animated.View>
         <Animated.View
-          style={[
-            styles.card,
-            { marginBottom: spacing.lg },
-            {
-              opacity: statsAnim,
-              transform: [{
-                translateY: statsAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
-            }
-          ]}
+          style={[styles.card, { marginBottom: spacing.lg }, statsStyle]}
         >
           <Text style={[typography.h2, { marginBottom: spacing.lg }]}>Your Stats</Text>
           {statsLoading ? (
@@ -360,19 +300,7 @@ const HomeScreen = () => {
           )}
         </Animated.View>
         <Animated.View
-          style={[
-            styles.card,
-            { marginBottom: spacing.lg },
-            {
-              opacity: achievementsAnim,
-              transform: [{
-                translateY: achievementsAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0],
-                }),
-              }],
-            }
-          ]}
+          style={[styles.card, { marginBottom: spacing.lg }, achievementsStyle]}
         >
           {achievementsLoading ? (
             <ModernLoader size="small" />
@@ -409,41 +337,18 @@ const HomeScreen = () => {
             </Pressable>
           )}
         </Animated.View>
-        <Animated.View
-          style={{
-            opacity: actionsHeaderAnim,
-            transform: [{
-              translateY: actionsHeaderAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}
-        >
+        <Animated.View style={actionsHeaderStyle}>
           <Text style={[typography.h3, { marginBottom: spacing.md, color: colors.textDark }]}>
             What would you like to do?
           </Text>
         </Animated.View>
-        <Animated.View
-          style={{
-            opacity: action1Anim,
-            transform: [{
-              translateY: action1Anim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}
-        >
+        <Animated.View style={action1Style}>
           <AnimatedPressable
             style={[
               styles.actionCard,
               { marginBottom: spacing.md, backgroundColor: colors.primary },
             ]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              navigation.navigate("CreateScreen");
-            }}
+            onPress={() => navigation.navigate("CreateScreen")}
           >
             <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
               <MaterialIcons name="note" size={32} color={colors.white} />
@@ -457,26 +362,13 @@ const HomeScreen = () => {
             <MaterialIcons name="chevron-right" size={24} color="rgba(255,255,255,0.7)" />
           </AnimatedPressable>
         </Animated.View>
-        <Animated.View
-          style={{
-            opacity: action2Anim,
-            transform: [{
-              translateY: action2Anim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}
-        >
+        <Animated.View style={action2Style}>
           <AnimatedPressable
             style={[
               styles.actionCard,
               { marginBottom: spacing.md },
             ]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              navigation.navigate("PreviousListScreen");
-            }}
+            onPress={() => navigation.navigate("PreviousListScreen")}
           >
             <View style={styles.actionIconContainer}>
               <MaterialIcons name="history" size={32} color={colors.primary} />
@@ -518,7 +410,7 @@ const HomeScreen = () => {
         <Animated.View
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: colors.overlay,
             opacity: modalOverlayAnim,
           }}
         >

@@ -78,10 +78,6 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
       dotAnimation3.stop();
     };
   }, []);
-  const spin = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
   const sizes = {
     small: 8,
     medium: 12,

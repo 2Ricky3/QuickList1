@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Text,
   SafeAreaView,
   TextInput,
-  Pressable,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -27,9 +26,12 @@ import {
 } from "../GlobalStyleSheet";
 import { SwipeableInput } from "../components/SwipeableInput";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import { PrimaryButton } from "../components/PrimaryButton";
 import { FAB } from "../components/FAB";
 import { ColorDisplay, getColorValue } from "../components/ColorDisplay";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
+import { useEntranceAnimation } from "../hooks/useEntranceAnimation";
+import { useShake } from "../hooks/useShake";
 import { logFirestoreError } from "../services/errorLogger";
 import { validateListName, validateItemsArray, validateTagsArray, sanitizeString } from "../utils/validation";
 const EditListScreen = () => {
@@ -45,9 +47,9 @@ const EditListScreen = () => {
   const [saving, setSaving] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const listColor = getColorValue(list.color, colors.primary);
-  const headerAnim = useRef(new Animated.Value(0)).current;
-  const itemsAnim = useRef(new Animated.Value(0)).current;
-  const settingsAnim = useRef(new Animated.Value(0)).current;
+  const [headerStyle, titleStyle, itemsStyle, tagsStyle, settingsStyle] =
+    useEntranceAnimation({ count: 5 });
+  const { shake, shakeStyle } = useShake();
 
   // Helper function to get item display name
   const getItemDisplay = (item: any): string => {
@@ -63,30 +65,7 @@ const EditListScreen = () => {
   const getItemName = (item: any): string => {
     return typeof item === 'string' ? item : (item.name || '');
   };
-  useEffect(() => {
-    Animated.stagger(80, [
-      Animated.spring(headerAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-      Animated.spring(itemsAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-      Animated.spring(settingsAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
   const handleAddItem = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setItems([...items, ""]);
   };
   const handleItemChange = (text: string, index: number) => {
@@ -95,7 +74,6 @@ const EditListScreen = () => {
     setItems(newItems);
   };
   const handleDeleteItem = async (index: number) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const newItems = items.filter((_, i) => i !== index);
     setItems(newItems.length > 0 ? newItems : [""]);
   };
@@ -115,26 +93,26 @@ const EditListScreen = () => {
       .filter((tag: string) => tag !== "");
     const titleValidation = validateListName(sanitizedTitle);
     if (!titleValidation.isValid) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      shake();
       Alert.alert("Invalid List Name", titleValidation.error);
       return;
     }
     const itemsValidation = validateItemsArray(sanitizedItems);
     if (!itemsValidation.isValid) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      shake();
       Alert.alert("Invalid Items", itemsValidation.error);
       return;
     }
     if (tagsArray.length > 0) {
       const tagsValidation = validateTagsArray(tagsArray);
       if (!tagsValidation.isValid) {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        shake();
         Alert.alert("Invalid Tags", tagsValidation.error);
         return;
       }
     }
     setSaving(true);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    haptic.press();
     try {
       await updateList(list.id, {
         title: sanitizedTitle,
@@ -142,12 +120,12 @@ const EditListScreen = () => {
         tags: tagsArray,
         allowPublicEdit: allowPublicEdit,
       });
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptic.success();
       Alert.alert("Success", "List updated successfully!");
       navigation.goBack();
     } catch (error) {
       logFirestoreError(error, 'Update list', 'lists');
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      haptic.error();
       Alert.alert("Error", "Failed to update list.");
     } finally {
       setSaving(false);
@@ -160,21 +138,15 @@ const EditListScreen = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+        <Animated.View style={[{ flex: 1 }, shakeStyle]}>
         <ScrollView
           contentContainerStyle={{ padding: spacing.xl, paddingBottom: 140 }}
           keyboardShouldPersistTaps="handled"
         >
-          <Animated.View style={{
+          <Animated.View style={[{
             alignItems: "center",
             marginBottom: spacing.xxl,
-            opacity: headerAnim,
-            transform: [{
-              translateY: headerAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}>
+          }, headerStyle]}>
             <ColorDisplay
               colorData={list.color}
               style={{
@@ -194,13 +166,13 @@ const EditListScreen = () => {
               {list.items?.length || 0} item{list.items?.length !== 1 ? 's' : ''}
             </Text>
           </Animated.View>
-          <View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.xl,
             marginBottom: spacing.lg,
             ...elevation.sm,
-          }}>
+          }, titleStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.md }}>
               <MaterialIcons name="title" size={20} color={listColor} />
               <Text style={[createScreenStyles.sectionLabel, { marginBottom: 0, marginLeft: spacing.sm }]}>
@@ -220,14 +192,14 @@ const EditListScreen = () => {
               ]}
               returnKeyType="next"
             />
-          </View>
-          <View style={{
+          </Animated.View>
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.xl,
             marginBottom: spacing.lg,
             ...elevation.sm,
-          }}>
+          }, itemsStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <MaterialIcons name="shopping-cart" size={20} color={listColor} />
@@ -235,7 +207,7 @@ const EditListScreen = () => {
                   Items ({items.filter(i => getItemName(i).trim()).length})
                 </Text>
               </View>
-              <Pressable
+              <AnimatedPressable
                 onPress={handleAddItem}
                 style={{
                   flexDirection: "row",
@@ -250,7 +222,7 @@ const EditListScreen = () => {
                 <Text style={{ color: listColor, fontWeight: "600", fontSize: 13, marginLeft: 2 }}>
                   Add
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             </View>
             {items.map((item, index) => (
               <SwipeableInput
@@ -266,14 +238,14 @@ const EditListScreen = () => {
                 returnKeyType="done"
               />
             ))}
-          </View>
-          <View style={{
+          </Animated.View>
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.xl,
             marginBottom: spacing.lg,
             ...elevation.sm,
-          }}>
+          }, tagsStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.md }}>
               <MaterialIcons name="label" size={20} color={listColor} />
               <Text style={[createScreenStyles.sectionLabel, { marginBottom: 0, marginLeft: spacing.sm }]}>
@@ -338,14 +310,14 @@ const EditListScreen = () => {
                 })}
               </View>
             )}
-          </View>
-          <View style={{
+          </Animated.View>
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.xl,
             marginBottom: spacing.lg,
             ...elevation.sm,
-          }}>
+          }, settingsStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.md }}>
               <MaterialIcons name="settings" size={20} color={listColor} />
               <Text style={[createScreenStyles.sectionLabel, { marginBottom: 0, marginLeft: spacing.sm }]}>
@@ -374,14 +346,14 @@ const EditListScreen = () => {
               <Switch
                 value={allowPublicEdit}
                 onValueChange={(value) => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  haptic.selection();
                   setAllowPublicEdit(value);
                 }}
                 thumbColor={allowPublicEdit ? listColor : "#f4f3f4"}
                 trackColor={{ false: "#767577", true: `${listColor}80` }}
               />
             </View>
-          </View>
+          </Animated.View>
           {list.shareId && (
             <View style={{
               backgroundColor: `${listColor}10`,
@@ -422,15 +394,14 @@ const EditListScreen = () => {
               </View>
             </View>
           )}
-          <Pressable
-            style={{ paddingVertical: spacing.lg, alignItems: "center", marginTop: spacing.md }}
+          <PrimaryButton
+            title="Cancel"
             onPress={() => navigation.goBack()}
-          >
-            <Text style={{ color: colors.textMedium, fontSize: 15, fontWeight: "500" }}>
-              Cancel
-            </Text>
-          </Pressable>
+            variant="ghost"
+            style={{ marginTop: spacing.md }}
+          />
         </ScrollView>
+        </Animated.View>
         <FAB
           onPress={handleSave}
           icon="check"
@@ -438,20 +409,14 @@ const EditListScreen = () => {
           loading={saving}
         />
         <View style={createScreenStyles.bottomBar}>
-          <AnimatedPressable
-            style={[
-              globalStyles.buttonContainer,
-              globalStyles.buttonContainerSecondary,
-              createScreenStyles.bottomButton,
-              { flex: 1 }
-            ]}
+          <PrimaryButton
+            title="Add Item"
+            icon="add"
             onPress={handleAddItem}
-          >
-            <MaterialIcons name="add" size={20} color={colors.primary} style={{ marginRight: 4 }} />
-            <Text style={[globalStyles.buttonTextSecondary, { fontSize: 15, fontWeight: "600" }]}>
-              Add Item
-            </Text>
-          </AnimatedPressable>
+            variant="outline"
+            fullWidth={false}
+            style={{ flex: 1 }}
+          />
         </View>
       </SafeAreaView>
     </KeyboardAvoidingView>

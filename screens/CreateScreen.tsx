@@ -20,6 +20,7 @@ import "react-native-get-random-values";
 import {
   globalStyles,
   colors,
+  gradients,
   spacing,
   borderRadius,
   elevation,
@@ -30,9 +31,12 @@ import { createList, fetchUserLists } from "../services/listService";
 import { updateUserStats, getEncouragingMessage } from "../services/achievementService";
 import { SwipeableInput } from "../components/SwipeableInput";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import { PrimaryButton } from "../components/PrimaryButton";
 import { ConfettiCelebration } from "../components/ConfettiCelebration";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
+import { useEntranceAnimation } from "../hooks/useEntranceAnimation";
+import { useShake } from "../hooks/useShake";
 import { LinearGradient } from "expo-linear-gradient";
 import { logFirestoreError } from "../services/errorLogger";
 import {
@@ -41,7 +45,7 @@ import {
   validateTagsArray,
   sanitizeString
 } from "../utils/validation";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 import {
   getExoticIngredientSuggestion,
 } from "../services/suggestionService";
@@ -249,7 +253,7 @@ const NumberWheelPicker: React.FC<NumberWheelPickerProps> = ({
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Pressable
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.overlay }}
           onPress={onClose}
         />
         <View style={{
@@ -302,31 +306,20 @@ const NumberWheelPicker: React.FC<NumberWheelPickerProps> = ({
             </ScrollView>
           </View>
           <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl, alignSelf: 'stretch' }}>
-            <Pressable
+            <PrimaryButton
+              title="Cancel"
               onPress={onClose}
-              style={({ pressed }) => ({
-                flex: 1,
-                paddingVertical: 14,
-                alignItems: 'center',
-                backgroundColor: pressed ? '#f0f0f0' : colors.backgroundLight,
-                borderRadius: 999,
-              })}
-            >
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textMedium }}>Cancel</Text>
-            </Pressable>
-            <AnimatedPressable
+              variant="secondary"
+              fullWidth={false}
+              style={{ flex: 1, borderRadius: borderRadius.round }}
+            />
+            <PrimaryButton
+              title="Done"
               onPress={handleDone}
-              style={{ flex: 1, borderRadius: 999, overflow: 'hidden' }}
-            >
-              <LinearGradient
-                colors={["#2ECC71", "#27AE60"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{ paddingVertical: 14, alignItems: 'center' }}
-              >
-                <Text style={{ color: colors.white, fontSize: 15, fontWeight: '700' }}>Done</Text>
-              </LinearGradient>
-            </AnimatedPressable>
+              variant="success"
+              fullWidth={false}
+              style={{ flex: 1, borderRadius: borderRadius.round }}
+            />
           </View>
         </View>
       </View>
@@ -352,44 +345,10 @@ const CreateScreen = () => {
   const [activeQtyIndex, setActiveQtyIndex] = useState<number | null>(null);
   const navigation = useNavigation();
   const { toast, showToast, hideToast } = useToast();
-  const headerAnim = useRef(new Animated.Value(0)).current;
-  const colorPickerAnim = useRef(new Animated.Value(0)).current;
-  const itemsAnim = useRef(new Animated.Value(0)).current;
-  const tagsAnim = useRef(new Animated.Value(0)).current;
-  const buttonsAnim = useRef(new Animated.Value(0)).current;
+  const [headerStyle, itemsStyle, tagsStyle, colorPickerStyle, buttonsStyle] =
+    useEntranceAnimation({ count: 5 });
+  const { shake, shakeStyle } = useShake();
   useEffect(() => {
-    Animated.stagger(80, [
-      Animated.spring(headerAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-      Animated.spring(colorPickerAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-      Animated.spring(itemsAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-      Animated.spring(tagsAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-      Animated.spring(buttonsAnim, {
-        toValue: 1,
-        tension: 300,
-        friction: 20,
-        useNativeDriver: true,
-      }),
-    ]).start();
     loadPastLists();
   }, []);
   const loadPastLists = async () => {
@@ -420,7 +379,6 @@ const CreateScreen = () => {
     return JSON.stringify(colorOption);
   };
   const toggleTag = (tag: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (tags.includes(tag)) {
       setTags(tags.filter(t => t !== tag));
     } else {
@@ -428,12 +386,10 @@ const CreateScreen = () => {
     }
   };
   const handleColorSelect = (colorOption: typeof COLOR_OPTIONS[0]) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setListColor(colorOption);
     showToast(`Color changed to ${colorOption.name}`, "info");
   };
   const handleAddItem = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setItems([...items, { name: "", quantity: 1, unit: "" }]);
   };
   const handleItemChange = (text: string, index: number) => {
@@ -447,7 +403,6 @@ const CreateScreen = () => {
     setItems(updated);
   };
   const handleDeleteItem = (index: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const updated = [...items];
     updated.splice(index, 1);
     setItems(updated);
@@ -463,26 +418,26 @@ const CreateScreen = () => {
       }));
     const titleValidation = validateListName(sanitizedTitle);
     if (!titleValidation.isValid) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      shake();
       Alert.alert("Invalid List Name", titleValidation.error);
       return;
     }
     const itemsValidation = validateItemsArray(sanitizedItems.map(i => i.name));
     if (!itemsValidation.isValid) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      shake();
       Alert.alert("Invalid Items", itemsValidation.error);
       return;
     }
     if (tags.length > 0) {
       const tagsValidation = validateTagsArray(tags);
       if (!tagsValidation.isValid) {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        shake();
         Alert.alert("Invalid Tags", tagsValidation.error);
         return;
       }
     }
     setSaving(true);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    haptic.press();
     try {
       const user = auth.currentUser;
       if (!user) return;
@@ -542,11 +497,11 @@ const CreateScreen = () => {
           );
         }, 500);
       }
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptic.success();
       Alert.alert("Success", "List created!" + (newlyUnlocked.length > 0 ? " 🎉" : ""));
       navigation.goBack();
     } catch (error) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      haptic.error();
       logFirestoreError(error, 'Save list', 'lists');
       Alert.alert("Error", "Could not save list. Please try again.");
     } finally {
@@ -555,10 +510,9 @@ const CreateScreen = () => {
   };
   const handleSurpriseMe = () => {
     setShowThemePicker(!showThemePicker);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
   const handleSelectTheme = (theme: keyof typeof THEMED_ITEMS) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    haptic.heavy();
     const themeItems = THEMED_ITEMS[theme];
     const available = themeItems.filter(
       (item) => !items.some((i) => i.name.toLowerCase() === item.toLowerCase())
@@ -574,14 +528,14 @@ const CreateScreen = () => {
     }
     setItems([...items, ...randomItems]);
     setShowThemePicker(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    haptic.success();
     showToast(`Added ${randomItems.length} themed items! 🎉`, "success");
     if (auth.currentUser) {
       updateUserStats(auth.currentUser.uid, { surprisesUsed: 1 });
     }
   };
   const handleRandomSurprise = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    haptic.heavy();
     const available = RANDOM_ITEMS.filter(
       (item) => !items.some((i) => i.name.toLowerCase() === item.toLowerCase())
     );
@@ -650,7 +604,7 @@ const CreateScreen = () => {
     );
   };
   const activateChallenge = (challenge: Challenge) => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    haptic.success();
     setActiveChallenge(challenge);
     setChallengeProgress(`Challenge Active: ${challenge.description}`);
     if (challenge.rule.type === 'speed') {
@@ -670,7 +624,7 @@ const CreateScreen = () => {
         if (prev === null || prev <= 1) {
           clearInterval(interval);
           setSpeedTimerActive(false);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          haptic.warning();
           Alert.alert("Time's Up!", `You added ${items.filter(i => i.name.trim()).length} items!`);
           return 0;
         }
@@ -694,7 +648,7 @@ const CreateScreen = () => {
             style: "default",
             onPress: () => {
               setItems([...items, { name: exotic.item, quantity: 1, unit: "" }]);
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              haptic.success();
             }
           }
         ]
@@ -709,7 +663,7 @@ const CreateScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      <LinearGradient colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]} style={{ flex: 1 }}>
+      <LinearGradient colors={gradients.screenBackground} style={{ flex: 1 }}>
         <Toast
           message={toast.message}
           type={toast.type}
@@ -723,20 +677,13 @@ const CreateScreen = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.xl,
             marginBottom: spacing.xl,
             ...elevation.md,
-            opacity: headerAnim,
-            transform: [{
-              translateY: headerAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}>
+          }, headerStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.xs }}>
               <MaterialIcons name="shopping-cart" size={32} color={colors.primary} />
               <Text style={[typography.h1, { marginBottom: 0, marginLeft: spacing.md, flex: 1, color: colors.textDark, fontSize: 24 }]}>
@@ -760,14 +707,13 @@ const CreateScreen = () => {
               Essential Information
             </Text>
           </View>
-          <Animated.View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.lg,
             marginBottom: spacing.md,
             ...elevation.sm,
-            opacity: headerAnim,
-          }}>
+          }, headerStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.sm }}>
               <MaterialIcons name="edit" size={20} color={colors.primary} />
               <Text style={{ fontSize: 15, fontWeight: "700", color: colors.textDark, marginLeft: spacing.sm }}>
@@ -798,20 +744,13 @@ const CreateScreen = () => {
               returnKeyType="done"
             />
           </Animated.View>
-          <Animated.View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.lg,
             marginBottom: spacing.xl,
             ...elevation.sm,
-            opacity: itemsAnim,
-            transform: [{
-              translateY: itemsAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}>
+          }, itemsStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.md }}>
               <MaterialIcons name="list" size={20} color={colors.primary} />
               <Text style={{ fontSize: 15, fontWeight: "700", color: colors.textDark, marginLeft: spacing.sm }}>
@@ -844,7 +783,7 @@ const CreateScreen = () => {
                   <View style={{ flex: 0.5 }}>
                     <Pressable
                       onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        haptic.tap();
                         setActiveQtyIndex(index);
                       }}
                       style={{
@@ -912,20 +851,13 @@ const CreateScreen = () => {
               Optional Customization
             </Text>
           </View>
-          <Animated.View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.lg,
             marginBottom: spacing.md,
             ...elevation.sm,
-            opacity: tagsAnim,
-            transform: [{
-              translateY: tagsAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}>
+          }, tagsStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.sm }}>
               <MaterialIcons name="label-outline" size={20} color={colors.textMedium} />
               <Text style={{ fontSize: 15, fontWeight: "600", color: colors.textDark, marginLeft: spacing.sm, flex: 1 }}>
@@ -947,6 +879,7 @@ const CreateScreen = () => {
                 return (
                   <AnimatedPressable
                     key={tag}
+                    haptic="selection"
                     onPress={() => toggleTag(tag)}
                     style={{
                       paddingHorizontal: spacing.md,
@@ -977,7 +910,7 @@ const CreateScreen = () => {
             {PREDEFINED_TAGS.length > 8 && (
               <Pressable
                 onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  haptic.tap();
                   LayoutAnimation.configureNext({
                     duration: 300,
                     create: { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
@@ -1038,20 +971,13 @@ const CreateScreen = () => {
               </View>
             )}
           </Animated.View>
-          <Animated.View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.lg,
             marginBottom: spacing.xl,
             ...elevation.sm,
-            opacity: colorPickerAnim,
-            transform: [{
-              translateY: colorPickerAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}>
+          }, colorPickerStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.md }}>
               <MaterialIcons name="palette" size={20} color={colors.textMedium} />
               <Text style={{ fontSize: 15, fontWeight: "600", color: colors.textDark, marginLeft: spacing.sm, flex: 1 }}>
@@ -1076,6 +1002,7 @@ const CreateScreen = () => {
                 return (
                   <AnimatedPressable
                     key={colorOption.id}
+                    haptic="selection"
                     onPress={() => handleColorSelect(colorOption)}
                     scaleValue={0.9}
                     style={{ alignItems: 'center', width: 64 }}
@@ -1196,42 +1123,44 @@ const CreateScreen = () => {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: spacing.md, paddingRight: spacing.xl }}
               >
-                <Pressable
+                <AnimatedPressable
                   onPress={handleRandomSurprise}
-                  style={({ pressed }) => ({
+                  haptic="none"
+                  style={{
                     width: 140,
                     padding: spacing.md,
-                    backgroundColor: pressed ? `${colors.primary}15` : `${colors.primary}10`,
+                    backgroundColor: `${colors.primary}10`,
                     borderRadius: borderRadius.lg,
                     borderWidth: 2,
                     borderColor: colors.primary,
                     alignItems: "center",
                     justifyContent: "center",
-                  })}
+                  }}
                 >
                   <Text style={{ fontSize: 32, marginBottom: spacing.sm }}>🎉</Text>
                   <Text style={{ fontSize: 14, fontWeight: "700", color: colors.primary, textAlign: "center" }}>
                     Random Surprise
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
                 {(Object.keys(THEMED_ITEMS) as Array<keyof typeof THEMED_ITEMS>).map((theme) => {
                   const themeText = theme.toString();
                   const emojiMatch = themeText.match(/[\u{1F300}-\u{1F9FF}]/u);
                   const emoji = emojiMatch ? emojiMatch[0] : "🎯";
                   const themeName = themeText.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim();
                   return (
-                    <Pressable
+                    <AnimatedPressable
                       key={theme}
                       onPress={() => handleSelectTheme(theme)}
-                      style={({ pressed }) => ({
+                      haptic="none"
+                      style={{
                         width: 140,
                         padding: spacing.md,
-                        backgroundColor: pressed ? colors.backgroundLight : colors.white,
+                        backgroundColor: colors.white,
                         borderRadius: borderRadius.lg,
                         borderWidth: 1.5,
                         borderColor: colors.border,
                         alignItems: "center",
-                      })}
+                      }}
                     >
                       <Text style={{ fontSize: 32, marginBottom: spacing.sm }}>{emoji}</Text>
                       <Text style={{
@@ -1251,26 +1180,19 @@ const CreateScreen = () => {
                       }}>
                         +3 items
                       </Text>
-                    </Pressable>
+                    </AnimatedPressable>
                   );
                 })}
               </ScrollView>
             </Animated.View>
           )}
-          <Animated.View style={{
+          <Animated.View style={[{
             backgroundColor: colors.white,
             borderRadius: borderRadius.lg,
             padding: spacing.xl,
             marginBottom: spacing.lg,
             ...elevation.sm,
-            opacity: buttonsAnim,
-            transform: [{
-              translateY: buttonsAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0],
-              }),
-            }],
-          }}>
+          }, buttonsStyle]}>
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.lg }}>
               <View style={{
                 width: 40,
@@ -1395,48 +1317,29 @@ const CreateScreen = () => {
             </View>
           </Animated.View>
         </ScrollView>
-        <View style={{
+        <Animated.View style={[{
           paddingHorizontal: spacing.lg,
           paddingTop: spacing.md,
           paddingBottom: spacing.xl,
           backgroundColor: 'rgba(255,255,255,0.97)',
           borderTopWidth: 1,
           borderTopColor: 'rgba(0,0,0,0.07)',
-        }}>
-          <AnimatedPressable
+        }, shakeStyle]}>
+          <PrimaryButton
+            title={saving ? "Saving..." : "Save List"}
+            icon="check-circle"
             onPress={handleSaveList}
             disabled={saving}
-            style={{ borderRadius: 999, overflow: 'hidden', marginBottom: spacing.sm }}
-          >
-            <LinearGradient
-              colors={["#2ECC71", "#27AE60"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                paddingVertical: 16,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              {saving ? (
-                <Text style={{ color: colors.white, fontSize: 17, fontWeight: '700' }}>Saving...</Text>
-              ) : (
-                <>
-                  <MaterialIcons name="check-circle" size={22} color={colors.white} />
-                  <Text style={{ color: colors.white, fontSize: 17, fontWeight: '700' }}>Save List</Text>
-                </>
-              )}
-            </LinearGradient>
-          </AnimatedPressable>
-          <Pressable
+            variant="success"
+            size="large"
+            style={{ borderRadius: borderRadius.round, marginBottom: spacing.sm }}
+          />
+          <PrimaryButton
+            title="Cancel"
             onPress={() => navigation.goBack()}
-            style={{ paddingVertical: 14, alignItems: 'center' }}
-          >
-            <Text style={{ color: colors.textMedium, fontSize: 14, fontWeight: '500' }}>Cancel</Text>
-          </Pressable>
-        </View>
+            variant="ghost"
+          />
+        </Animated.View>
         {activeQtyIndex !== null && (
           <NumberWheelPicker
             value={items[activeQtyIndex]?.quantity || 1}

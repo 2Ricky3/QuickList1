@@ -39,15 +39,15 @@ class ErrorLogger {
       console.info('Ã¢â€žÂ¹Ã¯Â¸Â INFO:', message, context);
     }
   }
-  private recordError(errorData: any): void {
+  private recordError(_errorData: any): void {
     if (!this.isDevelopment) {
     }
   }
-  private recordWarning(warningData: any): void {
+  private recordWarning(_warningData: any): void {
     if (!this.isDevelopment) {
     }
   }
-  setUserContext(userId: string, email?: string): void {
+  setUserContext(userId: string, _email?: string): void {
     if (this.isDevelopment) {
       console.info('Ã°Å¸â€˜Â¤ User context set:', userId);
     }

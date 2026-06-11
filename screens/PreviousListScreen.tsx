@@ -27,14 +27,17 @@ import {
 } from "firebase/firestore";
 import { useNavigation, useFocusEffect, NavigationProp } from "@react-navigation/native";
 import { auth, db } from "../firebaseConfig";
-import { colors, previousListStyles, spacing, typography, borderRadius, getTagColor, elevation } from "../GlobalStyleSheet";
+import { colors, previousListStyles, spacing, typography, borderRadius, getTagColor, elevation, motion } from "../GlobalStyleSheet";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { CardSkeleton } from "../components/SkeletonLoader";
 import { EmptyState } from "../components/EmptyState";
+import { PrimaryButton } from "../components/PrimaryButton";
+import { IconButton } from "../components/IconButton";
+import { AnimatedPressable } from "../components/AnimatedPressable";
 import { ColorDisplay, getColorValue } from "../components/ColorDisplay";
 import { logFirestoreError } from "../services/errorLogger";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -63,7 +66,7 @@ const PreviousListScreen = () => {
   React.useEffect(() => {
     Animated.timing(screenFadeAnim, {
       toValue: 1,
-      duration: 400,
+      duration: motion.duration.slow,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -120,8 +123,8 @@ const PreviousListScreen = () => {
       friction: 7,
     }).start();
   };
-  const toggleFilters = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const toggleFilters = () => {
+    haptic.tap();
     const toValue = showFilters ? 0 : 1;
     setShowFilters(!showFilters);
     Animated.spring(filterAnimation, {
@@ -138,7 +141,7 @@ const PreviousListScreen = () => {
       update: { type: 'spring', springDamping: 0.7 },
       delete: { type: 'easeInEaseOut', property: 'opacity' },
     });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic.tap();
     setExpandedLists((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(listId)) {
@@ -152,7 +155,6 @@ const PreviousListScreen = () => {
 
   const handleRemoveItem = async (listId: string, itemIndex: number) => {
     try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
       // Find the list to update
       const listToUpdate = lists.find(l => l.id === listId);
@@ -186,7 +188,7 @@ const PreviousListScreen = () => {
       });
     } catch (error) {
       logFirestoreError(error, 'Toggle item completion', 'lists');
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      haptic.error();
       Alert.alert("Error", "Failed to update item.");
     }
   };
@@ -251,7 +253,7 @@ const PreviousListScreen = () => {
   };
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic.tap();
     await fetchLists();
   }, []);
   useFocusEffect(
@@ -282,8 +284,8 @@ const PreviousListScreen = () => {
     setLists(sortedLists);
   }, [completedItems]);
 
-  const handleDeleteList = async (listId: string) => {
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  const handleDeleteList = (listId: string) => {
+    haptic.warning();
     Alert.alert(
       "Delete List",
       "Are you sure you want to delete this list?",
@@ -294,7 +296,7 @@ const PreviousListScreen = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              haptic.success();
               await deleteDoc(doc(db, "lists", listId));
               setLists((prev) => prev.filter((item) => item.id !== listId));
             } catch (error) {
@@ -307,8 +309,8 @@ const PreviousListScreen = () => {
       { cancelable: true }
     );
   };
-  const handleDeleteAllLists = async () => {
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  const handleDeleteAllLists = () => {
+    haptic.warning();
     Alert.alert(
       "Delete All Lists",
       `Are you sure you want to delete all ${lists.length} list(s)? This action cannot be undone.`,
@@ -319,18 +321,18 @@ const PreviousListScreen = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              haptic.heavy();
               const deletePromises = lists.map(list =>
                 deleteDoc(doc(db, "lists", list.id))
               );
               await Promise.all(deletePromises);
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              haptic.success();
               setLists([]);
               setAvailableTags([]);
               Alert.alert("Success", "All lists have been deleted.");
             } catch (error) {
               logFirestoreError(error, 'Delete all lists', 'lists');
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              haptic.error();
               Alert.alert("Error", "Failed to delete all lists.");
             }
           },
@@ -371,18 +373,17 @@ const PreviousListScreen = () => {
   };
   const handleCopyShareCode = async (code: string | undefined) => {
     if (!code) {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      haptic.warning();
       Alert.alert("Error", "This list cannot be shared.");
       return;
     }
     try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await Clipboard.setStringAsync(code);
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptic.success();
       Alert.alert("Copied!", "Share code copied to clipboard.");
     } catch (e) {
       logFirestoreError(e, 'Copy share code', 'clipboard');
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      haptic.error();
       Alert.alert("Error", "Failed to copy share code.");
     }
   };
@@ -459,18 +460,13 @@ const PreviousListScreen = () => {
                   maxLength={6}
                   onSubmitEditing={handleFetchSharedList}
                 />
-                <Pressable
-                  style={[
-                    styles.openButton,
-                    { opacity: shareCode.trim() ? 1 : 0.5 },
-                  ]}
+                <PrimaryButton
+                  title={loadingShared ? "..." : "Open"}
                   onPress={handleFetchSharedList}
                   disabled={loadingShared || !shareCode.trim()}
-                >
-                  <Text style={styles.openButtonText}>
-                    {loadingShared ? "..." : "Open"}
-                  </Text>
-                </Pressable>
+                  fullWidth={false}
+                  style={{ minWidth: 80 }}
+                />
               </View>
             </View>
             <View style={[styles.searchContainer, focusedInput === 'search' && styles.searchContainerFocused, { marginBottom: spacing.lg }]}>
@@ -537,8 +533,8 @@ const PreviousListScreen = () => {
                   </View>
                   {selectedTags.length > 0 && (
                     <Pressable
-                      onPress={async () => {
-                        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      onPress={() => {
+                        haptic.press();
                         setSelectedTags([]);
                       }}
                     >
@@ -554,10 +550,10 @@ const PreviousListScreen = () => {
                       const selected = selectedTags.includes(tag);
                       const tagColor = getTagColor(tag);
                       return (
-                        <Pressable
+                        <AnimatedPressable
                           key={tag}
-                          onPress={async () => {
-                            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          haptic="selection"
+                          onPress={() => {
                             setSelectedTags((prev) =>
                               prev.includes(tag)
                                 ? prev.filter((t) => t !== tag)
@@ -596,7 +592,7 @@ const PreviousListScreen = () => {
                           >
                             {tag}
                           </Text>
-                        </Pressable>
+                        </AnimatedPressable>
                       );
                     })}
                   </View>
@@ -608,18 +604,13 @@ const PreviousListScreen = () => {
               </Animated.View>
             )}
             {lists.length > 0 && (
-              <Pressable
+              <PrimaryButton
+                title="Delete All Lists"
+                icon="delete-forever"
                 onPress={handleDeleteAllLists}
-                style={({ pressed }) => [
-                  styles.deleteAllButton,
-                  pressed && { opacity: 0.7 }
-                ]}
-              >
-                <MaterialIcons name="delete-forever" size={22} color={colors.danger} />
-                <Text style={styles.deleteAllButtonText}>
-                  Delete All Lists
-                </Text>
-              </Pressable>
+                variant="dangerOutline"
+                style={{ marginBottom: spacing.lg }}
+              />
             )}
             {searchedLists.length === 0 ? (
               <EmptyState
@@ -682,7 +673,7 @@ const PreviousListScreen = () => {
                       },
                     ]}
                   >
-                    <View style={[styles.colorAccent, { backgroundColor: isListComplete(list) ? '#10b981' : listColor }]} />
+                    <View style={[styles.colorAccent, { backgroundColor: isListComplete(list) ? colors.successDeep : listColor }]} />
                     <View style={styles.cardContent}>
                       <View style={{ flexDirection: "row", marginBottom: spacing.md }}>
                         <Pressable
@@ -692,7 +683,7 @@ const PreviousListScreen = () => {
                           style={{ flexDirection: "row", alignItems: "flex-start", flex: 1 }}
                         >
                           {isListComplete(list) ? (
-                            <View style={[styles.colorIndicator, { backgroundColor: '#10b981', justifyContent: 'center', alignItems: 'center' }]}>
+                            <View style={[styles.colorIndicator, { backgroundColor: colors.successDeep, justifyContent: 'center', alignItems: 'center' }]}>
                               <MaterialIcons name="check" size={20} color={colors.white} />
                             </View>
                           ) : (
@@ -703,17 +694,17 @@ const PreviousListScreen = () => {
                             />
                           )}
                           <View style={{ flex: 1 }}>
-                            <Text style={[typography.h3, { color: isListComplete(list) ? '#10b981' : colors.textDark, marginBottom: spacing.xs }]} numberOfLines={1}>
+                            <Text style={[typography.h3, { color: isListComplete(list) ? colors.successDeep : colors.textDark, marginBottom: spacing.xs }]} numberOfLines={1}>
                               {list.title}
                             </Text>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                              <Text style={[styles.metadata, { color: isListComplete(list) ? '#10b981' : colors.textMedium }]}>
+                              <Text style={[styles.metadata, { color: isListComplete(list) ? colors.successDeep : colors.textMedium }]}>
                                 {list.items?.length || 0} item{list.items?.length !== 1 ? 's' : ''}
                               </Text>
                               {list.createdAt && (
                                 <>
-                                  <Text style={[styles.metadataDot, { color: isListComplete(list) ? '#10b981' : colors.textMedium }]}>•</Text>
-                                  <Text style={[styles.metadata, { color: isListComplete(list) ? '#10b981' : colors.textMedium }]}>
+                                  <Text style={[styles.metadataDot, { color: isListComplete(list) ? colors.successDeep : colors.textMedium }]}>•</Text>
+                                  <Text style={[styles.metadata, { color: isListComplete(list) ? colors.successDeep : colors.textMedium }]}>
                                     {formatDate(list.createdAt)}
                                   </Text>
                                 </>
@@ -799,29 +790,27 @@ const PreviousListScreen = () => {
                             const itemDisplay = formatItemDisplay(item);
                             const isCompleted = completedItems.has(`${list.id}-${index}-${itemName}`);
                             return (
-                              <Pressable
+                              <AnimatedPressable
                                 key={index}
-                                onPress={async () => {
-                                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                  handleRemoveItem(list.id, index);
-                                }}
-                                style={({ pressed }) => [
+                                onPress={() => handleRemoveItem(list.id, index)}
+                                haptic="selection"
+                                scaleValue={0.97}
+                                style={[
                                   styles.expandedItem,
                                   isCompleted && {
-                                    backgroundColor: '#d1fae5',
+                                    backgroundColor: colors.successSoft,
                                   },
-                                  pressed && styles.expandedItemPressed,
                                 ]}
                               >
-                                <View style={[styles.itemBullet, { backgroundColor: isCompleted ? '#10b981' : listColor }]} />
+                                <View style={[styles.itemBullet, { backgroundColor: isCompleted ? colors.successDeep : listColor }]} />
                                 <Text style={[styles.itemText, { 
-                                  color: isCompleted ? '#10b981' : colors.textDark,
+                                  color: isCompleted ? colors.successDeep : colors.textDark,
                                   textDecorationLine: isCompleted ? 'line-through' : 'none',
                                 }]}>
                                   {itemDisplay}
                                 </Text>
-                                <MaterialIcons name={isCompleted ? "check" : "close"} size={18} color={isCompleted ? '#10b981' : colors.textLight} style={{ marginLeft: 'auto' }} />
-                              </Pressable>
+                                <MaterialIcons name={isCompleted ? "check" : "close"} size={18} color={isCompleted ? colors.successDeep : colors.textLight} style={{ marginLeft: 'auto' }} />
+                              </AnimatedPressable>
                             );
                           })}
                         </View>
@@ -835,44 +824,28 @@ const PreviousListScreen = () => {
                       )}
                     </View>
                     <View style={styles.actionButtonsContainer}>
-                      <Pressable
+                      <PrimaryButton
+                        title="Edit"
+                        icon="edit"
                         onPress={() => navigation.navigate("EditListScreen", { list })}
-                        style={({ pressed }) => [
-                          styles.actionButton,
-                          styles.actionButtonOutline,
-                          pressed && { backgroundColor: colors.primary + '15' },
-                        ]}
-                        accessibilityLabel="Edit List"
-                      >
-                        <MaterialIcons name="edit" size={18} color={colors.primary} />
-                        <Text style={[styles.actionButtonText, { color: colors.primary }]}>
-                          Edit
-                        </Text>
-                      </Pressable>
-                      <Pressable
+                        variant="outline"
+                        fullWidth={false}
+                        style={{ flex: 1 }}
+                      />
+                      <PrimaryButton
+                        title="Share"
+                        icon="share"
                         onPress={() => handleCopyShareCode(list.shareId)}
-                        style={({ pressed }) => [
-                          styles.actionButton,
-                          styles.actionButtonPrimary,
-                          pressed && { backgroundColor: colors.primaryDark },
-                        ]}
-                        accessibilityLabel="Share List"
-                      >
-                        <MaterialIcons name="share" size={18} color={colors.white} />
-                        <Text style={[styles.actionButtonText, { color: colors.white }]}>
-                          Share
-                        </Text>
-                      </Pressable>
-                      <Pressable
+                        fullWidth={false}
+                        style={{ flex: 1 }}
+                      />
+                      <IconButton
+                        icon="delete"
                         onPress={() => handleDeleteList(list.id)}
-                        style={({ pressed }) => [
-                          styles.actionButtonIcon,
-                          pressed && { backgroundColor: colors.danger + '15' },
-                        ]}
+                        color={colors.danger}
                         accessibilityLabel="Delete List"
-                      >
-                        <MaterialIcons name="delete" size={20} color={colors.danger} />
-                      </Pressable>
+                        style={styles.actionButtonIcon}
+                      />
                     </View>
                     </View>
                   </Animated.View>
@@ -958,41 +931,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 11,
     fontWeight: "700",
-  },
-  openButton: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    minHeight: 48,
-    justifyContent: "center",
-    alignItems: "center",
-    minWidth: 80,
-  },
-  openButtonText: {
-    color: colors.white,
-    fontWeight: "600",
-    fontSize: 15,
-  },
-  deleteAllButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.danger,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.lg,
-    minHeight: 48,
-    ...elevation.sm,
-  },
-  deleteAllButtonText: {
-    color: colors.danger,
-    fontWeight: "600",
-    fontSize: 15,
-    marginLeft: spacing.sm,
   },
   listCard: {
     backgroundColor: colors.white,
@@ -1106,42 +1044,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border + '40',
   },
-  actionButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    minHeight: 42,
-    gap: spacing.xs,
-  },
-  actionButtonOutline: {
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  actionButtonPrimary: {
-    backgroundColor: colors.primary,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
   actionButtonIcon: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
-    minHeight: 42,
-    minWidth: 42,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: colors.danger,
     backgroundColor: colors.white,
-  },
-  actionButtonText: {
-    fontWeight: "600",
-    fontSize: 14,
   },
 });
 export default PreviousListScreen;

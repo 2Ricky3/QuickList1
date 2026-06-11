@@ -7,7 +7,7 @@ import { globalStyles, onboardingStyles, colors, spacing } from "../GlobalStyleS
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AnimatedPressable } from "../components/AnimatedPressable";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 
 const steps = [
@@ -71,8 +71,6 @@ const OnboardingScreen = () => {
   }, [step]);
   
   const handleNext = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
     if (step < steps.length - 1) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -98,7 +96,7 @@ const OnboardingScreen = () => {
         iconRotateAnim.setValue(0);
       });
     } else {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptic.success();
       if (userId) {
         await AsyncStorage.setItem(`onboardingSeen:${userId}`, "true");
       }
@@ -112,7 +110,6 @@ const OnboardingScreen = () => {
   };
   
   const handleSkip = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (userId) {
       await AsyncStorage.setItem(`onboardingSeen:${userId}`, "true");
     }
@@ -225,6 +222,7 @@ const OnboardingScreen = () => {
         
         <AnimatedPressable 
           style={onboardingStyles.nextButton} 
+          haptic="press"
           onPress={handleNext}
         >
           <Text style={onboardingStyles.nextButtonText}>

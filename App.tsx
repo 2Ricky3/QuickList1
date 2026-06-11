@@ -14,8 +14,14 @@ import LandingScreen from "./screens/LandingScreen";
 import TermsScreen from "./screens/TermsScreen";
 import OnboardingScreen from "./screens/OnboardingScreen";
 import { RootStackParamList } from "./types";
+import { colors } from "./GlobalStyleSheet";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// TermsScreen is a modal component; adapt it to a navigable route.
+const TermsRoute = ({ navigation }: { navigation: { goBack: () => void } }) => (
+  <TermsScreen visible onClose={() => navigation.goBack()} />
+);
 
 export default function App() {
   return (
@@ -25,13 +31,13 @@ export default function App() {
         <Stack.Navigator
           initialRouteName="Splash"
           screenOptions={{
-            headerStyle: { backgroundColor: "#ffffffff" },
-            headerTintColor: "#520600",
+            headerStyle: { backgroundColor: colors.white },
+            headerTintColor: colors.primaryDark,
             headerTitleStyle: { fontWeight: "bold", fontSize: 20 },
             headerShadowVisible: false,
             animation: "fade",
             animationDuration: 300,
-            contentStyle: { backgroundColor: "#ffffff" },
+            contentStyle: { backgroundColor: colors.white },
           }}
         >
           <Stack.Screen
@@ -96,7 +102,7 @@ export default function App() {
           />
           <Stack.Screen
             name="Terms"
-            component={TermsScreen}
+            component={TermsRoute}
             options={{ 
               title: "Terms & Conditions",
               presentation: "modal",

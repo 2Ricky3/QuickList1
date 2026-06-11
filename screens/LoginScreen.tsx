@@ -9,14 +9,13 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
-  Pressable,
   StatusBar,
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
-import { colors } from "../GlobalStyleSheet";
+import { colors, gradients, borderRadius } from "../GlobalStyleSheet";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { loginWithEmail } from "../services/authService";
@@ -24,11 +23,14 @@ import { getAdminCredentials } from "../services/adminService";
 import { RootStackParamList } from "../types";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import { PrimaryButton } from "../components/PrimaryButton";
 import { FormInput } from "../components/FormInput";
 import { validateEmail, validatePassword } from "../utils/validation";
 import { logAuthError } from "../services/errorLogger";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
+import { useEntranceAnimation } from "../hooks/useEntranceAnimation";
+import { useShake } from "../hooks/useShake";
 import TermsModal from "./TermsScreen";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
@@ -42,24 +44,19 @@ const LoginScreen = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   const scrollViewRef = React.useRef<ScrollView>(null);
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+  const [screenStyle] = useEntranceAnimation();
+  const { shake, shakeStyle } = useShake();
 
   const handleLogin = async () => {
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
+      shake();
       showToast(emailValidation.error || "Invalid email", "error");
       return;
     }
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
+      shake();
       showToast(passwordValidation.error || "Invalid password", "error");
       return;
     }
@@ -87,6 +84,7 @@ const LoginScreen = () => {
       );
     } catch (error: any) {
       logAuthError(error, 'Login with email');
+      shake();
       showToast(error.message || 'Login failed. Please try again.', "error");
     } finally {
       setLoading(false);
@@ -94,7 +92,7 @@ const LoginScreen = () => {
   };
   return (
     <LinearGradient
-      colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]}
+      colors={gradients.screenBackground}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
@@ -105,7 +103,7 @@ const LoginScreen = () => {
           visible={toast.visible}
           onHide={hideToast}
         />
-        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        <Animated.View style={[{ flex: 1 }, screenStyle]}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
@@ -125,13 +123,13 @@ const LoginScreen = () => {
                 decelerationRate="fast"
               >
                 {/* Back */}
-                <Pressable
+                <AnimatedPressable
                   onPress={() => navigation.goBack()}
                   style={loginStyles.backButton}
                 >
                   <MaterialIcons name="chevron-left" size={28} color={colors.primary} />
                   <Text style={loginStyles.backText}>Back</Text>
-                </Pressable>
+                </AnimatedPressable>
 
                 {/* Logo + heading */}
                 <View style={loginStyles.logoSection}>
@@ -149,7 +147,7 @@ const LoginScreen = () => {
                 </View>
 
                 {/* Form */}
-                <View style={loginStyles.formSection}>
+                <Animated.View style={[loginStyles.formSection, shakeStyle]}>
                   <FormInput
                     placeholder="Email"
                     keyboardType="email-address"
@@ -172,24 +170,15 @@ const LoginScreen = () => {
                     isPassword={true}
                     icon="lock"
                   />
-                  <AnimatedPressable
+                  <PrimaryButton
+                    title={loading ? "Signing in..." : "Sign In"}
                     onPress={handleLogin}
                     disabled={loading}
-                    style={[loginStyles.buttonWrapper, loading && { opacity: 0.6 }]}
-                  >
-                    <LinearGradient
-                      colors={["#D40000", "#FF3030"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={loginStyles.primaryButton}
-                    >
-                      <Text style={loginStyles.primaryButtonText}>
-                        {loading ? "Signing in..." : "Sign In"}
-                      </Text>
-                    </LinearGradient>
-                  </AnimatedPressable>
+                    size="large"
+                    style={loginStyles.buttonWrapper}
+                  />
                   {loading && <ModernLoader size="large" style={{ marginTop: 16 }} />}
-                </View>
+                </Animated.View>
 
                 {/* Footer */}
                 <View style={loginStyles.footer}>
@@ -271,7 +260,7 @@ const loginStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#1A1A1A",
+    color: colors.textHeading,
     letterSpacing: -0.8,
     textAlign: "center",
   },
@@ -285,26 +274,14 @@ const loginStyles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonWrapper: {
-    borderRadius: 999,
+    borderRadius: borderRadius.round,
     overflow: "hidden",
     marginTop: 8,
-    shadowColor: "#000",
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 4,
-  },
-  primaryButton: {
-    borderRadius: 999,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    fontSize: 17,
-    fontWeight: "700" as const,
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
   },
   footer: {
     marginTop: 24,

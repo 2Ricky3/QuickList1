@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TextInputProps, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TextInputProps, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, borderRadius } from "../GlobalStyleSheet";
+import { IconButton } from "./IconButton";
 
 interface FormInputProps extends TextInputProps {
   icon?: string;
@@ -46,17 +47,15 @@ export const FormInput: React.FC<FormInputProps> = ({
           secureTextEntry={isPassword && !showPassword}
         />
         {isPassword && (
-          <TouchableOpacity
+          <IconButton
+            icon={showPassword ? "visibility" : "visibility-off"}
             onPress={() => setShowPassword(!showPassword)}
+            size={20}
+            color={isFocused ? colors.primary : colors.textMedium}
+            haptic="selection"
+            accessibilityLabel={showPassword ? "Hide password" : "Show password"}
             style={styles.passwordToggle}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons
-              name={showPassword ? "visibility" : "visibility-off"}
-              size={20}
-              color={isFocused ? colors.primary : colors.textMedium}
-            />
-          </TouchableOpacity>
+          />
         )}
       </View>
       {hasError && errorMessage && (
@@ -100,8 +99,9 @@ const styles = StyleSheet.create({
     color: colors.textDark,
   },
   passwordToggle: {
-    padding: spacing.sm,
     marginLeft: spacing.sm,
+    minWidth: 40,
+    minHeight: 40,
   },
   errorContainer: {
     flexDirection: "row",

@@ -9,16 +9,16 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
-  Pressable,
   StatusBar,
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
-import { colors } from "../GlobalStyleSheet";
+import { colors, gradients, borderRadius } from "../GlobalStyleSheet";
 import { ModernLoader } from "../components/ModernLoader";
 import { AnimatedPressable } from "../components/AnimatedPressable";
+import { PrimaryButton } from "../components/PrimaryButton";
 import { FormInput } from "../components/FormInput";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -29,6 +29,8 @@ import { logAuthError, errorLogger } from "../services/errorLogger";
 import { RootStackParamList } from "../types";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
+import { useEntranceAnimation } from "../hooks/useEntranceAnimation";
+import { useShake } from "../hooks/useShake";
 import TermsModal from "./TermsScreen";
 
 const RegisterScreen = () => {
@@ -41,32 +43,29 @@ const RegisterScreen = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   const scrollViewRef = React.useRef<ScrollView>(null);
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+  const [screenStyle] = useEntranceAnimation();
+  const { shake, shakeStyle } = useShake();
   const handleRegister = async () => {
     const sanitizedName = sanitizeString(name.trim());
     if (sanitizedName.length < 2) {
+      shake();
       showToast("Name must be at least 2 characters", "error");
       return;
     }
     if (sanitizedName.length > 50) {
+      shake();
       showToast("Name must be less than 50 characters", "error");
       return;
     }
     const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
+      shake();
       showToast(emailValidation.error || "Invalid email", "error");
       return;
     }
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
+      shake();
       showToast(passwordValidation.error || "Invalid password", "error");
       return;
     }
@@ -89,12 +88,13 @@ const RegisterScreen = () => {
     } catch (error: any) {
       logAuthError(error, 'Register with email');
       setLoading(false);
+      shake();
       showToast(error.message || 'Registration failed. Please try again.', "error");
     }
   };
   return (
     <LinearGradient
-      colors={["#FFFFFF", "#FFF4F4", "#FFE8E8"]}
+      colors={gradients.screenBackground}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
@@ -105,7 +105,7 @@ const RegisterScreen = () => {
           visible={toast.visible}
           onHide={hideToast}
         />
-        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        <Animated.View style={[{ flex: 1 }, screenStyle]}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
@@ -125,13 +125,13 @@ const RegisterScreen = () => {
                 decelerationRate="fast"
               >
                 {/* Back */}
-                <Pressable
+                <AnimatedPressable
                   onPress={() => navigation.goBack()}
                   style={regStyles.backButton}
                 >
                   <MaterialIcons name="chevron-left" size={28} color={colors.primary} />
                   <Text style={regStyles.backText}>Back</Text>
-                </Pressable>
+                </AnimatedPressable>
 
                 {/* Logo + heading */}
                 <View style={regStyles.logoSection}>
@@ -149,7 +149,7 @@ const RegisterScreen = () => {
                 </View>
 
                 {/* Form */}
-                <View style={regStyles.formSection}>
+                <Animated.View style={[regStyles.formSection, shakeStyle]}>
                   <FormInput
                     placeholder="Name"
                     value={name}
@@ -181,24 +181,15 @@ const RegisterScreen = () => {
                     isPassword={true}
                     icon="lock"
                   />
-                  <AnimatedPressable
+                  <PrimaryButton
+                    title={loading ? "Creating account..." : "Create Account"}
                     onPress={handleRegister}
                     disabled={loading}
-                    style={[regStyles.buttonWrapper, loading && { opacity: 0.6 }]}
-                  >
-                    <LinearGradient
-                      colors={["#D40000", "#FF3030"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={regStyles.primaryButton}
-                    >
-                      <Text style={regStyles.primaryButtonText}>
-                        {loading ? "Creating account..." : "Create Account"}
-                      </Text>
-                    </LinearGradient>
-                  </AnimatedPressable>
+                    size="large"
+                    style={regStyles.buttonWrapper}
+                  />
                   {loading && <ModernLoader size="large" style={{ marginTop: 16 }} />}
-                </View>
+                </Animated.View>
 
                 {/* Footer */}
                 <View style={regStyles.footer}>
@@ -280,7 +271,7 @@ const regStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#1A1A1A",
+    color: colors.textHeading,
     letterSpacing: -0.8,
     textAlign: "center",
   },
@@ -294,26 +285,14 @@ const regStyles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonWrapper: {
-    borderRadius: 999,
+    borderRadius: borderRadius.round,
     overflow: "hidden",
     marginTop: 8,
-    shadowColor: "#000",
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 4,
-  },
-  primaryButton: {
-    borderRadius: 999,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    fontSize: 17,
-    fontWeight: "700" as const,
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
   },
   footer: {
     marginTop: 20,

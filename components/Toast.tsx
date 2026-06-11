@@ -38,6 +38,7 @@ export const Toast: React.FC<ToastProps> = ({
       }, duration);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [visible]);
   const hideToast = () => {
     Animated.parallel([

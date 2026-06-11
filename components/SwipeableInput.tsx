@@ -3,7 +3,7 @@ import { View, TextInput, Pressable, Animated, StyleSheet, TextInputProps, Text 
 import { Swipeable } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, spacing, borderRadius, elevation, globalStyles } from "../GlobalStyleSheet";
-import * as Haptics from "expo-haptics";
+import { haptic } from "../utils/haptics";
 interface SwipeableInputProps extends TextInputProps {
   value: string;
   onChangeText: (text: string) => void;
@@ -25,7 +25,7 @@ export const SwipeableInput: React.FC<SwipeableInputProps> = ({
   const [isSwipeActive, setIsSwipeActive] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handleDelete = async () => {
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    haptic.success();
     
     // Animate the deletion
     Animated.sequence([
@@ -49,7 +49,7 @@ export const SwipeableInput: React.FC<SwipeableInputProps> = ({
   };
   const handleSwipeableOpen = () => {
     setIsSwipeActive(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    haptic.tap();
   };
   const handleSwipeableClose = () => {
     setIsSwipeActive(false);
